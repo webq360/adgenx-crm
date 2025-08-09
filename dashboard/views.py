@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import User
+from .models import User, DepositTransaction # Import DepositTransaction
+from django.contrib import messages # Import messages
 
 # Create your views here.
 
@@ -48,14 +49,34 @@ def auth(request):
 @login_required(login_url='auth')
 def deposit(request):
     if request.method == 'POST':
-        payment_method = request.POST.get('payment_method')
+        payment_method = request.POST.get('payment_method').capitalize()
         bdt_amount = request.POST.get('bdt_amount')
         tx_id = request.POST.get('tx_id')
         receipt = request.FILES.get('receipt')
-        # Process the deposit
-        print(payment_method, bdt_amount, tx_id, receipt)
-        return redirect('index')
+        usd_amount = request.POST.get('usd_amount')
+
+        try:
+            deposit_transaction = DepositTransaction.objects.create(
+                user=request.user,
+                method=payment_method,
+                trx_id=tx_id,
+                vendor_trx_id=tx_id, # Assuming vendor_trx_id is same as trx_id for now
+                receipt=receipt,
+                bdt_amount=bdt_amount,
+                usd_amount=usd_amount,
+                status='pending'
+            )
+            messages.success(request, 'Deposit request submitted successfully!')
+            return redirect('/') # Redirect to transactions page after successful submission
+        except Exception as e:
+            messages.error(request, f'Error submitting deposit request: {e}')
+            return redirect('deposit') # Redirect back to deposit page on error
     return render(request, 'deposit.html')
+
+@login_required(login_url='auth')
+def deposit_transactions(request):
+    transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'transactions.html', {'transactions': transactions})
 
 def logout_view(request):
     logout(request)
