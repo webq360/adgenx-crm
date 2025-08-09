@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" >
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    {% block styles %}
+    {% endblock %}
     <script src="{% static 'main.js' %}" defer></script>
 </head>
 <body>
@@ -19,7 +21,7 @@
         <img src="https://storage.googleapis.com/a1aa/image/3cf7344e-a050-424a-a893-b87d7ece095b.jpg" alt="Company logo with text 'salef'" width="32" height="32" style="object-fit: contain;" />
         </div>
         <nav class="nav flex-column mt-3 px-3 gap-2" aria-label="Main Menu">
-        <a href="#" class="nav-link active d-flex align-items-center gap-2" aria-current="page">
+        <a href="/" class="nav-link active d-flex align-items-center gap-2" aria-current="page">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="3" y="3" width="7" height="7" rx="1" ry="1"></rect>
             <rect x="14" y="3" width="7" height="7" rx="1" ry="1"></rect>
@@ -31,8 +33,8 @@
         <a href="#" class="nav-link d-flex align-items-center gap-2 fw-semibold ad-accounts-link">
             Ad Accounts
         </a>
-        <a href="#" class="nav-link d-flex align-items-center gap-2 fw-semibold text-dark">
-            Payment Info
+        <a href="/deposit" class="nav-link d-flex align-items-center gap-2 fw-semibold text-dark">
+            Deposit
         </a>
         <a href="#" class="nav-link d-flex align-items-center gap-2 fw-semibold text-dark">
             Finance
@@ -71,21 +73,16 @@
         </div>
         </div>
         <div class="topbar-right d-flex align-items-center gap-3 position-relative">
-        <button type="button" class="btn-support">
-            <i class="fas fa-headphones-alt"></i> Support
-        </button>
-        <button type="button" aria-label="Notifications" class="btn-icon position-relative">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge"></span>
-        </button>
-        <button type="button" aria-label="User menu" class="avatar">
-            <img src="https://storage.googleapis.com/a1aa/image/eb5b73e6-b4d0-479e-5dd4-a7703a02bc69.jpg" alt="User profile picture, circular avatar with gray background and text 'User'" />
-        </button>
-        <button type="button" aria-label="User menu dropdown" class="btn-dropdown">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem;">
-            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-        </button>
+            <button type="button" class="btn-support">
+                <i class="fas fa-headphones-alt"></i> Support
+            </button>
+            <button type="button" aria-label="Notifications" class="btn-icon position-relative">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge"></span>
+            </button>
+            <button type="button" aria-label="User menu" class="avatar">
+                <img src="https://img.icons8.com/?size=100&id=60655&format=png&color=000000" alt="User profile picture, circular avatar with gray background and text 'User'" />
+            </button>
         </div>
     </header>
 

@@ -1,0 +1,375 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'deposit.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+  <div class="container-fluid px-3 px-md-4 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h6 fw-semibold mb-0">Deposit to Your Fund</h1>
+      <button type="button" class="btn btn-primary d-flex align-items-center gap-1">
+        Add Balance <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-4">
+        <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="bg-primary p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+              <i class="fas fa-wallet"></i>
+            </div>
+            <h2 class="fs-6 fw-semibold mb-0">Wallet Balance</h2>
+          </div>
+          <p class="fs-5 fw-bold mb-1">$50.00</p>
+          <p class="text-muted small mb-0">Last deposit: 07 Aug 2025</p>
+        </div>
+      </div>
+      <div class="col-12 col-sm-4">
+        <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="bg-info p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+              <i class="fas fa-percent"></i>
+            </div>
+            <h2 class="fs-6 fw-semibold mb-0">Current USD Rate</h2>
+          </div>
+          <p class="fs-5 fw-bold mb-1">৳127.00/USD</p>
+          <p class="text-muted small mb-0">Expires on: 31 Jul 2025</p>
+        </div>
+      </div>
+      <div class="col-12 col-sm-4">
+        <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="bg-danger p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <h2 class="fs-6 fw-semibold mb-0">Pending Deposit</h2>
+          </div>
+          <p class="fs-5 fw-bold mb-1">0</p>
+          <p class="text-muted small mb-0">Admin approval is pending</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-light rounded-3 p-4 d-flex flex-column flex-md-row gap-4">
+      <div class="flex-grow-1 d-flex flex-column">
+        <!-- Stepper -->
+        <div class="step-progress">
+            <div class="step-item">
+                <div id="step-circle-1" class="step-circle active">1</div>
+                <div id="step-label-1" class="step-label active">Bank Info</div>
+                <div class="step-connector"></div>
+            </div>
+            <div class="step-item">
+                <div id="step-circle-2" class="step-circle inactive">2</div>
+                <div id="step-label-2" class="step-label">Payment Info</div>
+                <div class="step-connector"></div>
+            </div>
+            <div class="step-item">
+                <div id="step-circle-3" class="step-circle inactive">3</div>
+                <div id="step-label-3" class="step-label">Check & Finish</div>
+            </div>
+        </div>
+
+        <form id="deposit-form" method="POST" action="{% url 'deposit' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" id="hidden-payment-method">
+            <input type="hidden" name="bdt_amount" id="hidden-bdt-amount">
+            <input type="hidden" name="tx_id" id="hidden-tx-id">
+            <input type="file" name="receipt" id="hidden-receipt" class="d-none">
+        </form>
+
+        <div id="step-1">
+            <div class="d-flex flex-column flex-md-row gap-4">
+              <!-- Select Bank -->
+              <section class="flex-grow-1 bank-select">
+                <p class="fw-semibold small mb-2">Select Payment Method</p>
+                <div class="d-flex gap-3 mb-3">
+                    <div id="bank-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2 selected" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
+                        <img src="https://storage.googleapis.com/a1aa/image/7ac371b1-0bb8-489a-e593-61ca1cc1aef5.jpg" alt="City Bank logo, red and white color with text City Bank" width="48" height="48" />
+                        Bank
+                    </div>
+                    <div id="binance-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
+                        <img src="https://storage.googleapis.com/a1aa/image/762ee3d3-d46a-4069-5c80-0476924bd7e8.jpg" alt="Binance logo black and yellow circular icon" width="48" height="48" />
+                        Binance
+                    </div>
+                </div>
+              </section>
+
+              <!-- Bank Details -->
+              <section id="bank-details" class="bank-details flex-grow-1">
+                <p class="fw-semibold text-dark mb-2">Bank Details</p>
+                <p class="fw-semibold text-dark mb-1">City Bank</p>
+                <p class="mb-1">Acc Type: Bank</p>
+                <p class="mb-1">Acc Name: SALAF FOOD</p>
+                <p class="mb-1">Acc Number: 1503864135001</p>
+                <p class="mb-1">Branch Name: Naogaon</p>
+                <p class="mb-1">Routing Number: N/A</p>
+                <p class="fw-semibold mt-3 mb-1">Instructions:</p>
+                <p>→ NA</p>
+              </section>
+
+             <!-- Binance Details -->
+              <section id="binance-details" class="bank-details flex-grow-1" style="display: none;">
+                <p class="fw-semibold text-dark mb-2">Binance Details</p>
+                <p class="mb-1">Number: 1503864135001</p>
+                <p class="mb-1">Type: Personal</p>
+                <p class="mb-1">Routing Number: N/A</p>
+                <p class="fw-semibold mt-3 mb-1">Instructions:</p>
+                <p>→Attached the screenshots</p>
+              </section>
+            </div>
+            <div class="d-flex justify-content-end mt-4">
+              <button id="next-button-1" type="button" class="btn btn-primary align-items-center gap-1">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+        </div>
+
+        <div id="step-2" style="display: none;">
+            <div class="row">
+                <div class="col-lg-5">
+                    <div class="form-section p-2">
+                        <!-- Amount in BDT -->
+                        <div class="mb-4">
+                            <label for="bdtAmount" class="form-label fw-semibold text-dark">Amount in BDT</label>
+                            <div class="input-group">
+                                <span class="input-group-text">৳</span>
+                                <input type="number" class="form-control" id="bdtAmount" placeholder="Provide the amount in BDT" step="0.01" required>
+                            </div>
+                        </div>
+
+                        <!-- Transaction ID -->
+                        <div class="mb-4">
+                            <label for="txId" class="form-label fw-semibold text-dark">Trx ID or Reference</label>
+                            <input type="text" class="form-control" id="txId" placeholder="Trx ID" required>
+                        </div>
+
+                        <!-- Receipt Upload -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Receipt copy or screenshot</label>
+                            <div class="upload-area" onclick="document.getElementById('receiptFile').click()">
+                                <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                                <div id="upload-text" class="text-primary fw-medium">Upload</div>
+                                <div class="text-muted small">or drop a file</div>
+                            </div>
+                            <input type="file" id="receiptFile" class="d-none" accept="image/*,.pdf">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-lg-6 mb-4">
+                    <div class="form-section p-4">
+                        <h6 class="fw-semibold text-dark mb-3">You will receive the amount in USD:</h6>
+                        <div class="border rounded p-4 bg-light">
+                            <div class="amount-display">$0.00</div>
+                            <div class="rate-info mt-2">
+                                Your current USD rate is 127 BDT/USD and will expire on 7/31/2025.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button id="back-button-2" type="button" class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                </button>
+                <button id="next-button-2" type="button" class="btn btn-primary px-4" disabled>
+                    Next<i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="step-3" style="display: none;">
+            <div id="final-details-container"></div>
+        </div>
+
+      </div>
+
+      <!-- Tips -->
+      <aside class="tips flex-shrink-0" style="width: 18rem;">
+        <div class="title">
+          <i class="fas fa-lightbulb"></i>
+          Tips
+        </div>
+        <p class="fw-semibold mb-2">Here's how to proceed with your deposit:</p>
+        <ol class="ps-3 mb-2" style="line-height: 1.2;">
+          <li>Review the USD rate.</li>
+          <li>Select your preferred payment method.</li>
+          <li>Check payment details in the deposit wizard.</li>
+          <li>Fill out the required information in the form.</li>
+          <li>Complete the wizard.</li>
+          <li>Your account will be credited once verified by Nupem Global LLC Admin.</li>
+        </ol>
+        <p class="mb-0">
+          Need assistance? Feel free to reach out to our
+          <a href="#" target="_blank" rel="noopener noreferrer">support</a> team.
+        </p>
+      </aside>
+    </div>
+  </div>
+
+<script>
+    const bankButton = document.getElementById('bank-button');
+    const binanceButton = document.getElementById('binance-button');
+    const bankDetails = document.getElementById('bank-details');
+    const binanceDetails = document.getElementById('binance-details');
+
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+    const step3 = document.getElementById('step-3');
+
+    const stepCircle1 = document.getElementById('step-circle-1');
+    const stepCircle2 = document.getElementById('step-circle-2');
+    const stepCircle3 = document.getElementById('step-circle-3');
+
+    const stepLabel1 = document.getElementById('step-label-1');
+    const stepLabel2 = document.getElementById('step-label-2');
+    const stepLabel3 = document.getElementById('step-label-3');
+
+    const nextButton1 = document.getElementById('next-button-1');
+    const nextButton2 = document.getElementById('next-button-2');
+    const backButton2 = document.getElementById('back-button-2');
+
+    const finalDetailsContainer = document.getElementById('final-details-container');
+    const depositForm = document.getElementById('deposit-form');
+    const receiptFile = document.getElementById('receiptFile');
+    const uploadText = document.getElementById('upload-text');
+    const bdtAmount = document.getElementById('bdtAmount');
+    const txId = document.getElementById('txId');
+
+    let currentStep = 1;
+    const paymentDetails = {payment_method: 'bank'};
+
+    const updateStepUI = () => {
+        step1.style.display = currentStep === 1 ? 'block' : 'none';
+        step2.style.display = currentStep === 2 ? 'block' : 'none';
+        step3.style.display = currentStep === 3 ? 'block' : 'none';
+
+        stepCircle1.classList.toggle('active', currentStep >= 1);
+        stepCircle2.classList.toggle('active', currentStep >= 2);
+        stepCircle3.classList.toggle('active', currentStep >= 3);
+
+        stepLabel1.classList.toggle('active', currentStep >= 1);
+        stepLabel2.classList.toggle('active', currentStep >= 2);
+        stepLabel3.classList.toggle('active', currentStep >= 3);
+    };
+
+    const validateStep2 = () => {
+        if (bdtAmount.value && txId.value) {
+            nextButton2.disabled = false;
+        } else {
+            nextButton2.disabled = true;
+        }
+    };
+
+    bankButton.addEventListener('click', () => {
+        paymentDetails.payment_method = 'bank';
+        bankDetails.style.display = 'block';
+        binanceDetails.style.display = 'none';
+        bankButton.classList.add('selected');
+        binanceButton.classList.remove('selected');
+    });
+
+    binanceButton.addEventListener('click', () => {
+        paymentDetails.payment_method = 'binance';
+        bankDetails.style.display = 'none';
+        binanceDetails.style.display = 'block';
+        bankButton.classList.remove('selected');
+        binanceButton.classList.add('selected');
+    });
+
+    nextButton1.addEventListener('click', () => {
+        currentStep = 2;
+        updateStepUI();
+    });
+
+    bdtAmount.addEventListener('input', validateStep2);
+    txId.addEventListener('input', validateStep2);
+
+    nextButton2.addEventListener('click', () => {
+        paymentDetails.bdt_amount = bdtAmount.value;
+        paymentDetails.tx_id = txId.value;
+        paymentDetails.receipt = receiptFile.files[0];
+        currentStep = 3;
+        updateStepUI();
+        const finalDetailsHtml = `
+            <div class="container py-4">
+              <div class="row border border-0 border-md border-secondary-subtle rounded">
+                <div class="col-md-6 px-3 px-md-4 py-3 py-md-4">
+                  <p class="small fw-semibold mb-2">${paymentDetails.payment_method === 'bank' ? 'Bank' : 'Binance'}</p>
+                  <div class="d-flex align-items-start mb-3">
+                    <img alt="Payment method logo" src="${paymentDetails.payment_method === 'bank' ? 'https://storage.googleapis.com/a1aa/image/7ac371b1-0bb8-489a-e593-61ca1cc1aef5.jpg' : 'https://storage.googleapis.com/a1aa/image/762ee3d3-d46a-4069-5c80-0476924bd7e8.jpg'}" width="40" height="40" class="me-3" />
+                    <div class="small lh-sm">
+                      <p class="mb-0">ID - PA01</p>
+                      <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'City Bank' : 'Binance'}</p>
+                      <p class="mb-0">${paymentDetails.payment_method === 'bank' ? '1503864135001' : ''}</p>
+                      <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Naogaon, N/A' : ''}</p>
+                    </div>
+                  </div>
+
+                  <p class="small fw-semibold mb-1">Amount in BDT</p>
+                  <p class="small mb-3">৳ ${paymentDetails.bdt_amount}</p>
+
+                  <p class="small fw-semibold mb-1">Trx ID or Reference</p>
+                  <p class="small mb-3">${paymentDetails.tx_id}</p>
+
+                  <div class="d-flex align-items-center mb-1">
+                    <i class="far fa-copy fa-lg text-secondary me-2"></i>
+                    <p class="small fw-semibold mb-0">Receipt copy or screenshot</p>
+                  </div>
+                  <p class="small ms-4 mb-0">${paymentDetails.receipt ? paymentDetails.receipt.name : 'N/A'}</p>
+                </div>
+
+                <div class="col-md-6 px-3 px-md-4 py-3 py-md-4 vertical-line">
+                  <p class="small fw-semibold mb-2">USD Amount:</p>
+                  <p class="h5 fw-bold mb-3">$${(paymentDetails.bdt_amount / 127).toFixed(2)}</p>
+                  <p class="small">Based on your current USD rate</p>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button id="back-button-3" type="button" class="btn btn-secondary d-flex align-items-center">
+                  <i class="fas fa-arrow-left me-2"></i> Back
+                </button>
+                <button id="finish-button" type="button" class="btn btn-success d-flex align-items-center">
+                  Finish <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+              </div>
+            </div>
+        `;
+        finalDetailsContainer.innerHTML = finalDetailsHtml;
+        const backButton3 = document.getElementById('back-button-3');
+        const finishButton = document.getElementById('finish-button');
+        backButton3.addEventListener('click', () => {
+            currentStep = 2;
+            updateStepUI();
+        });
+        finishButton.addEventListener('click', () => {
+            document.getElementById('hidden-payment-method').value = paymentDetails.payment_method;
+            document.getElementById('hidden-bdt-amount').value = paymentDetails.bdt_amount;
+            document.getElementById('hidden-tx-id').value = paymentDetails.tx_id;
+            document.getElementById('hidden-receipt').files = receiptFile.files;
+            depositForm.submit();
+        });
+    });
+
+    backButton2.addEventListener('click', () => {
+        currentStep = 1;
+        updateStepUI();
+    });
+
+    receiptFile.addEventListener('change', () => {
+        if (receiptFile.files.length > 0) {
+            uploadText.textContent = receiptFile.files[0].name;
+        }
+    });
+
+</script>
+
+{% endblock %}

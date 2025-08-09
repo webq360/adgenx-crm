@@ -45,6 +45,18 @@ def auth(request):
                     return redirect('index')
     return render(request, 'auth.html')
 
+@login_required(login_url='auth')
+def deposit(request):
+    if request.method == 'POST':
+        payment_method = request.POST.get('payment_method')
+        bdt_amount = request.POST.get('bdt_amount')
+        tx_id = request.POST.get('tx_id')
+        receipt = request.FILES.get('receipt')
+        # Process the deposit
+        print(payment_method, bdt_amount, tx_id, receipt)
+        return redirect('index')
+    return render(request, 'deposit.html')
+
 def logout_view(request):
     logout(request)
     return redirect('auth')

@@ -5,22 +5,22 @@
     <main class="flex-grow-1 overflow-auto p-4">
     <h1 class="fs-5 fw-semibold mb-1">Overview</h1>
     <p class="small mb-4">
-        Hello USER, <span>👋</span> This is your regular dashboard!
+        Hello {{ request.user.first_name }} {{ request.user.last_name }}, 
+        <span>👋</span> This is your regular dashboard!
     </p>
 
     <!-- Status bars -->
     <div class="d-flex flex-wrap gap-3 mb-4">
         <div class="status-bar status-red">
         <div class="status-icon bg-danger">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem;">
-            <path d="M9 12h6m-3-3v6m-6 3h12a2 2 0 002-2v-3a2 2 0 00-2-2h-1" stroke-linecap="round" stroke-linejoin="round"></path>
-            <rect x="3" y="7" width="6" height="10" rx="1" ry="1" stroke-linecap="round" stroke-linejoin="round"></rect>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16.002 13.5C16.002 14.3284 16.6735 15 17.502 15C18.3304 15 19.002 14.3284 19.002 13.5C19.002 12.6716 18.3304 12 17.502 12C16.6735 12 16.002 12.6716 16.002 13.5Z" stroke="white" stroke-width="1.5"></path>
+            <path d="M2.00195 11C2.00195 7.22876 2.00195 5.34315 3.17353 4.17157C4.3451 3 6.23072 3 10.002 3H14.002C14.9319 3 15.3969 3 15.7784 3.10222C16.8137 3.37962 17.6223 4.18827 17.8997 5.22354C18.002 5.60504 18.002 6.07003 18.002 7M10.002 7H16.002C18.8304 7 20.2446 7 21.1233 7.87868C22.002 8.75736 22.002 10.1716 22.002 13V15C22.002 17.8284 22.002 19.2426 21.1233 20.1213C20.2446 21 18.8304 21 16.002 21H12.5005" stroke="white" stroke-width="1.5" stroke-linecap="round"></path><path d="M10 17H6M6 17H2M6 17V21M6 17V13" stroke="white" stroke-width="1.5" stroke-linecap="round"></path></svg>
         </div>
         <div>
             <div>Pending</div>
             <div>Deposit</div>
         </div>
+        <div class="value fs-3 p-2">0</div>
         </div>
         <div class="status-bar status-green">
         <div class="status-icon bg-success">
@@ -33,6 +33,7 @@
             <div>Pending</div>
             <div>Accounts</div>
         </div>
+        <div class="value fs-3 p-2">0</div>
         </div>
         <div class="status-bar status-purple-light">
         <div class="status-icon bg-purple text-white fw-bold text-center" style="font-size: 0.75rem;">Ad</div>
@@ -40,6 +41,7 @@
             <div>Share &amp; Remove</div>
             <div>Ad Acc Requests</div>
         </div>
+        <div class="value fs-3 p-2">0</div>
         </div>
         <div class="status-bar status-purple">
         <div class="status-icon bg-purple text-white">
@@ -53,19 +55,19 @@
             <div>Ad Accounts</div>
             <div>in Review</div>
         </div>
+        <div class="value fs-3 p-2">0</div>
         </div>
         <div class="status-bar status-yellow">
         <div class="status-icon bg-warning text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-            <path d="M12 8c-1.657 0-3 1.343-3 3 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.657-1.343-3-3-3z" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M12 2v2m0 16v2m8-10h-2M4 12H2m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m12.728 0l-1.414-1.414M7.05 7.05L5.636 5.636" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M11 8.99976C7.41015 8.99976 4.5 11.9099 4.5 15.4997C4.5 19.0896 7.41015 21.9997 11 21.9997C14.5899 21.9997 17.5 19.0896 17.5 15.4997C17.5 11.9099 14.5899 8.99976 11 8.99976Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 8.5L15.4116 4.29397C14.7437 3.68176 14.4098 3.37565 14.0084 3.38437C13.6069 3.3931 13.2866 3.71342 12.6459 4.35406L11.6803 5.31973C11.116 5.88402 10.8338 6.16617 10.4728 6.19872C10.1118 6.23127 9.78377 6.00415 9.12764 5.5499L4 2M20 8.5H16.5M20 8.5V5.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M12.9811 13.7406C12.902 13.0084 12.2028 11.8255 10.9455 11.8255C9.48465 11.8254 8.86996 12.7982 8.74523 13.2846C8.55064 13.9352 8.58956 15.2728 10.3019 15.4186C12.4423 15.601 13.2998 15.9047 13.1907 17.4797C13.0816 19.0546 11.8884 19.3949 10.9455 19.3583C10.0025 19.322 8.45977 18.8012 8.3999 17.4003M10.7959 10.8V11.829M10.7959 19.3489V20.4" stroke="white" stroke-width="1.5" stroke-linecap="round"></path></svg>
         </div>
         <div>
             <div>Low</div>
             <div>Balance</div>
         </div>
-        <div class="value">0</div>
+        <div class="value fs-3 p-2">0</div>
         </div>
         <div class="status-bar status-red-light">
         <div class="status-icon bg-danger">
@@ -79,7 +81,7 @@
             <div>Restricted</div>
             <div>by Meta</div>
         </div>
-        <div class="value">0</div>
+        <div class="value fs-3 p-2">0</div>
         </div>
     </div>
 
