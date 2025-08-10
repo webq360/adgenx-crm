@@ -76,7 +76,7 @@ def deposit(request):
             wallet.save()
 
             messages.success(request, 'Deposit request submitted successfully!')
-            return redirect('deposit_transactions') # Redirect to transactions page after successful submission
+            return redirect('index') # Redirect to transactions page after successful submission
         except Exception as e:
             messages.error(request, f'Error submitting deposit request: {e}')
             return redirect('deposit') # Redirect back to deposit page on error

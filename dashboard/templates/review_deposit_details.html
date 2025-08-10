@@ -20,7 +20,7 @@
           <p><strong>BDT Amount:</strong> ৳{{ transaction.bdt_amount }}</p>
           <p><strong>USD Amount:</strong> ${{ transaction.usd_amount }}</p>
           <p><strong>Status:</strong> <span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></p>
-          <p><strong>Timestamp:</strong> {{ transaction.created_at|date:"d M Y H:i" }}</p>
+          <p><strong>Timestamp:</strong> {{ transaction.created_at|date:"H:i, d M Y" }}</p>
         </div>
         <div class="col-md-6">
           {% if transaction.receipt %}

@@ -59,7 +59,7 @@
                 {{ transaction.user.first_name }} {{ transaction.user.last_name }} ({{ transaction.user.username }})
               </td>
               {% endif %}
-              <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ transaction.created_at|date:"d M Y" }}</td>
+              <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ transaction.created_at|date:"H:i, d M Y" }}</td>
               <td style="font-size: 0.75rem;">{{ transaction.method }}</td>
               <td style="font-size: 0.75rem;">{{ transaction.trx_id }}</td>
               <td style="font-size: 0.75rem;">{{ transaction.vendor_trx_id }}</td>
@@ -75,7 +75,7 @@
               <td><span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></td>
               {% if request.user.is_staff %}
               <td class="pe-2">
-                <a href="{% url 'review_deposit_details' transaction.id %}" class="btn btn-sm btn-info">View</a>
+                <a href="{% url 'review_deposit_details' transaction.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
               </td>
               {% endif %}
               <td class="pe-2"></td>
