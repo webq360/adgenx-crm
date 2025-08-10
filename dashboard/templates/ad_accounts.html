@@ -1,0 +1,106 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+<main class="flex-grow-1 overflow-auto p-4">
+    <section class="bg-white rounded-3 shadow-sm p-3">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3 gap-3">
+        <h2 class="fw-semibold text-secondary fs-6 mb-0">Ad Accounts</h2>
+        <div class="d-flex gap-2 w-100 w-sm-auto">
+            <input type="search" class="input-search" placeholder="Search ad accounts" aria-label="Search ad accounts" />
+            <a href="{% url 'request_ad_account' %}" type="button" class="btn-create text-decoration-none" role="button">
+            Create Ad Account
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem;">
+                <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            </a>
+        </div>
+        </div>
+        <div class="table-responsive">
+        <table class="table table-borderless align-middle mb-0" style="font-size: 0.75rem;">
+            <thead class="bg-light border border-secondary-subtle">
+            <tr>
+                <th class="border border-secondary-subtle">Ad Account</th>
+                <th class="border border-secondary-subtle">Connected BM</th>
+                <th class="border border-secondary-subtle" style="cursor: pointer; user-select: none;">
+                Balance
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 0.75rem; height: 0.75rem; display: inline-block; margin-left: 0.25rem;">
+                    <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                </th>
+                <th class="border border-secondary-subtle">Total Spent</th>
+                <th class="border border-secondary-subtle">Limit</th>
+                <th class="border border-secondary-subtle">Status</th>
+                <th class="border border-secondary-subtle">Action</th>
+                {% if not request.user.is_staff %}
+                <th class="border border-secondary-subtle">Top Up</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for ad_account in ad_accounts %}
+            <tr class="border border-secondary-subtle align-top">
+                <td class="border border-secondary-subtle">
+                <!--ad_account name-->
+                <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
+                <!--ad_account_id-->
+                <p class="text-secondary mb-0" style="line-height: 1.2;">
+                    id - {{ ad_account.acc_id }}<br />
+                    <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
+                </p>
+                </td>
+                <td class="border border-secondary-subtle">
+                <!--admin BM name-->
+                <p class="mb-0">{{ ad_account.mb_admin_reference.bm_name }}</p>
+                <!--admin BM id-->
+                <p class="text-secondary mb-1" style="line-height: 1.2;">{{ ad_account.mb_admin_reference.bm_id }}</p>
+                <!--client bm name-->
+                <p class="fw-semibold mb-0">{{ ad_account.user.first_name }} {{ ad_account.user.last_name }}</p>
+                <!--client bm id-->
+                <p class="text-secondary mb-0" style="line-height: 1.2;">{{ ad_account.bm_client_id }}</p>
+                </td>
+                <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
+                <td class="border border-secondary-subtle">${{ ad_account.total_spent }}</td>
+                <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
+                <td class="border border-secondary-subtle">
+                <span class="badge-{% if ad_account.status == 'active' %}active{% else %}inactive{% endif %}">{{ ad_account.status|capfirst }}</span>
+                </td>
+                <td class="border border-secondary-subtle text-center">
+                {% if request.user.is_staff %}
+                    <a href="{% url 'ad_account_details' ad_account.id %}" class="btn-icon" aria-label="More actions">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </a>
+                {% else %}
+                    <button type="button" class="btn-icon" aria-label="More actions">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                        </svg>
+                    </button>
+                {% endif %}
+                </td>
+                {% if not request.user.is_staff %}
+                <td class="border border-secondary-subtle">
+                <button type="button" class="btn-topup">Top Up</button>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No ad accounts found.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </section>
+</main>
+
+{% endblock %}

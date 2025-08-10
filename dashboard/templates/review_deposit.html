@@ -10,6 +10,14 @@
   <div class="container-fluid py-4 px-4">
     <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Review Deposit Requests</h2>
     <div class="bg-white rounded-3 p-3 shadow-sm">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <a href="{% url 'review_deposit' %}"  type="button" role="button" class="btn-filter text-decoration-none active">
+          Deposits
+        </a>
+        <a href="{% url 'review_ad_account' %}" type="button" role="button" class="btn-filter text-decoration-none">
+          Ad Accounts
+        </a>
+      </div>
       <div class="table-responsive">
         <table class="table align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.75rem;">
           <thead>

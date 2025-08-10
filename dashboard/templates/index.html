@@ -10,7 +10,7 @@
             Hello {{ request.user.first_name }} {{ request.user.last_name }}, 
             <span>👋</span> This is your regular dashboard!
         </p>
-        <a href="/deposit" class="btn-add-balance" role="button" type="button">
+        <a href="{% url 'deposit' %}" class="btn-add-balance text-decoration-none" role="button" type="button">
             Add Balance 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem; margin-left: 0.25rem;">
             <path d="M5 12h14m-7-7l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -30,7 +30,7 @@
             <div>Pending</div>
             <div>Deposit</div>
         </div>
-        <div class="value fs-3 p-2">{{ wallet.pending_deposit }}</div>
+        <div class="value fs-3 p-2">{{ wallet.pending_deposits }}</div>
         </div>
         <div class="status-bar status-green">
         <div class="status-icon bg-success">
@@ -43,7 +43,7 @@
             <div>Pending</div>
             <div>Accounts</div>
         </div>
-        <div class="value fs-3 p-2">0</div>
+        <div class="value fs-3 p-2">{{ wallet.pending_accounts }}</div>
         </div>
         <div class="status-bar status-purple-light">
         <div class="status-icon bg-purple text-white fw-bold text-center" style="font-size: 0.75rem;">Ad</div>
@@ -157,12 +157,12 @@
         <h2 class="fw-semibold text-secondary fs-6 mb-0">Ad Accounts</h2>
         <div class="d-flex gap-2 w-100 w-sm-auto">
             <input type="search" class="input-search" placeholder="Search ad accounts" aria-label="Search ad accounts" />
-            <button type="button" class="btn-create">
+            <a href="{% url 'request_ad_account' %}" type="button" class="btn-create text-decoration-none" role="button">
             Create Ad Account
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem;">
                 <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
-            </button>
+            </a>
         </div>
         </div>
         <div class="table-responsive">

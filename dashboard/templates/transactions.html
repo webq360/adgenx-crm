@@ -12,7 +12,7 @@
     <div class="bg-white rounded-3 p-3 shadow-sm">
       <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
 
-        <button type="button" class="btn-filter">Deposit</button>
+        <button type="button" class="btn-filter active">Deposit</button>
         <button type="button" class="btn-filter">All Transactions</button>
         <button type="button" class="btn-filter">Top Up</button>
         <button type="button" class="btn-filter">Withdrawals</button>
@@ -63,7 +63,7 @@
               <td style="font-size: 0.75rem;">{{ transaction.method }}</td>
               <td style="font-size: 0.75rem;">{{ transaction.trx_id }}</td>
               <td style="font-size: 0.75rem;">{{ transaction.vendor_trx_id }}</td>
-              <td class="attachment">
+              <td class="">
                 {% if transaction.receipt %}
                 <a href="{{ transaction.receipt.url }}" target="_blank"><i class="fas fa-link"></i> View Receipt</a>
                 {% else %}

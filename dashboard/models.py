@@ -30,7 +30,35 @@ class DepositTransaction(models.Model):
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    pending_deposit = models.IntegerField(default=0)
+    pending_deposits = models.IntegerField(default=0)
+    pending_accounts = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username}'s Wallet"
+
+
+class AdminBM(models.Model):
+    bm_id = models.CharField(max_length=100)
+    bm_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.bm_name
+
+class AdAccount(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    STATUS_CHOICES = (
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+    )
+    name = models.CharField(max_length=100)
+    acc_id = models.CharField(max_length=100)
+    acc_link = models.URLField()
+    bm_client_id = models.CharField(max_length=100)
+    mb_admin_reference = models.ForeignKey(AdminBM, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=10, decimal_places=2)
+    total_spent = models.DecimalField(max_digits=10, decimal_places=2)
+    start_date = models.DateField()
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='inactive')
+
+    def __str__(self):
+        return self.name
