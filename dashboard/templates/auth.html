@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +30,7 @@
     <div class="container-fluid h-custom">
     <div class="row d-flex justify-content-center align-items-center h-100">
         <div class="col-md-9 col-lg-6 col-xl-5">
-        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+        <img src="{% static 'draw2.webp' %}"
             class="img-fluid" alt="Sample image">
         </div>
         <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
@@ -40,7 +41,7 @@
                 <!-- Email input -->
                 <div data-mdb-input-init class="form-outline mb-3">
                     <label class="form-label" for="login-email">Email address</label>
-                    <input type="email" autocomplete="off" name="email" id="login-email" class="form-control form-control-lg"
+                    <input type="text" autocomplete="off" name="email" id="login-email" class="form-control form-control-lg"
                         placeholder="Enter a valid email address" />
                 </div>
 

@@ -20,7 +20,7 @@
             <div>Pending</div>
             <div>Deposit</div>
         </div>
-        <div class="value fs-3 p-2">0</div>
+        <div class="value fs-3 p-2">{{ wallet.pending_deposit }}</div>
         </div>
         <div class="status-bar status-green">
         <div class="status-icon bg-success">
@@ -96,7 +96,7 @@
             </svg>
             Wallet Balance
             </div>
-            <p class="card-value mb-1">$0</p>
+            <p class="card-value mb-1">${{ wallet.balance }}</p>
             <p class="card-subtext mb-0">Last deposit:</p>
         </div>
         </div>

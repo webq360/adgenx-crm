@@ -1,14 +1,17 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import User, DepositTransaction # Import DepositTransaction
+from .models import User, DepositTransaction, Wallet # Import DepositTransaction and Wallet
 from django.contrib import messages # Import messages
 
 # Create your views here.
 
 @login_required(login_url='auth')
 def index(request):
-    return render(request, 'index.html')
+    if request.user.is_staff:
+        return redirect('review_deposit')
+    wallet = Wallet.objects.get(user=request.user)
+    return render(request, 'index.html', {'wallet': wallet})       
 
 def auth(request):
     if request.user.is_authenticated:
@@ -43,6 +46,7 @@ def auth(request):
                         last_name=last_name
                     )
                     login(request, user)
+                    Wallet.objects.create(user=user)
                     return redirect('index')
     return render(request, 'auth.html')
 
@@ -66,17 +70,62 @@ def deposit(request):
                 usd_amount=usd_amount,
                 status='pending'
             )
+            # Update user's wallet pending_deposit
+            wallet, created = Wallet.objects.get_or_create(user=request.user)
+            wallet.pending_deposit += 1
+            wallet.save()
+
             messages.success(request, 'Deposit request submitted successfully!')
-            return redirect('/') # Redirect to transactions page after successful submission
+            return redirect('deposit_transactions') # Redirect to transactions page after successful submission
         except Exception as e:
             messages.error(request, f'Error submitting deposit request: {e}')
             return redirect('deposit') # Redirect back to deposit page on error
-    return render(request, 'deposit.html')
+        
+    wallet = Wallet.objects.get(user=request.user)
+    return render(request, 'deposit.html', {'wallet': wallet})
 
 @login_required(login_url='auth')
 def deposit_transactions(request):
-    transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
+    if request.user.is_staff:
+        transactions = DepositTransaction.objects.all().order_by('-created_at')
+    else:
+        transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'transactions.html', {'transactions': transactions})
+
+@login_required(login_url='auth')
+def review_deposit(request):
+    if not request.user.is_staff:
+        return redirect('index') # Or some other appropriate redirect/error
+    pending_transactions = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
+    return render(request, 'review_deposit.html', {'transactions': pending_transactions})
+
+@login_required(login_url='auth')
+def review_deposit_details(request, transaction_id):
+    if not request.user.is_staff:
+        return redirect('index') # Or some other appropriate redirect/error
+    transaction = get_object_or_404(DepositTransaction, id=transaction_id)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            transaction.status = 'approved'
+            messages.success(request, 'Deposit request approved successfully!')
+            # Update user's wallet balance
+            wallet = Wallet.objects.get(user=transaction.user)
+            wallet.balance += transaction.usd_amount
+            wallet.pending_deposit -= 1
+            wallet.save()
+        elif action == 'reject':
+            transaction.status = 'rejected'
+            messages.error(request, 'Deposit request rejected.')
+            # Decrement pending_deposit even if rejected
+            wallet = Wallet.objects.get(user=transaction.user)
+            wallet.pending_deposit -= 1
+            wallet.save()
+        transaction.save()
+        return redirect('review_deposit')
+
+    return render(request, 'review_deposit_details.html', {'transaction': transaction})
 
 def logout_view(request):
     logout(request)

@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'transactions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4 px-4">
+    <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Review Deposit Requests</h2>
+    <div class="bg-white rounded-3 p-3 shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.75rem;">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>User Info</th>
+              <th class="ps-2">Timestamp</th>
+              <th>Method</th>
+              <th>TRX ID</th>
+              <th>BDT Amount <i class="fas fa-sort ms-1 text-secondary"></i></th>
+              <th>USD Amount <i class="fas fa-sort ms-1 text-secondary"></i></th>
+              <th>Status</th>
+              <th class="pe-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions %}
+            <tr>
+              {% if request.user.is_staff %}
+              <td style="font-size: 0.75rem;">{{ transaction.id }}</td>
+              <td style="font-size: 0.75rem;">
+                {{ transaction.user.first_name }} {{ transaction.user.last_name }} ({{ transaction.user.username }})
+              </td>
+              {% endif %}
+              <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ transaction.created_at|date:"d M Y H:i" }}</td>
+              <td style="font-size: 0.75rem;">{{ transaction.method }}</td>
+              <td style="font-size: 0.75rem;">{{ transaction.trx_id }}</td>
+              <td style="font-size: 0.75rem;">৳{{ transaction.bdt_amount }}</td>
+              <td style="font-size: 0.75rem;">${{ transaction.usd_amount }}</td>
+              <td><span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></td>
+              <td class="pe-2">
+                <a href="{% url 'review_deposit_details' transaction.id %}" class="btn btn-sm btn-primary">View</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center">No pending deposit requests found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

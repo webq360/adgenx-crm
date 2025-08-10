@@ -7,4 +7,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('deposit/', views.deposit, name='deposit'),
     path('transactions/deposit/', views.deposit_transactions, name='deposit_transactions'),
+    path('review/deposit/', views.review_deposit, name='review_deposit'),
+    path('review/deposit/<int:transaction_id>/', views.review_deposit_details, name='review_deposit_details'),
 ]

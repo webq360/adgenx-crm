@@ -30,7 +30,7 @@
             </div>
             <h2 class="fs-6 fw-semibold mb-0">Wallet Balance</h2>
           </div>
-          <p class="fs-5 fw-bold mb-1">$50.00</p>
+          <p class="fs-5 fw-bold mb-1">${{ wallet.balance }}</p>
           <p class="text-muted small mb-0">Last deposit: 07 Aug 2025</p>
         </div>
       </div>
@@ -54,7 +54,7 @@
             </div>
             <h2 class="fs-6 fw-semibold mb-0">Pending Deposit</h2>
           </div>
-          <p class="fs-5 fw-bold mb-1">0</p>
+          <p class="fs-5 fw-bold mb-1">{{ wallet.pending_deposit }}</p>
           <p class="text-muted small mb-0">Admin approval is pending</p>
         </div>
       </div>

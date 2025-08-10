@@ -33,19 +33,25 @@
         <a href="#" class="nav-link d-flex align-items-center gap-2 fw-semibold ad-accounts-link">
             Ad Accounts
         </a>
+        {% if not request.user.is_staff %}
         <a href="/deposit" class="nav-link d-flex align-items-center gap-2 fw-semibold text-dark">
             Deposit
         </a>
+        {% endif %}
         <a href="/transactions/deposit" class="nav-link d-flex align-items-center gap-2 fw-semibold text-dark">
             Transactions
         </a>
+        {% if request.user.is_staff %}
+        <a href="{% url 'review_deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold text-dark">
+            Pending
+        </a>
+        {% endif %}
         </nav>
     </div>
     <div class="others-menu mt-auto px-3 pb-3">
         <p class="text-secondary small fw-semibold mb-2">Others Menu</p>
-        <a href="#" class="d-flex align-items-center gap-2 fw-semibold text-dark text-decoration-none mb-2">
-        <i class="fas fa-headphones-alt"></i>
-        Support Inbox
+        <a href="/logout" class="d-flex align-items-center gap-2 fw-semibold text-dark text-decoration-none mb-2">
+        Logout
         </a>
         <a href="#" class="d-flex align-items-center gap-2 fw-semibold text-dark text-decoration-none">
         <i class="fas fa-cog"></i>
