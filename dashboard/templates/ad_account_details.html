@@ -24,22 +24,19 @@
                 <tr>
                     <th colspan="2" class="table-info">Connected BM</th>
                 </tr>
+                {% for bm_account in ad_account.bm_accounts.all %}
                 <tr>
-                    <th scope="row">Admin BM Name</th>
-                    <td>{{ ad_account.mb_admin_reference.bm_name }}</td>
+                    <th scope="row">BM Info</th>
+                    <td class="d-flex flex-column">
+                        <span>{{ bm_account.acc_name }}</span>
+                        <span>{{ bm_account.acc_id }}</span>
+                    </td>
                 </tr>
+                {% empty %}
                 <tr>
-                    <th scope="row">Admin BM ID</th>
-                    <td>{{ ad_account.mb_admin_reference.bm_id }}</td>
+                    <td colspan="2">No BM accounts</td>
                 </tr>
-                <tr>
-                    <th scope="row">Client BM Name</th>
-                    <td>{{ ad_account.bm_client_name }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Client BM ID</th>
-                    <td>{{ ad_account.bm_client_id }}</td>
-                </tr>
+                {% endfor %}
                 <tr>
                     <th colspan="2" class="table-info">Financials</th>
                 </tr>
@@ -71,7 +68,7 @@
     </div>
 
     <div class="mt-4 d-flex justify-content-between align-items-center">
-        <a href="{% url 'ad_accounts' %}" class="btn btn-primary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
+        <a href="{% url 'review_ad_account' %}" class="btn btn-primary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
         {% if ad_account.status != 'active' %}
         <form method="post" class="d-inline">
             {% csrf_token %}

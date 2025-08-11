@@ -45,9 +45,12 @@
                     <span class="text-secondary">({{ ad_account.user.username }})</span>
                 </td>
                 <td style="font-size: 0.75rem;">
-                    {{ ad_account.mb_admin_reference.bm_name }}<br>
-                    <span class="text-secondary">{{ ad_account.mb_admin_reference.bm_id }}</span><br>
-                    <span class="text-secondary">{{ ad_account.bm_client_id }}</span>
+                    {% for bm_account in ad_account.bm_accounts.all %}
+                        <p class="fw-semibold mb-0">{{ bm_account.acc_name }}</p>
+                        <p class="text-secondary mb-1" style="line-height: 1.2;">{{ bm_account.acc_id }}</p>
+                    {% empty %}
+                        <p class="text-secondary mb-0">No BM accounts</p>
+                    {% endfor %}
                 </td>
                 <td style="font-size: 0.75rem;">${{ ad_account.balance }}</td>
                 <td style="font-size: 0.75rem;">${{ ad_account.total_spent }}</td>

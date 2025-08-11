@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import User, DepositTransaction, Wallet, AdAccount, AdminBM
+from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount
 from django.contrib import messages # Import messages
 
 # Create your views here.
@@ -142,22 +142,16 @@ def request_ad_account(request):
             messages.error(request, 'All fields are required.')
             return redirect('request_ad_account')
 
-        # Check if an AdminBM object exists, if not create one
-        mb_admin_reference = AdminBM.objects.first()
-        if not mb_admin_reference:
-            mb_admin_reference = AdminBM.objects.create(bm_id="DUMMY_BM_ID", bm_name="DUMMY_BM_NAME")
+        bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_client_id, defaults={'acc_name': name})
 
         balance = 0.00
         total_spent = 0.00
 
-        AdAccount.objects.create(
+        ad_account = AdAccount.objects.create(
             user=request.user,
             name=name,
             acc_id="",  # Set acc_id to empty string
             acc_link=acc_link,
-            bm_client_id=bm_client_id,
-            bm_client_name="",  # Set bm_client_name to empty string
-            mb_admin_reference=mb_admin_reference,
             balance=balance,
             total_spent=total_spent,
             start_date=start_date,
@@ -165,6 +159,7 @@ def request_ad_account(request):
             monthly_budget=monthly_budget,
             limit=0.00  # Set limit to 0
         )
+        ad_account.bm_accounts.add(bm_account)
 
         wallet = Wallet.objects.get(user=request.user)
         wallet.pending_accounts += 1
