@@ -132,16 +132,14 @@ def review_deposit_details(request, transaction_id):
 def request_ad_account(request):
     if request.method == 'POST':
         name = request.POST.get('accountName')
-        acc_id = request.POST.get('accId') # Get acc_id from form
         bm_client_id = request.POST.get('bmId')
-        bm_client_name = request.POST.get('bmClientName', '') # New field
         acc_link = request.POST.get('fbPageLink')
         start_date = request.POST.get('startDate')
-        limit = request.POST.get('limit', 0.00) # New field
+        monthly_budget = request.POST.get('monthly_budget', 0.00)
 
         # Validation
-        if not name or not acc_id:
-            messages.error(request, 'Account Name and Account ID are required.')
+        if not name or not bm_client_id or not acc_link or not start_date or not monthly_budget:
+            messages.error(request, 'All fields are required.')
             return redirect('request_ad_account')
 
         # Check if an AdminBM object exists, if not create one
@@ -155,16 +153,17 @@ def request_ad_account(request):
         AdAccount.objects.create(
             user=request.user,
             name=name,
-            acc_id=acc_id,
+            acc_id="",  # Set acc_id to empty string
             acc_link=acc_link,
             bm_client_id=bm_client_id,
-            bm_client_name=bm_client_name,
+            bm_client_name="",  # Set bm_client_name to empty string
             mb_admin_reference=mb_admin_reference,
             balance=balance,
             total_spent=total_spent,
             start_date=start_date,
             status='inactive',
-            limit=limit
+            monthly_budget=monthly_budget,
+            limit=0.00  # Set limit to 0
         )
 
         wallet = Wallet.objects.get(user=request.user)

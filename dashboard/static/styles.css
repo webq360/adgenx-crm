@@ -158,6 +158,9 @@ body {
     border-color: #e5e7eb;
     vertical-align: middle;
 }
+.table tbody th {
+    font-weight: normal;
+}
 .table tbody td {
     font-size: 0.75rem;
     vertical-align: top;

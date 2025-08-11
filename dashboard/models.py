@@ -60,6 +60,7 @@ class AdAccount(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     total_spent = models.DecimalField(max_digits=10, decimal_places=2)
     start_date = models.DateField()
+    monthly_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='inactive')
 
     def __str__(self):

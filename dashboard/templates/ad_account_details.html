@@ -4,10 +4,10 @@
 <div class="container mt-5">
     <h2 class="mb-4">Ad Account Details</h2>
     <div class="table-responsive">
-        <table class="table table-bordered">
+        <table class="table">
             <tbody>
                 <tr>
-                    <th colspan="2" class="table-dark">Ad Account</th>
+                    <th colspan="2" class="table-info">Ad Account</th>
                 </tr>
                 <tr>
                     <th scope="row" class="w-25">Account Name</th>
@@ -22,7 +22,7 @@
                     <td><a href="{{ ad_account.acc_link }}" target="_blank">{{ ad_account.acc_link }}</a></td>
                 </tr>
                 <tr>
-                    <th colspan="2" class="table-dark">Connected BM</th>
+                    <th colspan="2" class="table-info">Connected BM</th>
                 </tr>
                 <tr>
                     <th scope="row">Admin BM Name</th>
@@ -41,7 +41,11 @@
                     <td>{{ ad_account.bm_client_id }}</td>
                 </tr>
                 <tr>
-                    <th colspan="2" class="table-dark">Financials</th>
+                    <th colspan="2" class="table-info">Financials</th>
+                </tr>
+                <tr>
+                    <th scope="row">Monthly Budget</th>
+                    <td>${{ ad_account.monthly_budget }}</td>
                 </tr>
                 <tr>
                     <th scope="row">Balance</th>
@@ -56,11 +60,11 @@
                     <td>${{ ad_account.limit }}</td>
                 </tr>
                  <tr>
-                    <th colspan="2" class="table-dark">Status</th>
+                    <th colspan="2" class="table-info">Status</th>
                 </tr>
                 <tr>
                     <th scope="row">Status</th>
-                    <td>{{ ad_account.status }}</td>
+                    <td class="badge-{{ ad_account.status }}">{{ ad_account.status }}</td>
                 </tr>
             </tbody>
         </table>

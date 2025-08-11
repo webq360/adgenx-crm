@@ -1,5 +1,4 @@
 {% extends 'layout.html' %}
-{% load static %}
 
 {% block styles %}
 {% endblock %}
@@ -58,7 +57,7 @@
                 <!--admin BM id-->
                 <p class="text-secondary mb-1" style="line-height: 1.2;">{{ ad_account.mb_admin_reference.bm_id }}</p>
                 <!--client bm name-->
-                <p class="fw-semibold mb-0">{{ ad_account.user.first_name }} {{ ad_account.user.last_name }}</p>
+                <p class="fw-semibold mb-0">{{ ad_account.bm_client_name }}</p>
                 <!--client bm id-->
                 <p class="text-secondary mb-0" style="line-height: 1.2;">{{ ad_account.bm_client_id }}</p>
                 </td>
