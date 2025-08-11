@@ -27,8 +27,11 @@
                 {% for bm_account in ad_account.bm_accounts.all %}
                 <tr>
                     <th scope="row">BM Info</th>
-                    <td class="d-flex flex-column">
+                    <td>
                         <span>{{ bm_account.acc_name }}</span>
+                        {% if bm_account.acc_name %}
+                        <br>
+                        {% endif %}
                         <span>{{ bm_account.acc_id }}</span>
                     </td>
                 </tr>
@@ -61,7 +64,7 @@
                 </tr>
                 <tr>
                     <th scope="row">Status</th>
-                    <td class="badge-{{ ad_account.status }}">{{ ad_account.status }}</td>
+                    <td class="">{{ ad_account.status | capfirst }}</td>
                 </tr>
             </tbody>
         </table>

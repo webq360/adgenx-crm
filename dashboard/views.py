@@ -142,7 +142,7 @@ def request_ad_account(request):
             messages.error(request, 'All fields are required.')
             return redirect('request_ad_account')
 
-        bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_client_id, defaults={'acc_name': name})
+        bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_client_id, acc_name='')
 
         balance = 0.00
         total_spent = 0.00
