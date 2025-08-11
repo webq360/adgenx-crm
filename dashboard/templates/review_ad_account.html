@@ -52,7 +52,7 @@
                 <td style="font-size: 0.75rem;">${{ ad_account.balance }}</td>
                 <td style="font-size: 0.75rem;">${{ ad_account.total_spent }}</td>
                 <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ ad_account.start_date|date:"d M Y" }}</td>
-                <td><span class="status-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span></td>
+                <td><span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span></td>
                 <td class="pe-2">
                     <a href="{% url 'ad_account_details' ad_account.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
                 </td>

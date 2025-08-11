@@ -1,26 +1,85 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<div class="container">
-    <h2>Ad Account Details</h2>
-    <p><strong>Name:</strong> {{ ad_account.name }}</p>
-    <p><strong>Account ID:</strong> {{ ad_account.acc_id }}</p>
-    <p><strong>Account Link:</strong> <a href="{{ ad_account.acc_link }}" target="_blank">{{ ad_account.acc_link }}</a></p>
-    <p><strong>BM Client ID:</strong> {{ ad_account.bm_client_id }}</p>
-    <p><strong>Admin BM:</strong> {{ ad_account.mb_admin_reference.bm_name }}</p>
-    <p><strong>Balance:</strong> ${{ ad_account.balance }}</p>
-    <p><strong>Total Spent:</strong> ${{ ad_account.total_spent }}</p>
-    <p><strong>Start Date:</strong> {{ ad_account.start_date }}</p>
-    <p><strong>Status:</strong> {{ ad_account.status }}</p>
+<div class="container mt-5">
+    <h2 class="mb-4">Ad Account Details</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th colspan="2" class="table-dark">Ad Account</th>
+                </tr>
+                <tr>
+                    <th scope="row" class="w-25">Account Name</th>
+                    <td>{{ ad_account.name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Account ID</th>
+                    <td>{{ ad_account.acc_id }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Account Link</th>
+                    <td><a href="{{ ad_account.acc_link }}" target="_blank">{{ ad_account.acc_link }}</a></td>
+                </tr>
+                <tr>
+                    <th colspan="2" class="table-dark">Connected BM</th>
+                </tr>
+                <tr>
+                    <th scope="row">Admin BM Name</th>
+                    <td>{{ ad_account.mb_admin_reference.bm_name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Admin BM ID</th>
+                    <td>{{ ad_account.mb_admin_reference.bm_id }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Client BM Name</th>
+                    <td>{{ ad_account.bm_client_name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Client BM ID</th>
+                    <td>{{ ad_account.bm_client_id }}</td>
+                </tr>
+                <tr>
+                    <th colspan="2" class="table-dark">Financials</th>
+                </tr>
+                <tr>
+                    <th scope="row">Balance</th>
+                    <td>${{ ad_account.balance }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Total Spent</th>
+                    <td>${{ ad_account.total_spent }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Limit</th>
+                    <td>${{ ad_account.limit }}</td>
+                </tr>
+                 <tr>
+                    <th colspan="2" class="table-dark">Status</th>
+                </tr>
+                <tr>
+                    <th scope="row">Status</th>
+                    <td>{{ ad_account.status }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    {% if ad_account.status != 'active' %}
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
-        <a href="{% url 'ad_accounts' %}" class="btn btn-danger">Cancel</a>
-    </form>
-    {% else %}
-    <a href="{% url 'ad_accounts' %}" class="btn btn-primary"><i class="fas fa-arrow-left me-2"></i>Back</a>
-    {% endif %}
+    <div class="mt-4 d-flex justify-content-between align-items-center">
+        <a href="{% url 'ad_accounts' %}" class="btn btn-primary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
+        {% if ad_account.status != 'active' %}
+        <form method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
+        </form>
+        {% else %}
+        <form method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" name="action" value="deactivate" class="btn btn-warning">Deactivate</button>
+        </form>
+        {% endif %}
+        
+    </div>
 </div>
 {% endblock %}

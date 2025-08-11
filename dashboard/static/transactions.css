@@ -58,16 +58,6 @@ body {
       align-items: center;
       gap: 0.25rem;
     }
-    .status-approved {
-      background-color: #2E7D32;
-      color: white;
-      border-radius: 50px;
-      padding: 0.25rem 1rem;
-      font-weight: 600;
-      font-size: 0.6875rem;
-      white-space: nowrap;
-      display: inline-block;
-    }
     .form-control-sm {
       font-size: 0.75rem;
       height: 1.75rem;

@@ -185,138 +185,62 @@
             </tr>
             </thead>
             <tbody>
+            {% for ad_account in ad_accounts %}
             <tr class="border border-secondary-subtle align-top">
                 <td class="border border-secondary-subtle">
-                <p class="fw-semibold mb-1">#10649-1Step@_TECK TONIK</p>
+                <!--ad_account name-->
+                <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
+                <!--ad_account_id-->
                 <p class="text-secondary mb-0" style="line-height: 1.2;">
-                    id - 1594810361151663<br />
-                    <a href="https://www.facebook.com/share/16qwkLisVW/" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">https://www.facebook.com/share/16qwkLisVW/</a>
+                    id - {{ ad_account.acc_id }}<br />
+                    <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
                 </p>
                 </td>
                 <td class="border border-secondary-subtle">
-                <p class="mb-0">Adgenx</p>
-                <p class="text-secondary mb-1" style="line-height: 1.2;">3543877409203066</p>
-                <p class="fw-semibold mb-0">Alamin OTA</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">7619631018137928</p>
+                <!--admin BM name-->
+                <p class="mb-0">{{ ad_account.mb_admin_reference.bm_name }}</p>
+                <!--admin BM id-->
+                <p class="text-secondary mb-1" style="line-height: 1.2;">{{ ad_account.mb_admin_reference.bm_id }}</p>
+                <!--client bm name-->
+                <p class="fw-semibold mb-0">{{ ad_account.user.first_name }} {{ ad_account.user.last_name }}</p>
+                <!--client bm id-->
+                <p class="text-secondary mb-0" style="line-height: 1.2;">{{ ad_account.bm_client_id }}</p>
                 </td>
-                <td class="border border-secondary-subtle">$0.01</td>
-                <td class="border border-secondary-subtle">$0</td>
-                <td class="border border-secondary-subtle">$0.01</td>
+                <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
+                <td class="border border-secondary-subtle">${{ ad_account.total_spent }}</td>
+                <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
                 <td class="border border-secondary-subtle">
-                <span class="badge-active">Active</span>
+                <span class="badge-{% if ad_account.status == 'active' %}active{% else %}inactive{% endif %}">{{ ad_account.status|capfirst }}</span>
                 </td>
                 <td class="border border-secondary-subtle text-center">
-                <button type="button" class="btn-icon" aria-label="More actions">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="19" cy="12" r="1"></circle>
-                    <circle cx="5" cy="12" r="1"></circle>
-                    </svg>
-                </button>
+                {% if request.user.is_staff %}
+                    <a href="{% url 'ad_account_details' ad_account.id %}" class="btn-icon" aria-label="More actions">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </a>
+                {% else %}
+                    <button type="button" class="btn-icon" aria-label="More actions">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                        </svg>
+                    </button>
+                {% endif %}
                 </td>
+                {% if not request.user.is_staff %}
                 <td class="border border-secondary-subtle">
                 <button type="button" class="btn-topup">Top Up</button>
                 </td>
+                {% endif %}
             </tr>
-            <tr class="border border-secondary-subtle align-top">
-                <td class="border border-secondary-subtle">
-                <p class="fw-semibold mb-1">#10650-1Step@_Hasan</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">
-                    id - 3898597073748174<br />
-                    <a href="https://www.facebook.com/share/1GUKFThpJ7/" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">https://www.facebook.com/share/1GUKFThpJ7/</a>
-                </p>
-                </td>
-                <td class="border border-secondary-subtle">
-                <p class="mb-0">Adgenx</p>
-                <p class="text-secondary mb-1" style="line-height: 1.2;">3543877409203066</p>
-                <p class="fw-semibold mb-0">hasanurkabir1</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">533197819058085</p>
-                </td>
-                <td class="border border-secondary-subtle">$0.01</td>
-                <td class="border border-secondary-subtle">$0</td>
-                <td class="border border-secondary-subtle">$0.01</td>
-                <td class="border border-secondary-subtle">
-                <span class="badge-active">Active</span>
-                </td>
-                <td class="border border-secondary-subtle text-center">
-                <button type="button" class="btn-icon" aria-label="More actions">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="19" cy="12" r="1"></circle>
-                    <circle cx="5" cy="12" r="1"></circle>
-                    </svg>
-                </button>
-                </td>
-                <td class="border border-secondary-subtle">
-                <button type="button" class="btn-topup">Top Up</button>
-                </td>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No ad accounts found.</td>
             </tr>
-            <tr class="border border-secondary-subtle align-top">
-                <td class="border border-secondary-subtle">
-                <p class="fw-semibold mb-1">#10652-1Step@_Mahmud</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">
-                    id - 2164678930628099<br />
-                    <a href="https://www.facebook.com/tayebafreshfood" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">https://www.facebook.com/tayebafreshfood</a>
-                </p>
-                </td>
-                <td class="border border-secondary-subtle">
-                <p class="mb-0">Adgenx</p>
-                <p class="text-secondary mb-1" style="line-height: 1.2;">3543877409203066</p>
-                <p class="fw-semibold mb-0">Muhammad Business portfolio</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">652962470910669</p>
-                </td>
-                <td class="border border-secondary-subtle">$10.73</td>
-                <td class="border border-secondary-subtle">$39.28</td>
-                <td class="border border-secondary-subtle">$50.01</td>
-                <td class="border border-secondary-subtle">
-                <span class="badge-active">Active</span>
-                </td>
-                <td class="border border-secondary-subtle text-center">
-                <button type="button" class="btn-icon" aria-label="More actions">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="19" cy="12" r="1"></circle>
-                    <circle cx="5" cy="12" r="1"></circle>
-                    </svg>
-                </button>
-                </td>
-                <td class="border border-secondary-subtle">
-                <button type="button" class="btn-topup">Top Up</button>
-                </td>
-            </tr>
-            <tr class="border border-secondary-subtle align-top">
-                <td class="border border-secondary-subtle">
-                <p class="fw-semibold mb-1">#10672-1Step@ 5 Minute shop._</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">
-                    id - 1234567890123456<br />
-                    <a href="https://www.facebook.com/5minuteshop" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">https://www.facebook.com/5minuteshop</a>
-                </p>
-                </td>
-                <td class="border border-secondary-subtle">
-                <p class="mb-0">Adgenx</p>
-                <p class="text-secondary mb-1" style="line-height: 1.2;">3543877409203066</p>
-                <p class="fw-semibold mb-0">5 Minute Shop BM</p>
-                <p class="text-secondary mb-0" style="line-height: 1.2;">1234567890123456</p>
-                </td>
-                <td class="border border-secondary-subtle">$5.00</td>
-                <td class="border border-secondary-subtle">$20.00</td>
-                <td class="border border-secondary-subtle">$25.00</td>
-                <td class="border border-secondary-subtle">
-                <span class="badge-active">Active</span>
-                </td>
-                <td class="border border-secondary-subtle text-center">
-                <button type="button" class="btn-icon" aria-label="More actions">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="19" cy="12" r="1"></circle>
-                    <circle cx="5" cy="12" r="1"></circle>
-                    </svg>
-                </button>
-                </td>
-                <td class="border border-secondary-subtle">
-                <button type="button" class="btn-topup">Top Up</button>
-                </td>
-            </tr>
+            {% endfor %}
             </tbody>
         </table>
         </div>

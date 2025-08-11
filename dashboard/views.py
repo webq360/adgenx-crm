@@ -11,7 +11,8 @@ def index(request):
     if request.user.is_staff:
         return redirect('review_deposit')  # Redirect staff to review deposits
     wallet = Wallet.objects.get(user=request.user)
-    return render(request, 'index.html', {'wallet': wallet})       
+    ad_accounts = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
+    return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts})       
 
 def auth(request):
     if request.user.is_authenticated:
@@ -133,8 +134,10 @@ def request_ad_account(request):
         name = request.POST.get('accountName')
         acc_id = request.POST.get('accId') # Get acc_id from form
         bm_client_id = request.POST.get('bmId')
+        bm_client_name = request.POST.get('bmClientName', '') # New field
         acc_link = request.POST.get('fbPageLink')
         start_date = request.POST.get('startDate')
+        limit = request.POST.get('limit', 0.00) # New field
 
         # Validation
         if not name or not acc_id:
@@ -155,11 +158,13 @@ def request_ad_account(request):
             acc_id=acc_id,
             acc_link=acc_link,
             bm_client_id=bm_client_id,
+            bm_client_name=bm_client_name,
             mb_admin_reference=mb_admin_reference,
             balance=balance,
             total_spent=total_spent,
             start_date=start_date,
-            status='inactive'
+            status='inactive',
+            limit=limit
         )
 
         wallet = Wallet.objects.get(user=request.user)
@@ -197,6 +202,13 @@ def ad_account_details(request, ad_account_id):
             wallet.pending_accounts -= 1
             wallet.save()
             messages.success(request, 'Ad account has been activated.')
+        elif action == 'deactivate':
+            ad_account.status = 'inactive'
+            ad_account.save()
+            wallet = Wallet.objects.get(user=ad_account.user)
+            wallet.pending_accounts += 1 # Increment if it was active and now inactive
+            wallet.save()
+            messages.warning(request, 'Ad account has been deactivated.')
         elif action == 'cancel':
             return redirect('ad_accounts')
         return redirect('ad_accounts')
