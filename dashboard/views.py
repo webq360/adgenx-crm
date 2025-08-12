@@ -189,23 +189,55 @@ def ad_account_details(request, ad_account_id):
 
     if request.method == 'POST':
         action = request.POST.get('action')
-        if action == 'activate':
+        if action == 'save':
+            ad_account.name = request.POST.get('name')
+            ad_account.acc_id = request.POST.get('acc_id')
+            ad_account.acc_link = request.POST.get('acc_link')
+            ad_account.monthly_budget = request.POST.get('monthly_budget')
+            ad_account.balance = request.POST.get('balance')
+            ad_account.total_spent = request.POST.get('total_spent')
+            ad_account.limit = request.POST.get('limit')
+            ad_account.save()
+
+            for bm_account in ad_account.bm_accounts.all():
+                bm_account.acc_name = request.POST.get(f'bm_acc_name_{bm_account.id}')
+                bm_account.acc_id = request.POST.get(f'bm_acc_id_{bm_account.id}')
+                bm_account.save()
+
+            messages.success(request, 'Ad account details have been updated.')
+
+        elif action == 'add_bm':
+            bm_acc_name = request.POST.get('bm_acc_name')
+            bm_acc_id = request.POST.get('bm_acc_id')
+            if bm_acc_name and bm_acc_id:
+                bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_acc_id, defaults={'acc_name': bm_acc_name})
+                ad_account.bm_accounts.add(bm_account)
+                messages.success(request, 'BM account has been added.')
+
+        elif action.startswith('remove_bm_'):
+            bm_account_id = action.split('_')[-1]
+            bm_account = get_object_or_404(BMAccount, id=bm_account_id)
+            ad_account.bm_accounts.remove(bm_account)
+            messages.success(request, 'BM account has been removed.')
+
+        elif action == 'activate':
             ad_account.status = 'active'
             ad_account.save()
             wallet = Wallet.objects.get(user=ad_account.user)
-            wallet.pending_accounts -= 1
-            wallet.save()
+            if wallet.pending_accounts > 0:
+                wallet.pending_accounts -= 1
+                wallet.save()
             messages.success(request, 'Ad account has been activated.')
+
         elif action == 'deactivate':
             ad_account.status = 'inactive'
             ad_account.save()
             wallet = Wallet.objects.get(user=ad_account.user)
-            wallet.pending_accounts += 1 # Increment if it was active and now inactive
+            wallet.pending_accounts += 1
             wallet.save()
             messages.warning(request, 'Ad account has been deactivated.')
-        elif action == 'cancel':
-            return redirect('ad_accounts')
-        return redirect('ad_accounts')
+
+        return redirect('ad_account_details', ad_account_id=ad_account.id)
 
     return render(request, 'ad_account_details.html', {'ad_account': ad_account})
 

@@ -1,89 +1,131 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Ad Account Details</h2>
-    <div class="table-responsive">
-        <table class="table">
-            <tbody>
-                <tr>
-                    <th colspan="2" class="table-info">Ad Account</th>
-                </tr>
-                <tr>
-                    <th scope="row" class="w-25">Account Name</th>
-                    <td>{{ ad_account.name }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Account ID</th>
-                    <td>{{ ad_account.acc_id }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Account Link</th>
-                    <td><a href="{{ ad_account.acc_link }}" target="_blank">{{ ad_account.acc_link }}</a></td>
-                </tr>
-                <tr>
-                    <th colspan="2" class="table-info">Connected BM</th>
-                </tr>
-                {% for bm_account in ad_account.bm_accounts.all %}
-                <tr>
-                    <th scope="row">BM Info</th>
-                    <td>
-                        <span>{{ bm_account.acc_name }}</span>
-                        {% if bm_account.acc_name %}
-                        <br>
-                        {% endif %}
-                        <span>{{ bm_account.acc_id }}</span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2">No BM accounts</td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <th colspan="2" class="table-info">Financials</th>
-                </tr>
-                <tr>
-                    <th scope="row">Monthly Budget</th>
-                    <td>${{ ad_account.monthly_budget }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Balance</th>
-                    <td>${{ ad_account.balance }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Total Spent</th>
-                    <td>${{ ad_account.total_spent }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Limit</th>
-                    <td>${{ ad_account.limit }}</td>
-                </tr>
-                 <tr>
-                    <th colspan="2" class="table-info">Status</th>
-                </tr>
-                <tr>
-                    <th scope="row">Status</th>
-                    <td class="">{{ ad_account.status | capfirst }}</td>
-                </tr>
-            </tbody>
-        </table>
+<div class="container mt-4">
+    <div class="mb-2 d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-1">Ad Account Details</h2>
+        <span>
+            {{ ad_account.user.first_name }} {{ ad_account.user.last_name }}<br>
+            <span class="text-secondary">({{ ad_account.user.username }})</span>
+        </span>
     </div>
 
-    <div class="mt-4 d-flex justify-content-between align-items-center">
-        <a href="{% url 'review_ad_account' %}" class="btn btn-primary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
-        {% if ad_account.status != 'active' %}
-        <form method="post" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
-        </form>
-        {% else %}
-        <form method="post" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" name="action" value="deactivate" class="btn btn-warning">Deactivate</button>
-        </form>
-        {% endif %}
-        
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table mb-2">
+                <tbody>
+                    <tr>
+                        <th colspan="2" class="table-info">Ad Account</th>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="w-25">Account Name</th>
+                        <td><input type="text" name="name" class="form-control" value="{{ ad_account.name }}"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Account ID</th>
+                        <td><input type="text" name="acc_id" class="form-control" value="{{ ad_account.acc_id }}"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Account Link</th>
+                        <td><input type="text" name="acc_link" class="form-control" value="{{ ad_account.acc_link }}"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" class="table-info">Connected BM</th>
+                    </tr>
+                    {% for bm_account in ad_account.bm_accounts.all %}
+                    <tr>
+                        <th scope="row">BM Info</th>
+                        <td>
+                            <div class="input-group">
+                                <input type="text" name="bm_acc_name_{{ bm_account.id }}" class="form-control" value="{{ bm_account.acc_name }}">
+                                <input type="text" name="bm_acc_id_{{ bm_account.id }}" class="form-control" value="{{ bm_account.acc_id }}">
+                                <button type="submit" name="action" value="remove_bm_{{ bm_account.id }}" class="btn btn-danger">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">No BM accounts</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2">
+                            <div class="d-flex justify-content-end">
+                                <a href="#" class="btn btn-primary text-decoration-none" data-bs-toggle="modal" data-bs-target="#addBmModal">Add BM Account</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" class="table-info">Financials</th>
+                    </tr>
+                    <tr>
+                        <th scope="row">Monthly Budget</th>
+                        <td><input type="text" name="monthly_budget" class="form-control" value="{{ ad_account.monthly_budget }}"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Balance</th>
+                        <td><input type="text" name="balance" class="form-control" value="{{ ad_account.balance }}"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Total Spent</th>
+                        <td><input type="text" name="total_spent" class="form-control" value="{{ ad_account.total_spent }}"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Limit</th>
+                        <td><input type="text" name="limit" class="form-control" value="{{ ad_account.limit }}"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" class="table-info">Status</th>
+                    </tr>
+                    <tr>
+                        <th scope="row">Status</th>
+                        <td class="">{{ ad_account.status | capfirst }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <a href="{% url 'review_ad_account' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
+            <div>
+                <button type="submit" name="action" value="save" class="btn btn-primary">Save Changes</button>
+                {% if ad_account.status != 'active' %}
+                <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
+                {% else %}
+                <button type="submit" name="action" value="deactivate" class="btn btn-warning">Deactivate</button>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Add BM Account Modal -->
+<div class="modal fade" id="addBmModal" tabindex="-1" aria-labelledby="addBmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBmModalLabel">Add BM Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bmAccountName" class="form-label">BM Account Name</label>
+                        <input type="text" name="bm_acc_name" class="form-control" id="bmAccountName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bmAccountId" class="form-label">BM Account ID</label>
+                        <input type="text" name="bm_acc_id" class="form-control" id="bmAccountId">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" name="action" value="add_bm" class="btn btn-primary">Add Account</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
