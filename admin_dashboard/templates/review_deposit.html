@@ -11,10 +11,10 @@
     <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Review Deposit Requests</h2>
     <div class="bg-white rounded-3 p-3 shadow-sm">
       <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-        <a href="{% url 'review_deposit' %}"  type="button" role="button" class="btn-filter text-decoration-none active">
+        <a href="{% url 'admin_dashboard:review_deposit' %}"  type="button" role="button" class="btn-filter text-decoration-none active">
           Deposits
         </a>
-        <a href="{% url 'review_ad_account' %}" type="button" role="button" class="btn-filter text-decoration-none">
+        <a href="{% url 'admin_dashboard:review_ad_account' %}" type="button" role="button" class="btn-filter text-decoration-none">
           Ad Accounts
         </a>
       </div>
@@ -49,7 +49,7 @@
               <td style="font-size: 0.75rem;">${{ transaction.usd_amount }}</td>
               <td><span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></td>
               <td class="pe-2">
-                <a href="{% url 'review_deposit_details' transaction.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
+                <a href="{% url 'admin_dashboard:review_deposit_details' transaction.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
               </td>
             </tr>
             {% empty %}

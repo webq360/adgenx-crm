@@ -87,7 +87,7 @@
         </div>
 
         <div class="mt-4 d-flex justify-content-between align-items-center">
-            <a href="{% url 'review_ad_account' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
+            <a href="{% url 'admin_dashboard:review_ad_account' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
             <div>
                 <button type="submit" name="action" value="save" class="btn btn-primary">Save Changes</button>
                 {% if ad_account.status != 'active' %}
