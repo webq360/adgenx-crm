@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount
 from django.contrib import messages # Import messages
+from django.http import JsonResponse
+import json
 
 # Create your views here.
 
@@ -139,9 +141,34 @@ def ad_accounts(request):
     if request.user.is_staff:
         ad_accounts = AdAccount.objects.all().order_by('-start_date')
     else:
-        ad_accounts = AdAccount.objects.filter(user=request.user).order_by('-start_date')
+        ad_accounts = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
     return render(request, 'ad_accounts.html', {'ad_accounts': ad_accounts})
 
 def logout_view(request):
     logout(request)
     return redirect('auth')
+
+@login_required(login_url='auth')
+def topup(request):
+    if request.method == 'POST':
+        ad_account_id = request.POST.get('ad_account_id')
+        amount = request.POST.get('amount')
+
+        try:
+            amount = float(amount)
+            ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
+            wallet = get_object_or_404(Wallet, user=request.user)
+
+            if wallet.balance >= amount:
+                print(f"""
+                    Top-up successful!
+                    Ad Account: {ad_account.name} (ID: {ad_account.acc_id})
+                    Amount: ${amount}
+                """)
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Insufficient balance.'})
+        except (ValueError, AdAccount.DoesNotExist, Wallet.DoesNotExist) as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
