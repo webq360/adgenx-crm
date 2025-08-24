@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount
-from django.contrib import messages # Import messages
+from django.contrib import messages
 from django.http import JsonResponse
 import json
+
+from .fb_api_reqs import change_spend_cap, get_ad_account_info
 
 # Create your views here.
 
@@ -160,11 +162,9 @@ def topup(request):
             wallet = get_object_or_404(Wallet, user=request.user)
 
             if wallet.balance >= amount:
-                print(f"""
-                    Top-up successful!
-                    Ad Account: {ad_account.name} (ID: {ad_account.acc_id})
-                    Amount: ${amount}
-                """)
+                request = change_spend_cap(amount, ad_account.acc_id)
+                if not request:
+                    return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})    
                 return JsonResponse({'success': True})
             else:
                 return JsonResponse({'success': False, 'error': 'Insufficient balance.'})
