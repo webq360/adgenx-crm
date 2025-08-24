@@ -138,13 +138,7 @@ def request_ad_account(request):
         return redirect('index')
     return render(request, 'request_ad_account.html')
 
-@login_required(login_url='auth')
-def ad_accounts(request):
-    if request.user.is_staff:
-        ad_accounts = AdAccount.objects.all().order_by('-start_date')
-    else:
-        ad_accounts = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
-    return render(request, 'ad_accounts.html', {'ad_accounts': ad_accounts})
+
 
 def logout_view(request):
     logout(request)

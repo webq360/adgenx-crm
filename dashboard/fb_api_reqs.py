@@ -47,7 +47,7 @@ def get_ad_account_info(ad_account_id):
 
     url = f"https://graph.facebook.com/v23.0/{AD_ACCOUNT_ID}"
     params = {
-        "fields": "amount_spent,balance",
+        "fields": "amount_spent,balance, spend_cap",
         "access_token": MY_ACCESS_TOKEN
     }
 
