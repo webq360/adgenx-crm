@@ -33,12 +33,28 @@ def review_deposit_details(request, transaction_id):
 
     return render(request, 'review_deposit_details.html', {'transaction': transaction})
 
+from dashboard.fb_api_reqs import get_ad_account_info
+
 @login_required(login_url='auth')
 def ad_account_details(request, ad_account_id):
     if not request.user.is_staff:
         return redirect('index')
 
     ad_account = get_object_or_404(AdAccount, id=ad_account_id)
+
+    if ad_account.status == 'active':
+        ad_info = get_ad_account_info(ad_account.acc_id)
+        ad_account.balance = ad_info.get('balance', 0)
+        ad_account.total_spent = ad_info.get('amount_spent', 0)
+        spend_cap_str = ad_info.get('spend_cap', '0')
+        try:
+            ad_account.limit = float(spend_cap_str) / 100
+        except (ValueError, TypeError):
+            ad_account.limit = 0
+    else:
+        ad_account.balance = 0
+        ad_account.limit = 0
+        ad_account.total_spent = 0
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -47,9 +63,6 @@ def ad_account_details(request, ad_account_id):
             ad_account.acc_id = request.POST.get('acc_id')
             ad_account.acc_link = request.POST.get('acc_link')
             ad_account.monthly_budget = request.POST.get('monthly_budget')
-            ad_account.balance = request.POST.get('balance')
-            ad_account.total_spent = request.POST.get('total_spent')
-            ad_account.limit = request.POST.get('limit')
             ad_account.save()
 
             for bm_account in ad_account.bm_accounts.all():
@@ -92,5 +105,22 @@ def review_ad_account(request):
     if not request.user.is_staff:
         return redirect('index')
 
-    pending_ad_accounts = AdAccount.objects.filter(status='inactive').order_by('-start_date')
+    pending_ad_accounts_qs = AdAccount.objects.filter(status='inactive').order_by('-start_date')
+    pending_ad_accounts = []
+    for acc in pending_ad_accounts_qs:
+        ad_info = get_ad_account_info(acc.acc_id)
+        if ad_info:
+            acc.balance = ad_info.get('balance', 0)
+            acc.total_spent = ad_info.get('amount_spent', 0)
+            spend_cap_str = ad_info.get('spend_cap', '0')
+            try:
+                acc.limit = float(spend_cap_str) / 100
+            except (ValueError, TypeError):
+                acc.limit = 0
+        else:
+            acc.balance = 0
+            acc.limit = 0
+            acc.total_spent = 0
+        pending_ad_accounts.append(acc)
+
     return render(request, 'review_ad_account.html', {'ad_accounts': pending_ad_accounts})

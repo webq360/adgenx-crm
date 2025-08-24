@@ -23,7 +23,21 @@ def index(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:review_deposit')  # Redirect staff to review deposits
     wallet = Wallet.objects.get(user=request.user)
-    ad_accounts = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
+    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
+    
+    ad_accounts = []
+    for acc in ad_accounts_qs:
+        ad_info = get_ad_account_info(acc.acc_id)
+        acc.balance = ad_info.get('balance', 0)
+        spend_cap_str = ad_info.get('spend_cap', '0')
+        try:
+            acc.limit = float(spend_cap_str) / 100
+        except (ValueError, TypeError):
+            acc.limit = 0
+        acc.total_spent = ad_info.get('amount_spent', 0)
+        print(acc.limit)
+        ad_accounts.append(acc)
+
     utils = get_utils(request.user)
     return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts, 'utils': utils})       
 
@@ -115,22 +129,18 @@ def request_ad_account(request):
             messages.error(request, 'All fields are required.')
             return redirect('request_ad_account')
 
-        bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_client_id, acc_name='')
+        bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_client_id)
 
-        balance = 0.00
-        total_spent = 0.00
+        
 
         ad_account = AdAccount.objects.create(
             user=request.user,
             name=name,
             acc_id="",  # Set acc_id to empty string
             acc_link=acc_link,
-            balance=balance,
-            total_spent=total_spent,
             start_date=start_date,
             status='inactive',
-            monthly_budget=monthly_budget,
-            limit=0.00  # Set limit to 0
+            monthly_budget=monthly_budget
         )
         ad_account.bm_accounts.add(bm_account)
 
@@ -144,6 +154,8 @@ def logout_view(request):
     logout(request)
     return redirect('auth')
 
+from decimal import Decimal
+
 @login_required(login_url='auth')
 def topup(request):
     if request.method == 'POST':
@@ -155,10 +167,18 @@ def topup(request):
             ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
             wallet = get_object_or_404(Wallet, user=request.user)
 
-            if wallet.balance >= amount:
-                request = change_spend_cap(amount, ad_account.acc_id)
+            if wallet.balance >= Decimal(amount):
+                spend_cap_str = get_ad_account_info(ad_account.acc_id).get('spend_cap', '0')
+                try:
+                    ad_account_limit = float(spend_cap_str) / 100
+                except (ValueError, TypeError):
+                    ad_account_limit = 0
+                    
+                request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id)
                 if not request:
-                    return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})    
+                    return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})  
+                wallet.balance -= Decimal(amount)
+                wallet.save()
                 return JsonResponse({'success': True})
             else:
                 return JsonResponse({'success': False, 'error': 'Insufficient balance.'})

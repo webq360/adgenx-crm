@@ -52,6 +52,6 @@ def get_ad_account_info(ad_account_id):
     }
 
     response = requests.get(url, params=params)
-    print(response.json())
+    return response.json()
 
 get_ad_account_info('1490547679044213')
