@@ -36,8 +36,13 @@ class Wallet(models.Model):
 
 
 class BMAccount(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+    )
     acc_id = models.CharField(max_length=100)
     acc_name = models.CharField(max_length=100)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
         return self.acc_name

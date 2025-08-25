@@ -40,6 +40,9 @@
                             <div class="input-group">
                                 <input type="text" name="bm_acc_name_{{ bm_account.id }}" class="form-control" value="{{ bm_account.acc_name }}">
                                 <input type="text" name="bm_acc_id_{{ bm_account.id }}" class="form-control" value="{{ bm_account.acc_id }}">
+                                {% if bm_account.status == 'pending' %}
+                                <a href="{% url 'admin_dashboard:approve_bm_account' bm_account.id %}" class="btn btn-success">Approve</a>
+                                {% endif %}
                                 <button type="submit" name="action" value="remove_bm_{{ bm_account.id }}" class="btn btn-danger">Remove</button>
                             </div>
                         </td>

@@ -186,3 +186,21 @@ def topup(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+@login_required(login_url='auth')
+def request_bm_account(request):
+    if request.method == 'POST':
+        ad_account_id = request.POST.get('ad_account_id')
+        mb_name = request.POST.get('mb_name')
+        mb_id = request.POST.get('mb_id')
+
+        ad_account = get_object_or_404(AdAccount, id=ad_account_id)
+        bm_account, created = BMAccount.objects.get_or_create(
+            acc_id=mb_id, 
+            defaults={'acc_name': mb_name}
+        )
+        ad_account.bm_accounts.add(bm_account)
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})

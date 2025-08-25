@@ -8,17 +8,17 @@
 {% block content %}
 
   <div class="container-fluid py-4 px-4">
-    <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Review Ad Account Requests</h2>
+    <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Review BM Account Requests</h2>
     <div class="bg-white rounded-3 p-3 shadow-sm">
       <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
         <a href="{% url 'admin_dashboard:review_deposit' %}"  type="button" role="button" class="btn-filter text-decoration-none">
           Deposits
         </a>
-        <a href="{% url 'admin_dashboard:review_ad_account' %}" type="button" role="button" class="btn-filter text-decoration-none active">
+        <a href="{% url 'admin_dashboard:review_ad_account' %}" type="button" role="button" class="btn-filter text-decoration-none">
           Ad Accounts
         </a>
-        <a href="{% url 'admin_dashboard:review_bm_request' %}" type="button" role="button" class="btn-filter text-decoration-none">
-          BM Requests
+        <a href="{% url 'admin_dashboard:review_bm_request' %}" type="button" role="button" class="btn-filter text-decoration-none active">
+          BM Accounts
         </a>
       </div>
       <div class="table-responsive">
@@ -28,9 +28,6 @@
               <th>Ad Account</th>
               <th>User Info</th>
               <th>Connected BM</th>
-              <th>Balance</th>
-              <th>Total Spent</th>
-              <th>Start Date</th>
               <th>Status</th>
               <th class="pe-2">Action</th>
             </tr>
@@ -55,9 +52,6 @@
                         <p class="text-secondary mb-0">No BM accounts</p>
                     {% endfor %}
                 </td>
-                <td style="font-size: 0.75rem;">${{ ad_account.balance }}</td>
-                <td style="font-size: 0.75rem;">${{ ad_account.total_spent }}</td>
-                <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ ad_account.start_date|date:"d M Y" }}</td>
                 <td><span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span></td>
                 <td class="pe-2">
                     <a href="{% url 'admin_dashboard:ad_account_details' ad_account.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
@@ -65,7 +59,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="8" class="text-center">No pending ad account requests found.</td>
+              <td colspan="5" class="text-center">No pending ad account requests found.</td>
             </tr>
             {% endfor %}
           </tbody>

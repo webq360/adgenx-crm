@@ -52,9 +52,9 @@ def ad_account_details(request, ad_account_id):
         except (ValueError, TypeError):
             ad_account.limit = 0
     else:
-        ad_account.balance = 0
-        ad_account.limit = 0
-        ad_account.total_spent = 0
+        ad_account.balance = 'N/A'
+        ad_account.limit = 'N/A'
+        ad_account.total_spent = 'N/A'
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -89,6 +89,9 @@ def ad_account_details(request, ad_account_id):
         elif action == 'activate':
             ad_account.status = 'active'
             ad_account.save()
+            for bm_account in ad_account.bm_accounts.all():
+                bm_account.status = 'approved'
+                bm_account.save()
             messages.success(request, 'Ad account has been activated.')
 
         elif action == 'deactivate':
@@ -124,3 +127,24 @@ def review_ad_account(request):
         pending_ad_accounts.append(acc)
 
     return render(request, 'review_ad_account.html', {'ad_accounts': pending_ad_accounts})
+
+@login_required(login_url='auth')
+def approve_bm_account(request, bm_account_id):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    bm_account = get_object_or_404(BMAccount, id=bm_account_id)
+    bm_account.status = 'approved'
+    bm_account.save()
+    messages.success(request, 'BM account has been approved.')
+    return redirect(request.META.get('HTTP_REFERER', 'admin_dashboard:review_ad_account'))
+
+@login_required(login_url='auth')
+def review_bm_request(request):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    pending_bm_accounts = BMAccount.objects.filter(status='pending')
+    ad_accounts = AdAccount.objects.filter(bm_accounts__in=pending_bm_accounts, status='active').distinct()
+
+    return render(request, 'review_bm_request.html', {'ad_accounts': ad_accounts})

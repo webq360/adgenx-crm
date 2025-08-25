@@ -173,14 +173,7 @@
                     <tr>
                         <th class="border border-secondary-subtle">Ad Account</th>
                         <th class="border border-secondary-subtle">Connected BM</th>
-                        <th class="border border-secondary-subtle" style="cursor: pointer; user-select: none;">
-                            Balance
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#94a3b8" stroke-width="2"
-                                viewBox="0 0 24 24" aria-hidden="true"
-                                style="width: 0.75rem; height: 0.75rem; display: inline-block; margin-left: 0.25rem;">
-                                <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                        </th>
+                        <th class="border border-secondary-subtle">Balance</th>
                         <th class="border border-secondary-subtle">Total Spent</th>
                         <th class="border border-secondary-subtle">Limit</th>
                         <th class="border border-secondary-subtle">Status</th>
@@ -205,10 +198,17 @@
                         </td>
                         <td class="border border-secondary-subtle">
                             {% for bm_account in ad_account.bm_accounts.all %}
-                            <p class="fw-semibold mb-0">{{ bm_account.acc_name }}</p>
-                            <p class="text-secondary mb-1" style="line-height: 1.2;">{{ bm_account.acc_id }}</p>
+                                {% if bm_account.status == 'approved' %}
+                                <p class="text-success fw-semibold mb-0">Approved</p>
+                                    <p class="mb-0">{{ bm_account.acc_name }}</p>
+                                    <p class="mb-1">{{ bm_account.acc_id }}</p>
+                                {% elif bm_account.status == 'pending' %}
+                                <p class="text-warning fw-semibold mb-0">Pending</p>
+                                    <p class="mb-0 text-secondary">{{ bm_account.acc_name }}</p>
+                                    <p class="mb-1 text-secondary">{{ bm_account.acc_id }}</p>
+                                {% endif %}
                             {% empty %}
-                            <p class="text-secondary mb-0">No BM accounts</p>
+                                <p class="text-secondary mb-0">No BM accounts</p>
                             {% endfor %}
                         </td>
                         <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
@@ -218,27 +218,23 @@
                             <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
                         </td>
                         <td class="border border-secondary-subtle text-center">
-                            {% if request.user.is_staff %}
-                            <a href="{% url 'admin_dashboard:ad_account_details' ad_account.id %}" class="btn-icon"
-                                aria-label="More actions">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2"
-                                    viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </a>
-                            {% else %}
-                            <button type="button" class="btn-icon" aria-label="More actions">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569" stroke-width="2"
-                                    viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
-                                    <circle cx="12" cy="12" r="1"></circle>
-                                    <circle cx="19" cy="12" r="1"></circle>
-                                    <circle cx="5" cy="12" r="1"></circle>
-                                </svg>
-                            </button>
-                            {% endif %}
+                            <div class="dropup">
+                                <button class="btn-icon" type="button" id="dropdownMenuButton-{{ ad_account.id }}"
+                                    data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="top">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569"
+                                        stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"
+                                        style="width: 1.25rem; height: 1.25rem;">
+                                        <circle cx="12" cy="12" r="1"></circle>
+                                        <circle cx="19" cy="12" r="1"></circle>
+                                        <circle cx="5" cy="12" r="1"></circle>
+                                    </svg>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ ad_account.id }}">
+                                    <li><a class="dropdown-item text-decoration-none" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#adMbAccountModal"
+                                            data-ad-account-id="{{ ad_account.id }}">Ad MB Account</a></li>
+                                </ul>
+                            </div>
                         </td>
                         {% if not request.user.is_staff %}
                         <td class="border border-secondary-subtle">
@@ -260,6 +256,7 @@
     </section>
 </main>
 
+<!-- Top Up Modal -->
 <div class="modal fade" id="topupModal" tabindex="-1" aria-labelledby="topupModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -280,6 +277,37 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Top Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Ad MB Account Modal -->
+<div class="modal fade" id="adMbAccountModal" tabindex="-1" aria-labelledby="adMbAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adMbAccountModalLabel">Ad MB Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="ad-mb-account-form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="ad_account_id" id="ad-mb-account-id">
+                    <div id="ad-mb-account-message" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="mb-name" class="form-label">MB Name</label>
+                        <input type="text" class="form-control" id="mb-name" name="mb_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mb-id" class="form-label">MB ID</label>
+                        <input type="text" class="form-control" id="mb-id" name="mb_id" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
         </div>
@@ -321,6 +349,41 @@
             topupMessage.style.color = 'red';
         }
     });
+
+    const adMbAccountModal = document.getElementById('adMbAccountModal');
+    const adMbAccountMessage = document.getElementById('ad-mb-account-message');
+
+    adMbAccountModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const adAccountId = button.getAttribute('data-ad-account-id');
+        const adAccountIdInput = adMbAccountModal.querySelector('#ad-mb-account-id');
+        adAccountIdInput.value = adAccountId;
+        adMbAccountMessage.innerHTML = ''; // Clear previous messages
+        adMbAccountModal.querySelector('#mb-name').value = ''; // Clear previous mb name
+        adMbAccountModal.querySelector('#mb-id').value = ''; // Clear previous mb id
+    });
+
+    const adMbAccountForm = document.getElementById('ad-mb-account-form');
+    adMbAccountForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(adMbAccountForm);
+        const response = await fetch('/request_bm_account/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            adMbAccountMessage.innerHTML = 'Ad MB Account added successfully!';
+            adMbAccountMessage.style.color = 'green';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            adMbAccountMessage.innerHTML = `Error: ${result.error}`;
+            adMbAccountMessage.style.color = 'red';
+        }
+    });
 </script>
-    </main>
 {% endblock %}
