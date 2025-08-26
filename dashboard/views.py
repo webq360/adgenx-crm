@@ -27,7 +27,7 @@ def index(request):
     
     ad_accounts_data = []
     for acc in ad_accounts_qs:
-        ad_info = get_ad_account_info(acc.acc_id)
+        ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id if acc.admin_bm else None) if acc.status == 'active' else {}
         acc_balance = ad_info.get('balance', 0)
         spend_cap_str = ad_info.get('spend_cap', '0')
         try:
@@ -102,6 +102,8 @@ def auth(request):
 
 @login_required(login_url='auth')
 def deposit(request):
+    wallet = Wallet.objects.get(user=request.user)
+    utils = get_utils(request.user)
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method').capitalize()
         bdt_amount = request.POST.get('bdt_amount')
@@ -125,9 +127,9 @@ def deposit(request):
             return redirect('index') # Redirect to transactions page after successful submission
         except Exception as e:
             messages.error(request, f'Error submitting deposit request: {e}')
-            return redirect('deposit') # Redirect back to deposit page on error
+            return redirect('deposit', {'wallet': wallet, 'utils':utils}) # Redirect back to deposit page on error
         
-    return render(request, 'deposit.html')
+    return render(request, 'deposit.html', {'wallet': wallet, 'utils':utils})
 
 @login_required(login_url='auth')
 def deposit_transactions(request):
@@ -188,13 +190,13 @@ def topup(request):
             wallet = get_object_or_404(Wallet, user=request.user)
 
             if wallet.balance >= Decimal(amount):
-                spend_cap_str = get_ad_account_info(ad_account.acc_id).get('spend_cap', '0')
+                spend_cap_str = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None).get('spend_cap', '0')
                 try:
                     ad_account_limit = float(spend_cap_str) / 100
                 except (ValueError, TypeError):
                     ad_account_limit = 0
                     
-                request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id)
+                request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None)
                 if not request:
                     return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})  
                 wallet.balance -= Decimal(amount)
