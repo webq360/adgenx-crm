@@ -10,4 +10,5 @@ urlpatterns = [
     path('ad_accounts/<int:ad_account_id>/', views.ad_account_details, name='ad_account_details'),
     
     path('review/bm_request/', views.review_bm_request, name='review_bm_request'),
+    path('all_ad_accounts/', views.all_ad_accounts, name='all_ad_accounts'),
 ]

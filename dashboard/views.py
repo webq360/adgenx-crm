@@ -240,6 +240,7 @@ def remove_bm_account_request(request):
             # Ensure the BM account is associated with the ad account and user
             if bm_account in ad_account.bm_accounts.all():
                 bm_account.request_type = 'remove'
+                bm_account.status = 'pending'
                 bm_account.save()
                 messages.success(request, 'Remove BM Account request submitted successfully!')
                 return JsonResponse({'success': True})

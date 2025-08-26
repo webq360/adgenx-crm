@@ -6,7 +6,7 @@ from django.contrib import messages
 @login_required(login_url='auth')
 def review_deposit(request):
     if not request.user.is_staff:
-        return redirect('index') # Or some other appropriate redirect/error
+        return redirect('index')
     pending_transactions = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
     return render(request, 'review_deposit.html', {'transactions': pending_transactions})
 
@@ -128,23 +128,7 @@ def review_ad_account(request):
     if not request.user.is_staff:
         return redirect('index')
 
-    pending_ad_accounts_qs = AdAccount.objects.filter(status='inactive').order_by('-start_date')
-    pending_ad_accounts = []
-    for acc in pending_ad_accounts_qs:
-        ad_info = get_ad_account_info(acc.acc_id)
-        if ad_info:
-            acc.balance = ad_info.get('balance', 0)
-            acc.total_spent = ad_info.get('amount_spent', 0)
-            spend_cap_str = ad_info.get('spend_cap', '0')
-            try:
-                acc.limit = float(spend_cap_str) / 100
-            except (ValueError, TypeError):
-                acc.limit = 0
-        else:
-            acc.balance = 0
-            acc.limit = 0
-            acc.total_spent = 0
-        pending_ad_accounts.append(acc)
+    pending_ad_accounts = AdAccount.objects.filter(status='inactive').order_by('-start_date')
 
     return render(request, 'review_ad_account.html', {'ad_accounts': pending_ad_accounts})
 
@@ -159,3 +143,29 @@ def review_bm_request(request):
     ad_accounts = AdAccount.objects.filter(bm_accounts__in=pending_bm_accounts, status='active').distinct()
 
     return render(request, 'review_bm_request.html', {'ad_accounts': ad_accounts})
+
+@login_required(login_url='auth')
+def all_ad_accounts(request):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    raw_ad_accounts = AdAccount.objects.all().order_by('-start_date')
+    ad_accounts = []
+    for acc in raw_ad_accounts:
+        if acc.status != 'active':
+            acc.balance = 'N/A'
+            acc.limit = 'N/A'
+            acc.total_spent = 'N/A'
+               
+        else:
+            ad_info = get_ad_account_info(acc.acc_id)
+            if ad_info:
+                acc.balance = ad_info.get('balance', 0)
+                acc.total_spent = ad_info.get('amount_spent', 0)
+                spend_cap_str = ad_info.get('spend_cap', '0')
+                try:
+                    acc.limit = float(spend_cap_str) / 100
+                except (ValueError, TypeError):
+                    acc.limit = 0
+        ad_accounts.append(acc)
+    return render(request, 'all_ad_accounts.html', {'ad_accounts': ad_accounts})

@@ -114,7 +114,12 @@
                         <th scope="row">Status</th>
                         <td class="">{{ ad_account.status | capfirst }}</td>
                     </tr>
-                    {% if ad_account.status != 'active' %}
+                    {% if ad_account.status == 'active' %}
+                    <tr>
+                        <th scope="row">Admin BM</th>
+                        <td>{{ ad_account.admin_bm.acc_name }}</td>
+                    </tr>
+                    {% elif ad_account.status != 'active' %}
                     <tr>
                         <th scope="row">Admin BM</th>
                         <td>
@@ -135,7 +140,7 @@
         </div>
 
         <div class="mt-4 d-flex justify-content-between align-items-center">
-            <a href="{% url 'admin_dashboard:review_ad_account' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
+            <a href="{% url 'admin_dashboard:all_ad_accounts' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
             <div>
                 <button type="submit" name="action" value="save" class="btn btn-primary">Save Changes</button>
                 {% if ad_account.status == 'active' %}
