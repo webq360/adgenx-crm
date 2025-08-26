@@ -62,14 +62,11 @@ def ad_account_details(request, ad_account_id):
         if action == 'save':
             ad_account.name = request.POST.get('name')
             ad_account.acc_id = request.POST.get('acc_id')
-            ad_account.acc_link = request.POST.get('acc_link')
-            ad_account.monthly_budget = request.POST.get('monthly_budget')
+            admin_bm_id = request.POST.get('admin_bm')
+            if admin_bm_id:
+                admin_bm = get_object_or_404(AdminBM, id=admin_bm_id)
+                ad_account.admin_bm = admin_bm
             ad_account.save()
-
-            for bm_account in ad_account.bm_accounts.all():
-                bm_account.acc_name = request.POST.get(f'bm_acc_name_{bm_account.id}')
-                bm_account.acc_id = request.POST.get(f'bm_acc_id_{bm_account.id}')
-                bm_account.save()
 
             messages.success(request, 'Ad account details have been updated.')
 
@@ -101,18 +98,12 @@ def ad_account_details(request, ad_account_id):
             messages.success(request, 'BM account has been removed.')
 
         elif action == 'activate':
-            admin_bm_id = request.POST.get('admin_bm')
-            if admin_bm_id:
-                admin_bm = get_object_or_404(AdminBM, id=admin_bm_id)
-                ad_account.admin_bm = admin_bm
-                ad_account.status = 'active'
-                ad_account.save()
-                for bm_account in ad_account.bm_accounts.all():
-                    bm_account.status = 'approved'
-                    bm_account.save()
-                messages.success(request, 'Ad account has been activated.')
-            else:
-                messages.error(request, 'Please select an Admin BM account.')
+            ad_account.status = 'active'
+            ad_account.save()
+            for bm_account in ad_account.bm_accounts.all():
+                bm_account.status = 'approved'
+                bm_account.save()
+            messages.success(request, 'Ad account has been activated.')
 
         elif action == 'deactivate':
             ad_account.status = 'inactive'

@@ -151,9 +151,7 @@ def request_ad_account(request):
             messages.error(request, 'All fields are required.')
             return redirect('request_ad_account')
 
-        bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_client_id)
-
-        
+        bm_account = BMAccount.objects.create(acc_id=bm_client_id, status='pending', request_type='add')
 
         ad_account = AdAccount.objects.create(
             user=request.user,

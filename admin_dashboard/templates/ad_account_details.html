@@ -20,15 +20,26 @@
                     </tr>
                     <tr>
                         <th scope="row" class="w-25">Account Name</th>
-                        <td><input type="text" name="name" class="form-control" value="{{ ad_account.name }}"></td>
+                        <td><input type="text" name="name" id="ad-account-name" class="form-control" value="{{ ad_account.name }}"></td>
                     </tr>
                     <tr>
                         <th scope="row">Account ID</th>
-                        <td><input type="text" name="acc_id" class="form-control" value="{{ ad_account.acc_id }}"></td>
+                        <td><input type="text" name="acc_id" id="ad-account-id" class="form-control" value="{{ ad_account.acc_id }}"></td>
                     </tr>
                     <tr>
                         <th scope="row">Account Link</th>
-                        <td><input type="text" name="acc_link" class="form-control" value="{{ ad_account.acc_link }}"></td>
+                        <td>{{ ad_account.acc_link }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Admin BM</th>
+                        <td>
+                            <select class="form-select" name="admin_bm" id="admin-bm-select">
+                                <option value="">Choose Admin BM</option>
+                                {% for bm in admin_bms %}
+                                <option value="{{ bm.id }}" {% if ad_account.admin_bm.id == bm.id %}selected{% endif %}>{{ bm.acc_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <th colspan="2" class="table-info">Connected BM</th>
@@ -47,11 +58,11 @@
                                 </thead>
                                 <tbody>
                                     {% for bm_account in ad_account.bm_accounts.all %}
-                                    <tr>
+                                    <tr class="bm-account-row">
                                         {% if bm_account.request_type == 'add' %}
                                         <td><input type="text" name="bm_acc_name_{{ bm_account.id }}" class="form-control" value="{{ bm_account.acc_name }}"></td>
                                         <td><input type="text" name="bm_acc_id_{{ bm_account.id }}" class="form-control" value="{{ bm_account.acc_id }}"></td>
-                                        <td>{{ bm_account.status|capfirst }}</td>
+                                        <td class="bm-status">{{ bm_account.status|capfirst }}</td>
                                         <td>{{ bm_account.request_type|capfirst }}</td>
                                         <td>
                                             <button type="submit" name="action" value="approve_bm_{{ bm_account.id }}" class="btn btn-success btn-sm">Approve</button>
@@ -60,7 +71,7 @@
                                         {% else %}
                                         <td>{{ bm_account.acc_name }}</td>
                                         <td>{{ bm_account.acc_id }}</td>
-                                        <td>{{ bm_account.status|capfirst }}</td>
+                                        <td class="bm-status">{{ bm_account.status|capfirst }}</td>
                                         <td>{{ bm_account.request_type|capfirst }}</td>
                                         <td>
                                             {% if bm_account.request_type == 'add' %}
@@ -74,7 +85,7 @@
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="4">No BM accounts</td>
+                                        <td colspan="5">No BM accounts</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -93,7 +104,7 @@
                     </tr>
                     <tr>
                         <th scope="row">Monthly Budget</th>
-                        <td><input type="text" name="monthly_budget" class="form-control" value="{{ ad_account.monthly_budget }}"></td>
+                        <td>{{ ad_account.monthly_budget }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Balance</th>
@@ -114,27 +125,7 @@
                         <th scope="row">Status</th>
                         <td class="">{{ ad_account.status | capfirst }}</td>
                     </tr>
-                    {% if ad_account.status == 'active' %}
-                    <tr>
-                        <th scope="row">Admin BM</th>
-                        <td>{{ ad_account.admin_bm.acc_name }}</td>
-                    </tr>
-                    {% elif ad_account.status != 'active' %}
-                    <tr>
-                        <th scope="row">Admin BM</th>
-                        <td>
-                            <div class="input-group">
-                                <select class="form-select" name="admin_bm">
-                                    <option selected>Choose Admin BM</option>
-                                    {% for bm in admin_bms %}
-                                    <option value="{{ bm.id }}">{{ bm.acc_name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endif %}
+                    
                 </tbody>
             </table>
         </div>
@@ -143,7 +134,9 @@
             <a href="{% url 'admin_dashboard:all_ad_accounts' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
             <div>
                 <button type="submit" name="action" value="save" class="btn btn-primary">Save Changes</button>
-                {% if ad_account.status == 'active' %}
+                {% if ad_account.status != 'active' %}
+                <button type="submit" name="action" value="activate" id="activate-button" class="btn btn-success">Activate</button>
+                {% else %}
                 <button type="submit" name="action" value="deactivate" class="btn btn-warning">Deactivate</button>
                 {% endif %}
             </div>
@@ -179,4 +172,38 @@
         </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const adAccountNameInput = document.getElementById('ad-account-name');
+        const adAccountIdInput = document.getElementById('ad-account-id');
+        const adminBmSelect = document.getElementById('admin-bm-select');
+        const activateButton = document.getElementById('activate-button');
+
+        function checkConditions() {
+            const adAccountName = adAccountNameInput.value.trim();
+            const adAccountId = adAccountIdInput.value.trim();
+            const adminBmSelected = adminBmSelect.value !== "";
+            
+            let hasApprovedBm = false;
+            const bmStatusElements = document.querySelectorAll('.bm-status');
+            bmStatusElements.forEach(function(element) {
+                if (element.textContent.trim().toLowerCase() === 'approved') {
+                    hasApprovedBm = true;
+                }
+            });
+
+            if (adAccountName && adAccountId && adminBmSelected && hasApprovedBm) {
+                activateButton.disabled = false;
+            } else {
+                activateButton.disabled = true;
+            }
+        }
+
+
+        checkConditions();
+    });
+</script>
+{% endblock %}
 {% endblock %}
