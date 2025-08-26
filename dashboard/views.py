@@ -25,21 +25,43 @@ def index(request):
     wallet = Wallet.objects.get(user=request.user)
     ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
     
-    ad_accounts = []
+    ad_accounts_data = []
     for acc in ad_accounts_qs:
         ad_info = get_ad_account_info(acc.acc_id)
-        acc.balance = ad_info.get('balance', 0)
+        acc_balance = ad_info.get('balance', 0)
         spend_cap_str = ad_info.get('spend_cap', '0')
         try:
-            acc.limit = float(spend_cap_str) / 100
+            acc_limit = float(spend_cap_str) / 100
         except (ValueError, TypeError):
-            acc.limit = 0
-        acc.total_spent = ad_info.get('amount_spent', 0)
-        print(acc.limit)
-        ad_accounts.append(acc)
+            acc_limit = 0
+        acc_total_spent = ad_info.get('amount_spent', 0)
+
+        bm_accounts_list = []
+        for bm in acc.bm_accounts.all():
+            bm_accounts_list.append({
+                'id': bm.id,
+                'acc_name': bm.acc_name,
+                'acc_id': bm.acc_id,
+                'status': bm.status,
+                'request_type': bm.request_type,
+            })
+
+        ad_accounts_data.append({
+            'id': acc.id,
+            'name': acc.name,
+            'acc_id': acc.acc_id,
+            'acc_link': acc.acc_link,
+            'start_date': str(acc.start_date), # Convert date to string
+            'monthly_budget': str(acc.monthly_budget), # Convert Decimal to string
+            'status': acc.status,
+            'balance': acc_balance,
+            'limit': acc_limit,
+            'total_spent': acc_total_spent,
+            'bm_accounts': bm_accounts_list,
+        })
 
     utils = get_utils(request.user)
-    return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts, 'utils': utils})       
+    return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts_data, 'utils': utils})       
 
 def auth(request):
     if request.user.is_authenticated:
@@ -195,12 +217,33 @@ def request_bm_account(request):
         mb_id = request.POST.get('mb_id')
 
         ad_account = get_object_or_404(AdAccount, id=ad_account_id)
-        bm_account, created = BMAccount.objects.get_or_create(
+        bm_account = BMAccount.objects.create(
             acc_id=mb_id, 
-            defaults={'acc_name': mb_name}
+            acc_name= mb_name,
+            request_type='add',
         )
         ad_account.bm_accounts.add(bm_account)
 
         return JsonResponse({'success': True})
 
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+@login_required(login_url='auth')
+def remove_bm_account_request(request):
+    if request.method == 'POST':
+        ad_account_id = request.POST.get('ad_account_id')
+        bm_account_ids = request.POST.getlist('bm_account_ids') # getlist for multiple checkboxes
+
+        try:
+            ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
+            for bm_id in bm_account_ids:
+                bm_account = get_object_or_404(BMAccount, id=bm_id)
+                # Ensure the BM account is associated with the ad account and user
+                if bm_account in ad_account.bm_accounts.all():
+                    bm_account.request_type = 'remove'
+                    bm_account.save()
+            messages.success(request, 'Remove BM Account request submitted successfully!')
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})

@@ -10,4 +10,5 @@ urlpatterns = [
     path('request_ad_account/', views.request_ad_account, name='request_ad_account'),
     path('topup/', views.topup, name='topup'),
     path('request_bm_account/', views.request_bm_account, name='request_bm_account'),
+    path('remove_bm_account_request/', views.remove_bm_account_request, name='remove_bm_account_request'),
 ]

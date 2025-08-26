@@ -76,9 +76,22 @@ def ad_account_details(request, ad_account_id):
             bm_acc_name = request.POST.get('bm_acc_name')
             bm_acc_id = request.POST.get('bm_acc_id')
             if bm_acc_name and bm_acc_id:
-                bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_acc_id, defaults={'acc_name': bm_acc_name})
+                bm_account, created = BMAccount.objects.get_or_create(acc_id=bm_acc_id, defaults={'acc_name': bm_acc_name, 'request_type': 'add'})
                 ad_account.bm_accounts.add(bm_account)
                 messages.success(request, 'BM account has been added.')
+
+        elif action.startswith('approve_bm_'):
+            bm_account_id = action.split('_')[-1]
+            bm_account = get_object_or_404(BMAccount, id=bm_account_id)
+
+            if bm_account.request_type == 'add':
+                bm_account.acc_name = request.POST.get(f'bm_acc_name_{bm_account.id}')
+                bm_account.acc_id = request.POST.get(f'bm_acc_id_{bm_account.id}')
+                bm_account.request_type = 'N/A'
+
+            bm_account.status = 'approved'
+            bm_account.save()
+            messages.success(request, 'BM account has been approved.')
 
         elif action.startswith('remove_bm_'):
             bm_account_id = action.split('_')[-1]
@@ -128,16 +141,7 @@ def review_ad_account(request):
 
     return render(request, 'review_ad_account.html', {'ad_accounts': pending_ad_accounts})
 
-@login_required(login_url='auth')
-def approve_bm_account(request, bm_account_id):
-    if not request.user.is_staff:
-        return redirect('index')
 
-    bm_account = get_object_or_404(BMAccount, id=bm_account_id)
-    bm_account.status = 'approved'
-    bm_account.save()
-    messages.success(request, 'BM account has been approved.')
-    return redirect(request.META.get('HTTP_REFERER', 'admin_dashboard:review_ad_account'))
 
 @login_required(login_url='auth')
 def review_bm_request(request):

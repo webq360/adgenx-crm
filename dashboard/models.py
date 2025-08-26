@@ -40,9 +40,15 @@ class BMAccount(models.Model):
         ('pending', 'Pending'),
         ('approved', 'Approved'),
     )
+    REQUEST_TYPE_CHOICES = (
+        ('N/A', 'N/A'),
+        ('add', 'Add'),
+        ('remove', 'Remove'),
+    )
     acc_id = models.CharField(max_length=100)
     acc_name = models.CharField(max_length=100)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    request_type = models.CharField(max_length=10, choices=REQUEST_TYPE_CHOICES, default='N/A')
 
     def __str__(self):
         return self.acc_name

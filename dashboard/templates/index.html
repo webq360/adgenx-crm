@@ -197,7 +197,7 @@
                             </p>
                         </td>
                         <td class="border border-secondary-subtle">
-                            {% for bm_account in ad_account.bm_accounts.all %}
+                            {% for bm_account in ad_account.bm_accounts %}
                                 {% if bm_account.status == 'approved' %}
                                 <p class="text-success fw-semibold mb-0">Approved</p>
                                     <p class="mb-0">{{ bm_account.acc_name }}</p>
@@ -218,21 +218,17 @@
                             <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
                         </td>
                         <td class="border border-secondary-subtle text-center">
-                            <div class="dropup">
-                                <button class="btn-icon" type="button" id="dropdownMenuButton-{{ ad_account.id }}"
-                                    data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="top">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#475569"
-                                        stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"
-                                        style="width: 1.25rem; height: 1.25rem;">
-                                        <circle cx="12" cy="12" r="1"></circle>
-                                        <circle cx="19" cy="12" r="1"></circle>
-                                        <circle cx="5" cy="12" r="1"></circle>
-                                    </svg>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Actions
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ ad_account.id }}">
-                                    <li><a class="dropdown-item text-decoration-none" href="#" data-bs-toggle="modal"
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                             data-bs-target="#adMbAccountModal"
                                             data-ad-account-id="{{ ad_account.id }}">Ad MB Account</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#removeBmAccountModal"
+                                            data-ad-account-id="{{ ad_account.id }}">Remove BM Account</a></li>
                                 </ul>
                             </div>
                         </td>
@@ -314,7 +310,39 @@
     </div>
 </div>
 
+<!-- Remove BM Account Modal -->
+<div class="modal fade" id="removeBmAccountModal" tabindex="-1" aria-labelledby="removeBmAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeBmAccountModalLabel">Remove BM Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="remove-bm-account-form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="ad_account_id" id="remove-bm-account-ad-id">
+                    <div id="remove-bm-account-message" class="mb-3"></div>
+                    <p>Select BM accounts to remove:</p>
+                    <div id="bm-accounts-checkboxes">
+                        <!-- Checkboxes will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script id="ad_accounts_data_json" type="application/json">
+    {{ ad_accounts|json_script:"ad_accounts_data_json" }}
+</script>
 <script>
+    const ad_accounts_data_element = document.getElementById('ad_accounts_data_json');
+    const ad_accounts_data = JSON.parse(ad_accounts_data_element.textContent);
     const topupModal = document.getElementById('topupModal');
     const topupMessage = document.getElementById('topup-message');
 
@@ -383,6 +411,60 @@
         } else {
             adMbAccountMessage.innerHTML = `Error: ${result.error}`;
             adMbAccountMessage.style.color = 'red';
+        }
+    });
+
+    const removeBmAccountModal = document.getElementById('removeBmAccountModal');
+    const removeBmAccountMessage = document.getElementById('remove-bm-account-message');
+    const bmAccountsCheckboxesDiv = document.getElementById('bm-accounts-checkboxes');
+
+    removeBmAccountModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const adAccountId = button.getAttribute('data-ad-account-id');
+        const adAccountIdInput = removeBmAccountModal.querySelector('#remove-bm-account-ad-id');
+        adAccountIdInput.value = adAccountId;
+        removeBmAccountMessage.innerHTML = ''; // Clear previous messages
+        bmAccountsCheckboxesDiv.innerHTML = ''; // Clear previous checkboxes
+
+        const adAccount = ad_accounts_data.find(acc => acc.id == adAccountId);
+
+        if (adAccount && adAccount.bm_accounts.length > 0) {
+            adAccount.bm_accounts.forEach(bm => {
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" name="bm_account_ids" value="${bm.id}" id="bm-${bm.id}">
+                    <label class="form-check-label" for="bm-${bm.id}">
+                        ${bm.acc_name} (ID: ${bm.acc_id})
+                    </label>
+                `;
+                bmAccountsCheckboxesDiv.appendChild(div);
+            });
+        } else {
+            bmAccountsCheckboxesDiv.innerHTML = '<p>No BM accounts connected to this Ad Account.</p>';
+        }
+    });
+
+    const removeBmAccountForm = document.getElementById('remove-bm-account-form');
+    removeBmAccountForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(removeBmAccountForm);
+        const response = await fetch('/remove_bm_account_request/', { // New URL for backend
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            removeBmAccountMessage.innerHTML = 'Remove BM Account request submitted successfully!';
+            removeBmAccountMessage.style.color = 'green';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            removeBmAccountMessage.innerHTML = `Error: ${result.error}`;
+            removeBmAccountMessage.style.color = 'red';
         }
     });
 </script>
