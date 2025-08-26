@@ -67,6 +67,14 @@ class AdAccount(models.Model):
     monthly_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='inactive')
     bm_accounts = models.ManyToManyField(BMAccount, blank=True)
+    admin_bm = models.ForeignKey('AdminBM', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+class AdminBM(models.Model):
+    acc_name = models.CharField(max_length=100)
+    acc_id = models.IntegerField()
+
+    def __str__(self):
+        return self.acc_name

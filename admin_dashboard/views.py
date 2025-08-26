@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount
+from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM
 from django.contrib import messages
 
 @login_required(login_url='auth')
@@ -41,6 +41,7 @@ def ad_account_details(request, ad_account_id):
         return redirect('index')
 
     ad_account = get_object_or_404(AdAccount, id=ad_account_id)
+    admin_bms = AdminBM.objects.all()
 
     if ad_account.status == 'active':
         ad_info = get_ad_account_info(ad_account.acc_id)
@@ -100,12 +101,18 @@ def ad_account_details(request, ad_account_id):
             messages.success(request, 'BM account has been removed.')
 
         elif action == 'activate':
-            ad_account.status = 'active'
-            ad_account.save()
-            for bm_account in ad_account.bm_accounts.all():
-                bm_account.status = 'approved'
-                bm_account.save()
-            messages.success(request, 'Ad account has been activated.')
+            admin_bm_id = request.POST.get('admin_bm')
+            if admin_bm_id:
+                admin_bm = get_object_or_404(AdminBM, id=admin_bm_id)
+                ad_account.admin_bm = admin_bm
+                ad_account.status = 'active'
+                ad_account.save()
+                for bm_account in ad_account.bm_accounts.all():
+                    bm_account.status = 'approved'
+                    bm_account.save()
+                messages.success(request, 'Ad account has been activated.')
+            else:
+                messages.error(request, 'Please select an Admin BM account.')
 
         elif action == 'deactivate':
             ad_account.status = 'inactive'
@@ -114,7 +121,7 @@ def ad_account_details(request, ad_account_id):
 
         return redirect('admin_dashboard:ad_account_details', ad_account_id=ad_account.id)
 
-    return render(request, 'ad_account_details.html', {'ad_account': ad_account})
+    return render(request, 'ad_account_details.html', {'ad_account': ad_account, 'admin_bms': admin_bms})
 
 @login_required(login_url='auth')
 def review_ad_account(request):

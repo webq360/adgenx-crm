@@ -114,6 +114,22 @@
                         <th scope="row">Status</th>
                         <td class="">{{ ad_account.status | capfirst }}</td>
                     </tr>
+                    {% if ad_account.status != 'active' %}
+                    <tr>
+                        <th scope="row">Admin BM</th>
+                        <td>
+                            <div class="input-group">
+                                <select class="form-select" name="admin_bm">
+                                    <option selected>Choose Admin BM</option>
+                                    {% for bm in admin_bms %}
+                                    <option value="{{ bm.id }}">{{ bm.acc_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -122,9 +138,7 @@
             <a href="{% url 'admin_dashboard:review_ad_account' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
             <div>
                 <button type="submit" name="action" value="save" class="btn btn-primary">Save Changes</button>
-                {% if ad_account.status != 'active' %}
-                <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
-                {% else %}
+                {% if ad_account.status == 'active' %}
                 <button type="submit" name="action" value="deactivate" class="btn btn-warning">Deactivate</button>
                 {% endif %}
             </div>
