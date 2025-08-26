@@ -232,18 +232,19 @@ def request_bm_account(request):
 def remove_bm_account_request(request):
     if request.method == 'POST':
         ad_account_id = request.POST.get('ad_account_id')
-        bm_account_ids = request.POST.getlist('bm_account_ids') # getlist for multiple checkboxes
+        bm_account_id = request.POST.get('bm_account_id')
 
         try:
             ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
-            for bm_id in bm_account_ids:
-                bm_account = get_object_or_404(BMAccount, id=bm_id)
-                # Ensure the BM account is associated with the ad account and user
-                if bm_account in ad_account.bm_accounts.all():
-                    bm_account.request_type = 'remove'
-                    bm_account.save()
-            messages.success(request, 'Remove BM Account request submitted successfully!')
-            return JsonResponse({'success': True})
+            bm_account = get_object_or_404(BMAccount, id=bm_account_id)
+            # Ensure the BM account is associated with the ad account and user
+            if bm_account in ad_account.bm_accounts.all():
+                bm_account.request_type = 'remove'
+                bm_account.save()
+                messages.success(request, 'Remove BM Account request submitted successfully!')
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'BM account not associated with this Ad Account.'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})

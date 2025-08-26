@@ -218,17 +218,19 @@
                             <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
                         </td>
                         <td class="border border-secondary-subtle text-center">
-                            <div class="dropdown">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Actions
+                            <div class="dropup">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"strategy":"fixed"}'>
+                                    
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ ad_account.id }}">
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                            data-bs-target="#adMbAccountModal"
-                                            data-ad-account-id="{{ ad_account.id }}">Ad MB Account</a></li>
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                            data-bs-target="#removeBmAccountModal"
-                                            data-ad-account-id="{{ ad_account.id }}">Remove BM Account</a></li>
+                                    <li><button class="dropdown-item" data-bs-toggle="modal"
+                                        data-bs-target="#adMbAccountModal"
+                                        data-ad-account-id="{{ ad_account.id }}">Ad MB Account
+                                    </button></li>
+                                    <li><button class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#removeBmAccountModal"
+                                        data-ad-account-id="{{ ad_account.id }}">Remove BM Account
+                                    </button></li>
                                 </ul>
                             </div>
                         </td>
@@ -323,7 +325,6 @@
                 <div class="modal-body">
                     <input type="hidden" name="ad_account_id" id="remove-bm-account-ad-id">
                     <div id="remove-bm-account-message" class="mb-3"></div>
-                    <p>Select BM accounts to remove:</p>
                     <div id="bm-accounts-checkboxes">
                         <!-- Checkboxes will be populated by JavaScript -->
                     </div>
@@ -337,9 +338,7 @@
     </div>
 </div>
 
-<script id="ad_accounts_data_json" type="application/json">
-    {{ ad_accounts|json_script:"ad_accounts_data_json" }}
-</script>
+{{ ad_accounts|json_script:"ad_accounts_data_json" }}
 <script>
     const ad_accounts_data_element = document.getElementById('ad_accounts_data_json');
     const ad_accounts_data = JSON.parse(ad_accounts_data_element.textContent);
@@ -382,13 +381,17 @@
     const adMbAccountMessage = document.getElementById('ad-mb-account-message');
 
     adMbAccountModal.addEventListener('show.bs.modal', function (event) {
+        console.log('Add MB Account modal shown');
         const button = event.relatedTarget;
         const adAccountId = button.getAttribute('data-ad-account-id');
         const adAccountIdInput = adMbAccountModal.querySelector('#ad-mb-account-id');
         adAccountIdInput.value = adAccountId;
         adMbAccountMessage.innerHTML = ''; // Clear previous messages
-        adMbAccountModal.querySelector('#mb-name').value = ''; // Clear previous mb name
-        adMbAccountModal.querySelector('#mb-id').value = ''; // Clear previous mb id
+        adMbAccountModal.querySelector('#mb-name').value = '';
+        adMbAccountModal.querySelector('#mb-name').defaultValue = ''; // Clear previous mb name
+        adMbAccountModal.querySelector('#mb-id').value = '';
+        adMbAccountModal.querySelector('#mb-id').defaultValue = ''; // Clear previous mb id
+        console.log('Cleared mb-name and mb-id');
     });
 
     const adMbAccountForm = document.getElementById('ad-mb-account-form');
@@ -419,21 +422,25 @@
     const bmAccountsCheckboxesDiv = document.getElementById('bm-accounts-checkboxes');
 
     removeBmAccountModal.addEventListener('show.bs.modal', function (event) {
+        console.log('Remove BM Account modal shown');
         const button = event.relatedTarget;
         const adAccountId = button.getAttribute('data-ad-account-id');
         const adAccountIdInput = removeBmAccountModal.querySelector('#remove-bm-account-ad-id');
         adAccountIdInput.value = adAccountId;
         removeBmAccountMessage.innerHTML = ''; // Clear previous messages
         bmAccountsCheckboxesDiv.innerHTML = ''; // Clear previous checkboxes
+        console.log('Cleared previous messages and checkboxes');
 
         const adAccount = ad_accounts_data.find(acc => acc.id == adAccountId);
+        console.log('Ad Account data:', adAccount);
 
         if (adAccount && adAccount.bm_accounts.length > 0) {
+            console.log('Populating checkboxes for BM accounts:', adAccount.bm_accounts);
             adAccount.bm_accounts.forEach(bm => {
                 const div = document.createElement('div');
                 div.className = 'form-check';
                 div.innerHTML = `
-                    <input class="form-check-input" type="checkbox" name="bm_account_ids" value="${bm.id}" id="bm-${bm.id}">
+                    <input class="form-check-input" type="radio" name="bm_account_id" value="${bm.id}" id="bm-${bm.id}">
                     <label class="form-check-label" for="bm-${bm.id}">
                         ${bm.acc_name} (ID: ${bm.acc_id})
                     </label>
@@ -441,6 +448,7 @@
                 bmAccountsCheckboxesDiv.appendChild(div);
             });
         } else {
+            console.log('No BM accounts found for this Ad Account.');
             bmAccountsCheckboxesDiv.innerHTML = '<p>No BM accounts connected to this Ad Account.</p>';
         }
     });
