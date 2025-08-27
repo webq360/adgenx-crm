@@ -198,7 +198,7 @@ def topup(request):
             ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
             wallet = get_object_or_404(Wallet, user=request.user)
 
-            if wallet.balance >= Decimal(amount):
+            if wallet.balance > 0.01 and wallet.balance >= Decimal(amount):
                 ad_account_limit = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None).get('spend_cap', 0)
                     
                 request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None)

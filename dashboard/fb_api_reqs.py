@@ -68,7 +68,6 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
                 except (ValueError, TypeError):
                     info[field] = 0
         info['balance'] = info.get('spend_cap') - info.get('amount_spent')
-        print(info)
         return info
     except Exception as e:
         print('❌ Error getting ad account info:', e)
