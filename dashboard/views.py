@@ -201,7 +201,7 @@ def topup(request):
             if wallet.balance > 0.01 and wallet.balance >= Decimal(amount):
                 ad_account_limit = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None).get('spend_cap', 0)
                     
-                request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None)
+                request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None)
                 if not request:
                     return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})  
                 wallet.balance -= Decimal(amount)
