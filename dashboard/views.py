@@ -32,11 +32,7 @@ def index(request):
             if ad_info:
                 acc_balance = ad_info.get('balance', 0)
                 acc_total_spent = ad_info.get('amount_spent', 0)
-                spend_cap_str = ad_info.get('spend_cap', '0')
-                try:
-                    acc_limit = float(spend_cap_str) / 100
-                except (ValueError, TypeError):
-                    acc_limit = 0
+                acc_limit = ad_info.get('spend_cap', 0)
             else:
                 acc_balance = 'N/A'
                 acc_limit = 'N/A'
@@ -200,11 +196,7 @@ def topup(request):
             wallet = get_object_or_404(Wallet, user=request.user)
 
             if wallet.balance >= Decimal(amount):
-                spend_cap_str = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None).get('spend_cap', '0')
-                try:
-                    ad_account_limit = float(spend_cap_str) / 100
-                except (ValueError, TypeError):
-                    ad_account_limit = 0
+                ad_account_limit = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None).get('spend_cap', 0)
                     
                 request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None)
                 if not request:

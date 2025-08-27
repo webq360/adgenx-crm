@@ -47,11 +47,7 @@ def ad_account_details(request, ad_account_id):
         ad_info = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None)
         ad_account.balance = ad_info.get('balance', 0)
         ad_account.total_spent = ad_info.get('amount_spent', 0)
-        spend_cap_str = ad_info.get('spend_cap', '0')
-        try:
-            ad_account.limit = float(spend_cap_str) / 100
-        except (ValueError, TypeError):
-            ad_account.limit = 0
+        ad_account.limit = ad_info.get('spend_cap', 0)
     else:
         ad_account.balance = 'N/A'
         ad_account.limit = 'N/A'
@@ -148,11 +144,7 @@ def all_ad_accounts(request):
             if ad_info:
                 acc.balance = ad_info.get('balance', 0)
                 acc.total_spent = ad_info.get('amount_spent', 0)
-                spend_cap_str = ad_info.get('spend_cap', '0')
-                try:
-                    acc.limit = float(spend_cap_str) / 100
-                except (ValueError, TypeError):
-                    acc.limit = 0
+                acc.limit = ad_info.get('spend_cap', 0)
             else:
                 acc.balance = 'N/A'
                 acc.limit = 'N/A'
