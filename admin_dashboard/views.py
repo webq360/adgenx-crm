@@ -194,5 +194,6 @@ def manage_user(request):
 
         messages.success(request, 'User details updated successfully.')
         return redirect(f'/admin_dashboard/manage_user/?username={user_to_manage.username}')
-
-    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet})
+    
+    all_users = User.objects.filter(is_staff=False)
+    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'all_users': all_users})
