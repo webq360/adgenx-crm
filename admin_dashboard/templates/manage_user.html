@@ -24,8 +24,8 @@
               {% csrf_token %}
               <input type="hidden" name="user_id" value="{{ user_to_manage.id }}">
               <div class="mb-3">
-                <p><strong>Username:</strong> {{ user_to_manage.username }}</p>
                 <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
+                <p><strong>Whatsapp Number:</strong> {{ user_to_manage.phone_number }}</p>
               </div>
               <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if user_to_manage.is_active %}checked{% endif %}>
