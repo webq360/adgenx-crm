@@ -37,7 +37,7 @@
             </div>
             <h2 class="fs-6 fw-semibold mb-0">Current USD Rate</h2>
           </div>
-          <p class="fs-5 fw-bold mb-1">৳127.00/USD</p>
+          <p class="fs-5 fw-bold mb-1">৳{{ wallet.dollar_rate }}/USD</p>
           <p class="text-muted small mb-0">Expires on: 31 Jul 2025</p>
         </div>
       </div>
@@ -138,7 +138,7 @@
                             <label for="bdtAmount" class="form-label fw-semibold text-dark">Amount in BDT</label>
                             <div class="input-group">
                                 <span class="input-group-text">৳</span>
-                                <input type="number" class="form-control" id="bdtAmount" placeholder="Provide the amount in BDT" step="0.01" required>
+                                <input type="number" class="form-control" id="bdtAmount" placeholder="Provide the amount in BDT" step="0.01" required data-dollar-rate="{{ wallet.dollar_rate }}">
                             </div>
                         </div>
 
@@ -166,6 +166,7 @@
                     <div class="form-section p-4">
                         <h6 class="fw-semibold text-dark mb-3">You will receive the amount in USD:</h6>
                         <div class="border rounded p-4 bg-light">
+                          <!--entered bdt amount in usd -->
                             <div class="amount-display">$0.00</div>
                             <div class="rate-info mt-2">
                                 Your current USD rate is 127 BDT/USD and will expire on 7/31/2025.

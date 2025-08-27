@@ -47,7 +47,7 @@
             Deposit
         </a>
         {% endif %}
-
+        
         {% if request.user.is_staff %}
         <a href="{% url 'admin_dashboard:review_deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
@@ -65,15 +65,16 @@
             All Ad Accounts
         </a>
 
-        <a href="{% url 'deposit_transactions'  %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.33337 15.538V6.71172C3.33337 4.33338 3.33337 3.14421 4.06561 2.40536C4.79784 1.6665 5.97635 1.6665 8.33337 1.6665H11.6667C14.0237 1.6665 15.2022 1.6665 15.9345 2.40536C16.6667 3.14421 16.6667 4.33338 16.6667 6.71172V15.538C16.6667 16.7978 16.6667 17.4276 16.2817 17.6755C15.6526 18.0808 14.6801 17.231 14.191 16.9226C13.7868 16.6677 13.5848 16.5403 13.3605 16.5329C13.1181 16.5249 12.9125 16.6472 12.4758 16.9226L10.8834 17.9268C10.4538 18.1977 10.239 18.3332 10 18.3332C9.76104 18.3332 9.54629 18.1977 9.11671 17.9268L7.52432 16.9226C7.12017 16.6677 6.91809 16.5403 6.69382 16.5329C6.45147 16.5249 6.24582 16.6472 5.8091 16.9226C5.32 17.231 4.34743 18.0808 3.71833 17.6755C3.33337 17.4276 3.33337 16.7978 3.33337 15.538Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.3333 5H6.66663" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8.33329 8.3335H6.66663" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12.0834 8.22917C11.393 8.22917 10.8334 8.71883 10.8334 9.32292C10.8334 9.927 11.393 10.4167 12.0834 10.4167C12.7737 10.4167 13.3334 10.9063 13.3334 11.5104C13.3334 12.1145 12.7737 12.6042 12.0834 12.6042M12.0834 8.22917C12.6276 8.22917 13.0906 8.5335 13.2622 8.95833M12.0834 8.22917V7.5M12.0834 12.6042C11.5391 12.6042 11.0761 12.2998 10.9045 11.875M12.0834 12.6042V13.3333" stroke="#424B57" stroke-width="1.5" stroke-linecap="round"></path></svg>
-            Transactions
-        </a>
         <a href="{% url 'admin_dashboard:manage_user' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 640 640"><path d="M240 192C240 147.8 275.8 112 320 112C364.2 112 400 147.8 400 192C400 236.2 364.2 272 320 272C275.8 272 240 236.2 240 192zM448 192C448 121.3 390.7 64 320 64C249.3 64 192 121.3 192 192C192 262.7 249.3 320 320 320C390.7 320 448 262.7 448 192zM144 544C144 473.3 201.3 416 272 416L368 416C438.7 416 496 473.3 496 544L496 552C496 565.3 506.7 576 520 576C533.3 576 544 565.3 544 552L544 544C544 446.8 465.2 368 368 368L272 368C174.8 368 96 446.8 96 544L96 552C96 565.3 106.7 576 120 576C133.3 576 144 565.3 144 552L144 544z"/></svg>            
             Manage Users
         </a>
         {% endif %}
+
+        <a href="{% url 'deposit_transactions'  %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.33337 15.538V6.71172C3.33337 4.33338 3.33337 3.14421 4.06561 2.40536C4.79784 1.6665 5.97635 1.6665 8.33337 1.6665H11.6667C14.0237 1.6665 15.2022 1.6665 15.9345 2.40536C16.6667 3.14421 16.6667 4.33338 16.6667 6.71172V15.538C16.6667 16.7978 16.6667 17.4276 16.2817 17.6755C15.6526 18.0808 14.6801 17.231 14.191 16.9226C13.7868 16.6677 13.5848 16.5403 13.3605 16.5329C13.1181 16.5249 12.9125 16.6472 12.4758 16.9226L10.8834 17.9268C10.4538 18.1977 10.239 18.3332 10 18.3332C9.76104 18.3332 9.54629 18.1977 9.11671 17.9268L7.52432 16.9226C7.12017 16.6677 6.91809 16.5403 6.69382 16.5329C6.45147 16.5249 6.24582 16.6472 5.8091 16.9226C5.32 17.231 4.34743 18.0808 3.71833 17.6755C3.33337 17.4276 3.33337 16.7978 3.33337 15.538Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.3333 5H6.66663" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8.33329 8.3335H6.66663" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12.0834 8.22917C11.393 8.22917 10.8334 8.71883 10.8334 9.32292C10.8334 9.927 11.393 10.4167 12.0834 10.4167C12.7737 10.4167 13.3334 10.9063 13.3334 11.5104C13.3334 12.1145 12.7737 12.6042 12.0834 12.6042M12.0834 8.22917C12.6276 8.22917 13.0906 8.5335 13.2622 8.95833M12.0834 8.22917V7.5M12.0834 12.6042C11.5391 12.6042 11.0761 12.2998 10.9045 11.875M12.0834 12.6042V13.3333" stroke="#424B57" stroke-width="1.5" stroke-linecap="round"></path></svg>
+            Transactions
+        </a>
 
         </nav>
     </div>
