@@ -27,14 +27,24 @@ def index(request):
     
     ad_accounts_data = []
     for acc in ad_accounts_qs:
-        ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id if acc.admin_bm else None) if acc.status == 'active' else {}
-        acc_balance = ad_info.get('balance', 0)
-        spend_cap_str = ad_info.get('spend_cap', '0')
-        try:
-            acc_limit = float(spend_cap_str) / 100
-        except (ValueError, TypeError):
-            acc_limit = 0
-        acc_total_spent = ad_info.get('amount_spent', 0)
+        if acc.admin_bm:
+            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id)
+            if ad_info:
+                acc_balance = ad_info.get('balance', 0)
+                acc_total_spent = ad_info.get('amount_spent', 0)
+                spend_cap_str = ad_info.get('spend_cap', '0')
+                try:
+                    acc_limit = float(spend_cap_str) / 100
+                except (ValueError, TypeError):
+                    acc_limit = 0
+            else:
+                acc_balance = 'N/A'
+                acc_limit = 'N/A'
+                acc_total_spent = 'N/A'
+        else:
+            acc_balance = 'N/A'
+            acc_limit = 'N/A'
+            acc_total_spent = 'N/A'
 
         bm_accounts_list = []
         for bm in acc.bm_accounts.all():

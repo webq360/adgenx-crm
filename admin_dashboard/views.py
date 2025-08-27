@@ -143,13 +143,8 @@ def all_ad_accounts(request):
     raw_ad_accounts = AdAccount.objects.all().order_by('-start_date')
     ad_accounts = []
     for acc in raw_ad_accounts:
-        if acc.status != 'active':
-            acc.balance = 'N/A'
-            acc.limit = 'N/A'
-            acc.total_spent = 'N/A'
-               
-        else:
-            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id if acc.admin_bm else None)
+        if acc.status == 'active' and acc.admin_bm:
+            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id)
             if ad_info:
                 acc.balance = ad_info.get('balance', 0)
                 acc.total_spent = ad_info.get('amount_spent', 0)
@@ -158,5 +153,13 @@ def all_ad_accounts(request):
                     acc.limit = float(spend_cap_str) / 100
                 except (ValueError, TypeError):
                     acc.limit = 0
+            else:
+                acc.balance = 'N/A'
+                acc.limit = 'N/A'
+                acc.total_spent = 'N/A'
+        else:
+            acc.balance = 'N/A'
+            acc.limit = 'N/A'
+            acc.total_spent = 'N/A'
         ad_accounts.append(acc)
     return render(request, 'all_ad_accounts.html', {'ad_accounts': ad_accounts})
