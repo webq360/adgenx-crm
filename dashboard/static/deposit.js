@@ -102,14 +102,14 @@ nextButton2.addEventListener('click', () => {
         <div class="container py-4">
           <div class="row border border-0 border-md border-secondary-subtle rounded">
             <div class="col-md-6 px-3 px-md-4 py-3 py-md-4">
-              <p class="small fw-semibold mb-2">${paymentDetails.payment_method === 'bank' ? 'Bank' : 'Binance'}</p>
+              <p class="small fw-semibold mb-2">${paymentDetails.payment_method === 'bank' ? 'Bank' : 'Fund Transter'}</p>
               <div class="d-flex align-items-start mb-3">
-                <img alt="Payment method logo" src="${paymentDetails.payment_method === 'bank' ? 'https://storage.googleapis.com/a1aa/image/7ac371b1-0bb8-489a-e593-61ca1cc1aef5.jpg' : 'https://storage.googleapis.com/a1aa/image/762ee3d3-d46a-4069-5c80-0476924bd7e8.jpg'}" width="40" height="40" class="me-3" />
+                <img alt="" src="${paymentDetails.payment_method === 'bank' ? 'https://storage.googleapis.com/a1aa/image/7ac371b1-0bb8-489a-e593-61ca1cc1aef5.jpg' : 'https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg'}" width="40" height="40" class="me-3" />
                 <div class="small lh-sm">
-                  <p class="mb-0">ID - PA01</p>
-                  <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'City Bank' : 'Binance'}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? '1503864135001' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Naogaon, N/A' : ''}</p>
+                  <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'Pubali bank Limited' : ''}</p>
+                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'RIFAT HOSSAIN' : ''}</p>
+                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? '0038101011970' : ''}</p>
+                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Araihazar' : ''}</p>
                 </div>
               </div>
 
