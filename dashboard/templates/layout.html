@@ -23,7 +23,7 @@
         <nav class="nav flex-column mt-3 px-3 gap-2" aria-label="Main Menu">
 
         {% if not request.user.is_staff %}
-        <a href="{% url 'index' %}" class="nav-link active d-flex align-items-center gap-2" aria-current="page">
+        <a href="{% url 'dashboard:index' %}" class="nav-link active d-flex align-items-center gap-2" aria-current="page">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="3" y="3" width="7" height="7" rx="1" ry="1"></rect>
             <rect x="14" y="3" width="7" height="7" rx="1" ry="1"></rect>
@@ -33,14 +33,7 @@
             Overview
         </a>
 
-        <a href="{% url 'request_ad_account' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold ad-accounts-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C11.6353 5.5179 13.0696 4.1665 14.3039 4.1665C16.1558 4.1665 17.3253 6.31803 18.0078 9.23859C18.6596 12.0279 18.4707 15.8332 16.1558 15.8332C15.1242 15.8332 13.7038 14.3117 12.3149 12.2826C11.4311 11.004 10.6565 9.64609 10 8.22456Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C8.20127 5.5179 6.62352 4.1665 5.26578 4.1665C3.22865 4.1665 1.94221 6.31803 1.19153 9.23859C0.474461 12.0279 0.682248 15.8332 3.22865 15.8332C4.36333 15.8332 5.9258 14.3117 7.45364 12.2826C8.47221 10.9303 9.32063 9.57692 10 8.22456Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            Create Ad Account
-        </a>
-        <a href="{% url 'deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
+        <a href="{% url 'dashboard:deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13.335 11.25C13.335 11.9403 13.8945 12.5 14.585 12.5C15.2753 12.5 15.835 11.9403 15.835 11.25C15.835 10.5597 15.2753 10 14.585 10C13.8945 10 13.335 10.5597 13.335 11.25Z" stroke="#424B57" stroke-width="1.25">
             </path><path d="M1.66833 9.16667C1.66833 6.02397 1.66834 4.45262 2.64465 3.47631C3.62096 2.5 5.19231 2.5 8.33504 2.5H11.6684C12.4433 2.5 12.8308 2.5 13.1487 2.58518C14.0115 2.81635 14.6853 3.49022 14.9165 4.35295C15.0017 4.67087 15.0017 5.05836 15.0017 5.83333M8.33504 5.83333H13.335C15.692 5.83333 16.8705 5.83333 17.6028 6.56557C18.335 7.2978 18.335 8.47633 18.335 10.8333V12.5C18.335 14.857 18.335 16.0355 17.6028 16.7677C16.8705 17.5 15.692 17.5 13.335 17.5H10.4171" stroke="#424B57" stroke-width="1.25" stroke-linecap="round"></path>
             <path d="M8.33329 14.1668H4.99996M4.99996 14.1668H1.66663M4.99996 14.1668V17.5002M4.99996 14.1668V10.8335" stroke="#424B57" stroke-width="1.25" stroke-linecap="round"></path></svg>
