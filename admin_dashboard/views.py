@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM
+from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User
 from django.contrib import messages
 
 @login_required(login_url='auth')
@@ -155,3 +155,44 @@ def all_ad_accounts(request):
             acc.total_spent = 'N/A'
         ad_accounts.append(acc)
     return render(request, 'all_ad_accounts.html', {'ad_accounts': ad_accounts})
+
+@login_required(login_url='auth')
+def manage_user(request):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    user_to_manage = None
+    wallet = None
+    username = request.GET.get('username')
+    if username:
+        try:
+            user_to_manage = User.objects.get(username=username, is_staff=False)
+            wallet = Wallet.objects.get(user=user_to_manage)
+        except User.DoesNotExist:
+            messages.error(request, f"Normal user with username '{username}' not found.")
+        except Wallet.DoesNotExist:
+            pass
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        user_to_manage = get_object_or_404(User, id=user_id)
+        
+        is_active = request.POST.get('is_active') == 'on'
+        dollar_rate = request.POST.get('dollar_rate')
+        print(dollar_rate)
+
+        user_to_manage.is_active = is_active
+        user_to_manage.save()
+
+        if dollar_rate:
+            try:
+                wallet = Wallet.objects.get(user=user_to_manage)
+                wallet.dollar_rate = dollar_rate
+                wallet.save()
+            except Wallet.DoesNotExist:
+                pass
+
+        messages.success(request, 'User details updated successfully.')
+        return redirect(f'/admin_dashboard/manage_user/?username={user_to_manage.username}')
+
+    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet})

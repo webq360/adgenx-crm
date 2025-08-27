@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'transactions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4 px-4">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="bg-white rounded-3 p-3 shadow-sm">
+          <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Manage User</h2>
+          <form method="get" class="mb-3">
+            <div class="input-group">
+              <input type="text" class="form-control" name="username" placeholder="Enter username" value="{{ request.GET.username }}">
+              <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+          </form>
+
+          {% if user_to_manage %}
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="user_id" value="{{ user_to_manage.id }}">
+              <div class="mb-3">
+                <p><strong>Username:</strong> {{ user_to_manage.username }}</p>
+                <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
+              </div>
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if user_to_manage.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Active</label>
+              </div>
+              <div class="mb-3">
+                <label for="dollar_rate" class="form-label">Dollar Rate</label>
+                <input type="number" class="form-control" id="dollar_rate" name="dollar_rate" step="0.01" value="{% if wallet %}{{ wallet.dollar_rate }}{% endif %}">
+              </div>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+          {% elif request.GET.username %}
+            <p>User not found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

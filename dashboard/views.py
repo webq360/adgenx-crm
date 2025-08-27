@@ -99,7 +99,8 @@ def auth(request):
                         email=email, 
                         password=password, 
                         first_name=first_name, 
-                        last_name=last_name
+                        last_name=last_name,
+                        is_active=False
                     )
                     login(request, user)
                     Wallet.objects.create(user=user)
