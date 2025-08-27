@@ -34,7 +34,6 @@ def change_spend_cap(amount, ad_account_id, admin_bm_id):
                 AdAccount.Field.spend_cap: amount
             }
         )
-        print('✅ Spend cap updated successfully:', response)
         return True
     except Exception as e:
         print('❌ Error updating spend cap:', e)
@@ -61,7 +60,6 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
             'spend_cap'
         ]
         info = ad_account.api_get(fields=fields_to_get)
-        print('✅ Ad Account Info:', info)
         return info
     except Exception as e:
         print('❌ Error getting ad account info:', e)
