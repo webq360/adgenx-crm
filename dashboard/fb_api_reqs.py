@@ -56,18 +56,18 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
         ad_account = AdAccountObject('act_{}'.format(ad_account_id))
         fields_to_get = [
             'amount_spent',
-            'balance',
             'spend_cap'
         ]
         info = ad_account.api_get(fields=fields_to_get)
         
         # Convert currency fields from cents to dollars
-        for field in ['spend_cap', 'amount_spent', 'balance']:
+        for field in ['spend_cap', 'amount_spent']:
             if field in info:
                 try:
                     info[field] = float(info[field]) / 100
                 except (ValueError, TypeError):
                     info[field] = 0
+        info.balance = info.get('spend_cap') - info.get('amount_spent')
 
         return info
     except Exception as e:
