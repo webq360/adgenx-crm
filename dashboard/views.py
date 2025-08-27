@@ -28,7 +28,7 @@ def index(request):
     ad_accounts_data = []
     for acc in ad_accounts_qs:
         if acc.admin_bm:
-            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id)
+            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.acc_id)
             if ad_info:
                 acc_balance = ad_info.get('balance', 0)
                 acc_total_spent = ad_info.get('amount_spent', 0)
@@ -199,7 +199,7 @@ def topup(request):
             wallet = get_object_or_404(Wallet, user=request.user)
 
             if wallet.balance > 0.01 and wallet.balance >= Decimal(amount):
-                ad_account_limit = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None).get('spend_cap', 0)
+                ad_account_limit = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None).get('spend_cap', 0)
                     
                 request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None)
                 if not request:

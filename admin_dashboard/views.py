@@ -44,7 +44,7 @@ def ad_account_details(request, ad_account_id):
     admin_bms = AdminBM.objects.all()
 
     if ad_account.status == 'active':
-        ad_info = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.id if ad_account.admin_bm else None)
+        ad_info = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None)
         ad_account.balance = ad_info.get('balance', 0)
         ad_account.total_spent = ad_info.get('amount_spent', 0)
         ad_account.limit = ad_info.get('spend_cap', 0)
@@ -145,7 +145,7 @@ def all_ad_accounts(request):
     ad_accounts = []
     for acc in raw_ad_accounts:
         if acc.status == 'active' and acc.admin_bm:
-            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.id)
+            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.acc_id)
             if ad_info:
                 acc.balance = ad_info.get('balance', 0)
                 acc.total_spent = ad_info.get('amount_spent', 0)
