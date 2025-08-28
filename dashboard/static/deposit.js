@@ -46,7 +46,8 @@ const updateStepUI = () => {
 };
 
 const validateStep2 = () => {
-    if (bdtAmount.value && txId.value) {
+    const bdt = parseInt(bdtAmount.value);
+    if (bdtAmount.value && txId.value && !isNaN(bdt) && bdt >= 100 && bdt <= 1000000) {
         nextButton2.disabled = false;
     } else {
         nextButton2.disabled = true;
@@ -75,15 +76,29 @@ nextButton1.addEventListener('click', () => {
 });
 
 bdtAmount.addEventListener('input', () => {
-    const bdt = parseFloat(bdtAmount.value);
+    let amount = bdtAmount.value;
+
+    // Allow only digits
+    amount = amount.replace(/[^0-9]/g, '');
+
+    bdtAmount.value = amount;
+
+    const bdt = parseInt(amount); // Use parseInt for raw numbers
     const dollarRate = parseFloat(bdtAmount.dataset.dollarRate);
-    if (!isNaN(bdt) && dollarRate > 0) {
+
+    if (!isNaN(bdt) && bdt >= 100 && bdt <= 1000000 && dollarRate > 0) {
         const usdAmount = (bdt / dollarRate).toFixed(2);
-        amountDisplay.textContent = `$${usdAmount}`;
+        amountDisplay.textContent = `${usdAmount}`;
         document.getElementById('hidden-usd-amount').value = usdAmount;
+        bdtAmount.classList.remove('is-invalid');
     } else {
         amountDisplay.textContent = '$0.00';
         document.getElementById('hidden-usd-amount').value = '';
+        if (amount) { // only show invalid if there is some value
+            bdtAmount.classList.add('is-invalid');
+        } else {
+            bdtAmount.classList.remove('is-invalid');
+        }
     }
     validateStep2();
 });
