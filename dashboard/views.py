@@ -13,11 +13,11 @@ from .fb_api_reqs import change_spend_cap, get_ad_account_info
 def get_utils(user):
     pending_deposits = DepositTransaction.objects.filter(user=user, status='pending').count()
     pending_accounts = AdAccount.objects.filter(user=user, status='inactive').count()
-    pending_accounts = AdAccount.objects.filter(user=user, status='active').count()
+    active_accounts = AdAccount.objects.filter(user=user, status='active').count()
     return {
         'pending_deposits': pending_deposits,
         'pending_accounts': pending_accounts,
-        'active_accounts': pending_accounts,
+        'active_accounts': active_accounts,
     }
 
 def get_processed_ad_accounts_data(ad_accounts_qs):
