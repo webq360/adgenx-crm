@@ -20,16 +20,10 @@ def get_utils(user):
         'active_accounts': pending_accounts,
     }
 
-@login_required(login_url='auth')
-def index(request):
-    if request.user.is_staff:
-        return redirect('admin_dashboard:review_deposit')  # Redirect staff to review deposits
-    wallet = Wallet.objects.get(user=request.user)
-    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
-    
+def get_processed_ad_accounts_data(ad_accounts_qs):
     ad_accounts_data = []
     for acc in ad_accounts_qs:
-        if acc.admin_bm:
+        if acc.admin_bm and acc.status == 'active':
             ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.acc_id)
             if ad_info:
                 acc_balance = ad_info.get('balance', 0)
@@ -67,9 +61,35 @@ def index(request):
             'total_spent': acc_total_spent,
             'bm_accounts': bm_accounts_list,
         })
+    return ad_accounts_data
+
+@login_required(login_url='auth')
+def index(request):
+    if request.user.is_staff:
+        return redirect('admin_dashboard:review_deposit')  # Redirect staff to review deposits
+    wallet = Wallet.objects.get(user=request.user)
+    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
+    
+    ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 
     utils = get_utils(request.user)
-    return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts_data, 'utils': utils})       
+    return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts_data, 'utils': utils})
+
+
+@login_required(login_url='auth')
+def ad_accounts(request):
+    if request.user.is_staff:
+        return redirect('admin_dashboard:review_deposit')
+    
+    search_query = request.GET.get('search', '')
+    ad_accounts_qs = AdAccount.objects.filter(
+        user=request.user,
+        name__icontains=search_query
+    ).order_by('-start_date')
+    
+    ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
+
+    return render(request, 'ad_accounts.html', {'ad_accounts': ad_accounts_data, 'search_query': search_query})       
 
 def auth(request):
     if request.user.is_authenticated:

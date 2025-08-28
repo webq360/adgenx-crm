@@ -36,7 +36,7 @@ def change_spend_cap(amount, ad_account_id, admin_bm_id):
         )
         return True
     except Exception as e:
-        print('❌ Error updating spend cap:', e)
+        print(f'Error updating spend cap:{ad_account_id}', e)
         return False
 
 
@@ -70,5 +70,5 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
         info['balance'] = info.get('spend_cap') - info.get('amount_spent')
         return info
     except Exception as e:
-        print('❌ Error getting ad account info:', e)
+        print(f'Error getting ad account info:{ad_account_id}', e)
         return None

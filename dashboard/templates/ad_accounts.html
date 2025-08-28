@@ -1,0 +1,333 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <!-- Content -->
+    <main class="flex-grow-1 overflow-auto p-4">
+    <h1 class="fs-5 fw-semibold mb-1">Ad Accounts</h1>
+
+    <section class="bg-white rounded-3 shadow-sm p-3">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3 gap-3">
+            <h2 class="fw-semibold text-secondary fs-6 mb-0">Ad Accounts</h2>
+            <div class="d-flex gap-2 w-100 w-sm-auto">
+                 <form method="get" action="{% url 'ad_accounts' %}">
+                <input type="search" class="input-search" placeholder="Search ad accounts" name="search" value="{{ search_query }}"
+                    aria-label="Search ad accounts" />
+                </form>
+                <button type="submit" class="btn-create">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                    Search
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0" style="font-size: 0.75rem;">
+                <thead class="bg-light border border-secondary-subtle">
+                    <tr>
+                        <th class="border border-secondary-subtle">Ad Account</th>
+                        <th class="border border-secondary-subtle">Connected BM</th>
+                        <th class="border border-secondary-subtle">Remaining Balance</th>
+                        <th class="border border-secondary-subtle">Total Spent</th>
+                        <th class="border border-secondary-subtle">Limit</th>
+                        <th class="border border-secondary-subtle">Status</th>
+                        <th class="border border-secondary-subtle">Action</th>
+                        {% if not request.user.is_staff %}
+                        <th class="border border-secondary-subtle">Top Up</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ad_account in ad_accounts %}
+                    <tr class="border border-secondary-subtle align-top">
+                        <td class="border border-secondary-subtle">
+                            <!--ad_account name-->
+                            <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
+                            <!--ad_account_id-->
+                            <p class="text-secondary mb-0" style="line-height: 1.2;">
+                                id - {{ ad_account.acc_id }}<br />
+                                <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer"
+                                    class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
+                            </p>
+                        </td>
+                        <td class="border border-secondary-subtle">
+                            {% for bm_account in ad_account.bm_accounts %}
+                                {% if bm_account.status == 'approved' %}
+                                <p class="text-success fw-semibold mb-0">Approved</p>
+                                    <p class="mb-0">{{ bm_account.acc_name }}</p>
+                                    <p class="mb-1">{{ bm_account.acc_id }}</p>
+                                {% elif bm_account.status == 'pending' %}
+                                <p class="text-warning fw-semibold mb-0">Pending</p>
+                                    <p class="mb-0 text-secondary">{{ bm_account.acc_name }}</p>
+                                    <p class="mb-1 text-secondary">{{ bm_account.acc_id }}</p>
+                                {% endif %}
+                            {% empty %}
+                                <p class="text-secondary mb-0">No BM accounts</p>
+                            {% endfor %}
+                        </td>
+                        <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
+                        <td class="border border-secondary-subtle">${{ ad_account.total_spent }}</td>
+                        <td class="border border-secondary-subtle">${{ ad_account.limit }}</td>
+                        <td class="border border-secondary-subtle">
+                            <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
+                        </td>
+                        <td class="border border-secondary-subtle text-center">
+                            <div class="dropup">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"strategy":"fixed"}'>
+                                    
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ ad_account.id }}">
+                                    <li><button class="dropdown-item" data-bs-toggle="modal"
+                                        data-bs-target="#adMbAccountModal"
+                                        data-ad-account-id="{{ ad_account.id }}">Ad BM Account
+                                    </button></li>
+                                    <li><button class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#removeBmAccountModal"
+                                        data-ad-account-id="{{ ad_account.id }}">Remove BM Account
+                                    </button></li>
+                                </ul>
+                            </div>
+                        </td>
+                        {% if not request.user.is_staff %}
+                        <td class="border border-secondary-subtle">
+                            <button type="button" class="btn-topup" data-bs-toggle="modal" data-bs-target="#topupModal"
+                                data-ad-account-id="{{ ad_account.id }}">
+                                Top Up
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No ad accounts found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- Top Up Modal -->
+<div class="modal fade" id="topupModal" tabindex="-1" aria-labelledby="topupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="topupModalLabel">Top Up Ad Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="topup-form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="ad_account_id" id="ad-account-id">
+                    <div id="topup-message" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Top Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Ad MB Account Modal -->
+<div class="modal fade" id="adMbAccountModal" tabindex="-1" aria-labelledby="adMbAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adMbAccountModalLabel">Ad MB Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="ad-mb-account-form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="ad_account_id" id="ad-mb-account-id">
+                    <div id="ad-mb-account-message" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="mb-name" class="form-label">MB Name</label>
+                        <input type="text" class="form-control" id="mb-name" name="mb_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mb-id" class="form-label">MB ID</label>
+                        <input type="text" class="form-control" id="mb-id" name="mb_id" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Remove BM Account Modal -->
+<div class="modal fade" id="removeBmAccountModal" tabindex="-1" aria-labelledby="removeBmAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeBmAccountModalLabel">Remove BM Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="remove-bm-account-form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="ad_account_id" id="remove-bm-account-ad-id">
+                    <div id="remove-bm-account-message" class="mb-3"></div>
+                    <div id="bm-accounts-checkboxes">
+                        <!-- Checkboxes will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{ ad_accounts|json_script:"ad_accounts_data_json" }}
+<script>
+    const ad_accounts_data_element = document.getElementById('ad_accounts_data_json');
+    const ad_accounts_data = JSON.parse(ad_accounts_data_element.textContent);
+    const topupModal = document.getElementById('topupModal');
+    const topupMessage = document.getElementById('topup-message');
+
+    topupModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const adAccountId = button.getAttribute('data-ad-account-id');
+        const adAccountIdInput = topupModal.querySelector('#ad-account-id');
+        adAccountIdInput.value = adAccountId;
+        topupMessage.innerHTML = ''; // Clear previous messages
+        topupModal.querySelector('#amount').value = ''; // Clear previous amount
+    });
+
+    const topupForm = document.getElementById('topup-form');
+    topupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(topupForm);
+        const response = await fetch('/topup/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            topupMessage.innerHTML = 'Top up successful!';
+            topupMessage.style.color = 'green';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            topupMessage.innerHTML = `Error: ${result.error}`;
+            topupMessage.style.color = 'red';
+        }
+    });
+
+    const adMbAccountModal = document.getElementById('adMbAccountModal');
+    const adMbAccountMessage = document.getElementById('ad-mb-account-message');
+
+    adMbAccountModal.addEventListener('show.bs.modal', function (event) {
+        console.log('Add MB Account modal shown');
+        const button = event.relatedTarget;
+        const adAccountId = button.getAttribute('data-ad-account-id');
+        const adAccountIdInput = adMbAccountModal.querySelector('#ad-mb-account-id');
+        adAccountIdInput.value = adAccountId;
+        adMbAccountMessage.innerHTML = ''; // Clear previous messages
+        adMbAccountModal.querySelector('#mb-name').value = '';
+        adMbAccountModal.querySelector('#mb-name').defaultValue = ''; // Clear previous mb name
+        adMbAccountModal.querySelector('#mb-id').value = '';
+        adMbAccountModal.querySelector('#mb-id').defaultValue = ''; // Clear previous mb id
+        console.log('Cleared mb-name and mb-id');
+    });
+
+    const adMbAccountForm = document.getElementById('ad-mb-account-form');
+    adMbAccountForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(adMbAccountForm);
+        const response = await fetch('/request_bm_account/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            adMbAccountMessage.innerHTML = 'Ad MB Account added successfully!';
+            adMbAccountMessage.style.color = 'green';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            adMbAccountMessage.innerHTML = `Error: ${result.error}`;
+            adMbAccountMessage.style.color = 'red';
+        }
+    });
+
+    const removeBmAccountModal = document.getElementById('removeBmAccountModal');
+    const removeBmAccountMessage = document.getElementById('remove-bm-account-message');
+    const bmAccountsCheckboxesDiv = document.getElementById('bm-accounts-checkboxes');
+
+    removeBmAccountModal.addEventListener('show.bs.modal', function (event) {
+        console.log('Remove BM Account modal shown');
+        const button = event.relatedTarget;
+        const adAccountId = button.getAttribute('data-ad-account-id');
+        const adAccountIdInput = removeBmAccountModal.querySelector('#remove-bm-account-ad-id');
+        adAccountIdInput.value = adAccountId;
+        removeBmAccountMessage.innerHTML = ''; // Clear previous messages
+        bmAccountsCheckboxesDiv.innerHTML = ''; // Clear previous checkboxes
+        console.log('Cleared previous messages and checkboxes');
+
+        const adAccount = ad_accounts_data.find(acc => acc.id == adAccountId);
+        console.log('Ad Account data:', adAccount);
+
+        if (adAccount && adAccount.bm_accounts.length > 0) {
+            console.log('Populating checkboxes for BM accounts:', adAccount.bm_accounts);
+            adAccount.bm_accounts.forEach(bm => {
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input" type="radio" name="bm_account_id" value="${bm.id}" id="bm-${bm.id}">
+                    <label class="form-check-label" for="bm-${bm.id}">
+                        ${bm.acc_name} (ID: ${bm.acc_id})
+                    </label>
+                `;
+                bmAccountsCheckboxesDiv.appendChild(div);
+            });
+        } else {
+            console.log('No BM accounts found for this Ad Account.');
+            bmAccountsCheckboxesDiv.innerHTML = '<p>No BM accounts connected to this Ad Account.</p>';
+        }
+    });
+
+    const removeBmAccountForm = document.getElementById('remove-bm-account-form');
+    removeBmAccountForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(removeBmAccountForm);
+        const response = await fetch('/remove_bm_account_request/', { // New URL for backend
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            removeBmAccountMessage.innerHTML = 'Remove BM Account request submitted successfully!';
+            removeBmAccountMessage.style.color = 'green';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            removeBmAccountMessage.innerHTML = `Error: ${result.error}`;
+            removeBmAccountMessage.style.color = 'red';
+        }
+    });
+</script>
+{% endblock %}
