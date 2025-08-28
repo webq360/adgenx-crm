@@ -77,15 +77,17 @@ def index(request):
 
 
 @login_required(login_url='auth')
-def ad_accounts(request):
-    if request.user.is_staff:
-        return redirect('admin_dashboard:review_deposit')
-    
+def ad_accounts(request):    
     search_query = request.GET.get('search', '')
-    ad_accounts_qs = AdAccount.objects.filter(
-        user=request.user,
-        name__icontains=search_query
-    ).order_by('-start_date')
+    if request.user.is_staff:
+        ad_accounts_qs = AdAccount.objects.filter(
+            name__icontains=search_query
+        ).order_by('-start_date')
+    else:
+        ad_accounts_qs = AdAccount.objects.filter(
+            user=request.user,
+            name__icontains=search_query
+        ).order_by('-start_date')
     
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 

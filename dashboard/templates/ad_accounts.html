@@ -8,18 +8,19 @@
     <section class="bg-white rounded-3 shadow-sm p-3">
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3 gap-3">
             <h2 class="fw-semibold text-secondary fs-6 mb-0">Ad Accounts</h2>
-            <div class="d-flex gap-2 w-100 w-sm-auto">
-                 <form method="get" action="{% url 'ad_accounts' %}">
-                <input type="search" class="input-search" placeholder="Search ad accounts" name="search" value="{{ search_query }}"
-                    aria-label="Search ad accounts" />
-                </form>
-                <button type="submit" class="btn-create">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                    </svg>
-                    Search
-                </button>
-            </div>
+            <form method="get" action="{% url 'ad_accounts' %}">
+                <div class="d-flex gap-2 w-100 w-sm-auto">
+                    <input type="search" class="input-search" placeholder="Search ad accounts" name="search" 
+                    value="{{ search_query }}" aria-label="Search ad accounts" autocomplete="off" />
+
+                    <button type="submit" class="btn-create">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                        Search
+                    </button>
+                </div>
+            </form>
         </div>
         <div class="table-responsive">
             <table class="table table-borderless align-middle mb-0" style="font-size: 0.75rem;">
@@ -71,6 +72,8 @@
                         <td class="border border-secondary-subtle">
                             <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
                         </td>
+                        
+                        {% if not request.user.is_staff %}
                         <td class="border border-secondary-subtle text-center">
                             <div class="dropup">
                                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"strategy":"fixed"}'>
@@ -88,13 +91,16 @@
                                 </ul>
                             </div>
                         </td>
-                        {% if not request.user.is_staff %}
                         <td class="border border-secondary-subtle">
                             <button type="button" class="btn-topup" data-bs-toggle="modal" data-bs-target="#topupModal"
                                 data-ad-account-id="{{ ad_account.id }}">
                                 Top Up
                             </button>
                         </td>
+                        {% else %}
+                            <td class="border border-secondary-subtle text-center">
+                                <a href="{% url 'admin_dashboard:ad_account_details' ad_account.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
+                            </td>
                         {% endif %}
                     </tr>
                     {% empty %}

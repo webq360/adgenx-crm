@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User
 from django.contrib import messages
 
+from dashboard.fb_api_reqs import get_ad_account_info
+
+
 @login_required(login_url='auth')
 def review_deposit(request):
     if not request.user.is_staff:
@@ -32,8 +35,6 @@ def review_deposit_details(request, transaction_id):
         return redirect('admin_dashboard:review_deposit')
 
     return render(request, 'review_deposit_details.html', {'transaction': transaction})
-
-from dashboard.fb_api_reqs import get_ad_account_info
 
 @login_required(login_url='auth')
 def ad_account_details(request, ad_account_id):
@@ -136,30 +137,6 @@ def review_bm_request(request):
 
     return render(request, 'review_bm_request.html', {'ad_accounts': ad_accounts})
 
-@login_required(login_url='auth')
-def all_ad_accounts(request):
-    if not request.user.is_staff:
-        return redirect('index')
-
-    raw_ad_accounts = AdAccount.objects.all().order_by('-start_date')
-    ad_accounts = []
-    for acc in raw_ad_accounts:
-        if acc.status == 'active' and acc.admin_bm:
-            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.acc_id)
-            if ad_info:
-                acc.balance = ad_info.get('balance', 0)
-                acc.total_spent = ad_info.get('amount_spent', 0)
-                acc.limit = ad_info.get('spend_cap', 0)
-            else:
-                acc.balance = 'N/A'
-                acc.limit = 'N/A'
-                acc.total_spent = 'N/A'
-        else:
-            acc.balance = 'N/A'
-            acc.limit = 'N/A'
-            acc.total_spent = 'N/A'
-        ad_accounts.append(acc)
-    return render(request, 'all_ad_accounts.html', {'ad_accounts': ad_accounts})
 
 @login_required(login_url='auth')
 def manage_user(request):

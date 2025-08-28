@@ -131,7 +131,7 @@
         </div>
 
         <div class="mt-1 d-flex justify-content-between align-items-center">
-            <a href="{% url 'admin_dashboard:all_ad_accounts' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
+            <a href="{% url 'ad_accounts' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
             <div>
                 <button type="submit" name="action" value="save" class="btn btn-primary">Save Changes</button>
                 {% if ad_account.status != 'active' %}
