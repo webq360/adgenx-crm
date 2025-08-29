@@ -191,9 +191,9 @@ def review_topup(request):
 
         if topup.amount > ad_account_info.get('amount_spent'):
             decrease_amount = ad_account_info.get('spend_cap') - float(topup.amount)
-            request  = change_spend_cap(decrease_amount, topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
+            response  = change_spend_cap(decrease_amount, topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
                                               
-        if request and topup.type == 'decrease':
+        if response and topup.type == 'decrease':
             user = topup.ad_account.user
             wallet = Wallet.objects.get(user=user)
             wallet.balance += topup.amount
