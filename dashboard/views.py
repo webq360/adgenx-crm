@@ -171,15 +171,27 @@ def deposit_transactions(request):
     if request.user.is_staff:
         transactions = DepositTransaction.objects.all().order_by('-created_at')
     else:
-        transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
+        id = request.GET.get('id')
+        if id:
+            transactions = DepositTransaction.objects.filter(id=id, user=request.user).order_by('-created_at')
+        else:
+            transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'deposit_transactions.html', {'transactions': transactions})
 
 @login_required(login_url='auth')
 def topup_transactions(request):
+    ad_acc_name = request.GET.get('ad_acc_name')
     if request.user.is_staff:
-        topups = TopupHistory.objects.all().order_by('-date')
+        if ad_acc_name:
+            topups = TopupHistory.objects.filter(ad_account__name=ad_acc_name).order_by('-date')
+        else:
+            topups = TopupHistory.objects.all().order_by('-date')
     else:
-        topups = topups = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
+        ad_acc_name = request.GET.get('ad_acc_name')
+        if ad_acc_name:
+            topups = TopupHistory.objects.filter(ad_account__name=ad_acc_name, ad_account__user=request.user).order_by('-date')
+        else:
+            topups = topups = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
     return render(request, 'topup_transactions.html', {'topups': topups})
 
 @login_required(login_url='auth')

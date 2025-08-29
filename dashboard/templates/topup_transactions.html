@@ -16,15 +16,18 @@
         <a href="{% url 'topup_transactions' %}" type="button" class="btn-filter text-decoration-none active">Top Up</a>
         <a type="button" class="btn-filter text-decoration-none">Withdrawals</a>
 
-        <div class="ms-auto d-flex flex-wrap gap-3 align-items-center">
-          <div class="position-relative w-25">
-            <input type="text" class="form-control search-input" placeholder="Search transaction" />
-            <i class="fas fa-search search-icon"></i>
-          </div>
-          <div class="position-relative w-auto">
-            <input type="text" class="form-control date-input" placeholder="Select Date" onfocus="(this.type='date')" onblur="(this.type='text')" readonly />
-            <i class="far fa-calendar-alt date-icon"></i>
-          </div>
+        <div class="ms-auto">
+          <form method="get" accept="{% url 'topup_transactions' %}" class="d-flex align-items-center">
+            <input type="text" class="input-search" placeholder="Search ad accounts" name="ad_acc_name" 
+            value="{{ topups.ad_account.name }}" aria-label="Ad Account Name" autocomplete="off" />
+
+            <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+                Search
+            </button>
+        </form>
         </div>
       </div>
       <div class="table-responsive">
