@@ -154,7 +154,155 @@ body {
     outline: 2px solid #0d6efd;
 }
 
+
+.step-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 40px 20px;
+        }
+        
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 12px;
+        }
+        
+        .step-circle.active {
+            background-color: #0d6efd;
+        }
+        
+        .step-circle.inactive {
+            background-color: #e9ecef;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: #6c757d;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .step-label.active {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        
+        .step-connector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: 1;
+        }
+        
+        .step-item:last-child .step-connector {
+            display: none;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .step-progress {
+                padding: 20px 10px;
+            }
+            
+            .step-circle {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+            
+            .step-label {
+                font-size: 12px;
+            }
+            
+            .step-connector {
+                top: 17px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .step-label {
+                font-size: 11px;
+                max-width: 80px;
+            }
+        }
+
+.bank-option.selected {
+    outline: 2px solid #0d6efd;
+}
+
 .step-circle.active {
     background-color: #0d6efd;
     color: #fff;
+}
+
+.upload-area {
+            border: 2px dashed #6c757d;
+            border-radius: 0.375rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+        .upload-icon {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        .form-section {
+            background: white;
+        }
+        .amount-display {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #198754;
+        }
+        .rate-info {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        .container-custom {
+            max-width: 900px;
+        }
+
+
+.bank-option.selected {
+    outline: 2px solid #0d6efd;
+}
+
+.step-circle.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.vertical-line {
+    border-left: 1px solid #dee2e6;
 }
