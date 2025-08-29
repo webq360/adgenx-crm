@@ -1,5 +1,4 @@
 import os
-from decimal import Decimal
 from dotenv import load_dotenv
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
@@ -65,9 +64,9 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
         for field in ['spend_cap', 'amount_spent']:
             if field in info:
                 try:
-                    info[field] = Decimal(info[field]) / 100
+                    info[field] = float(info[field]) / 100
                 except (ValueError, TypeError):
-                    info[field] = Decimal(0)
+                    info[field] = 0
         info['balance'] = info.get('spend_cap') - info.get('amount_spent')
         return info
     except Exception as e:

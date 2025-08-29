@@ -190,7 +190,7 @@ def review_topup(request):
         ad_account_info = get_ad_account_info(topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
 
         if topup.amount > ad_account_info.get('amount_spent'):
-            decrease_amount = ad_account_info.get('spend_cap') - topup.amount
+            decrease_amount = ad_account_info.get('spend_cap') - float(topup.amount)
             request  = change_spend_cap(decrease_amount, topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
                                               
         if request and topup.type == 'decrease':
