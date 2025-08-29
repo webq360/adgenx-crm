@@ -17,9 +17,9 @@
         <a type="button" class="btn-filter text-decoration-none">Withdrawals</a>
 
         <div class="ms-auto">
-          <form method="get" accept="{% url 'topup_transactions' %}" class="d-flex align-items-center">
-            <input type="text" class="input-search" placeholder="Search ad accounts" name="ad_acc_name" 
-            value="{{ topups.ad_account.name }}" aria-label="Ad Account Name" autocomplete="off" />
+          <form method="get" accept="{% url 'deposit_transactions' %}" class="d-flex align-items-center">
+            <input type="text" class="input-search" placeholder="Ad Account Name" name="ad_acc_name" 
+            value="" autocomplete="off" />
 
             <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -27,8 +27,9 @@
                 </svg>
                 Search
             </button>
-        </form>
+          </form>
         </div>
+
       </div>
       <div class="table-responsive">
         <table class="table align-middle mb-0">
