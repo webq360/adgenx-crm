@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User, TopupHistory
 from django.contrib import messages
 
-from dashboard.fb_api_reqs import get_ad_account_info
+from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
 
 
 @login_required(login_url='auth')
@@ -187,13 +187,19 @@ def review_topup(request):
     if request.method == 'POST':
         topup_id = request.POST.get('topup_id')
         topup = get_object_or_404(TopupHistory, id=topup_id)
-        if topup.type == 'decrease':
+        ad_account_info = get_ad_account_info(topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
+
+        if topup.amount > ad_account_info.get('amount_spent'):
+            decrease_amount = ad_account_info.get('spend_cap') - topup.amount
+            request  = change_spend_cap(decrease_amount, topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
+                                              
+        if request and topup.type == 'decrease':
             user = topup.ad_account.user
             wallet = Wallet.objects.get(user=user)
             wallet.balance += topup.amount
             wallet.save()
-        topup.status = 'approved'
-        topup.save()
+            topup.status = 'approved'
+            topup.save()
 
     pending_topups = TopupHistory.objects.filter(status='pending').order_by('-date')
     return render(request, 'review_topup.html', {'topups': pending_topups})
