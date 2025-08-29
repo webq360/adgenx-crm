@@ -102,10 +102,20 @@ def auth(request):
         if action == 'login':
             email = request.POST.get('email')
             password = request.POST.get('password')
+
+            if not email or not password:
+                messages.error(request, 'Please provide both email and password.')
+                return redirect('auth')
+
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, f'Welcome back, {user.first_name}!')
                 return redirect('index')
+            else:
+                messages.error(request, 'Invalid email or password.')
+                return redirect('auth')
+
         elif action == 'register':
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
@@ -114,23 +124,36 @@ def auth(request):
             password = request.POST.get('password')
             password2 = request.POST.get('password2')
 
-            if password == password2:
-                if User.objects.filter(email=email).exists():
-                    # Handle existing user
-                    pass
-                else:
-                    user = User.objects.create_user(
-                        username=email, 
-                        email=email, 
-                        password=password, 
-                        first_name=first_name, 
-                        last_name=last_name,
-                        phone_number=phone_number,
-                        is_active=False
-                    )
-                    login(request, user)
-                    Wallet.objects.create(user=user)
-                    return redirect('index')
+            if not all([first_name, last_name, email, phone_number, password, password2]):
+                messages.error(request, 'Please fill in all fields.')
+                return redirect('auth')
+            
+            if len(password) < 8:
+                messages.error(request, 'Password must be at least 8 characters long.')
+                return redirect('auth')
+
+            if password != password2:
+                messages.error(request, 'Passwords do not match.')
+                return redirect('auth')
+
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'User with this email already exists.')
+                return redirect('auth')
+            
+            user = User.objects.create_user(
+                username=email, 
+                email=email, 
+                password=password, 
+                first_name=first_name, 
+                last_name=last_name,
+                phone_number=phone_number,
+                is_active=False
+            )
+            # login(request, user) # It's better to have the user log in after activation
+            Wallet.objects.create(user=user)
+            messages.success(request, 'Registration successful! Please wait for admin approval.')
+            return redirect('auth')
+
     return render(request, 'auth.html')
 
 @login_required(login_url='auth')
