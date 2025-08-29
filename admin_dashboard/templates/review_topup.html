@@ -53,7 +53,9 @@
                 <form action="{% url 'admin_dashboard:review_topup' %}" method="post">
                   <input type="hidden" name="topup_id" value="{{ topup.id }}">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-sm btn-success">Approve</button>
+
+                  <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
+                  <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger">Delete</button>
                 </form>
               </td>
             </tr>
