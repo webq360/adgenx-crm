@@ -172,7 +172,15 @@ def deposit_transactions(request):
         transactions = DepositTransaction.objects.all().order_by('-created_at')
     else:
         transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'transactions.html', {'transactions': transactions})
+    return render(request, 'deposit_transactions.html', {'transactions': transactions})
+
+@login_required(login_url='auth')
+def topup_transactions(request):
+    if request.user.is_staff:
+        topups = TopupHistory.objects.all().order_by('-date')
+    else:
+        topups = topups = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
+    return render(request, 'topup_transactions.html', {'topups': topups})
 
 @login_required(login_url='auth')
 def request_ad_account(request):
