@@ -13,3 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     });
 });
+
+const developer_info = () => {
+  const info = {
+        'name': 'Md Jowel',
+        'github': 'https://github.com/mohammad-jowel',
+        'linkedin': 'https://www.linkedin.com/in/md-jowel-539775251/'
+    };
+    console.log(info);
+};
