@@ -275,7 +275,7 @@ def topup(request):
                     
                 request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None)
                 if not request:
-                    return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})  
+                    return JsonResponse({'success': False, 'error': 'Topup failed.'})  
                 wallet.balance -= Decimal(amount)
                 wallet.save()
                 TopupHistory.objects.create(
