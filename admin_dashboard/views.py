@@ -110,7 +110,7 @@ def ad_account_details(request, ad_account_id):
         elif action == 'delete':
             ad_account.delete()
             messages.success(request, 'Ad account has been deleted.')
-            return redirect('admin_dashboard:all_ad_accounts')
+            return redirect('ad_accounts')
 
         return redirect('admin_dashboard:ad_account_details', ad_account_id=ad_account.id)
 
