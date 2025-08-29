@@ -184,22 +184,43 @@ def manage_user(request):
 def review_topup(request):
     if not request.user.is_staff:
         return redirect('index')
+
     if request.method == 'POST':
         topup_id = request.POST.get('topup_id')
         topup = get_object_or_404(TopupHistory, id=topup_id)
+        
         ad_account_info = get_ad_account_info(topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
+        
+        balance = float(ad_account_info.get('balance'))
+        spend_cap = float(ad_account_info.get('spend_cap'))
+        topup_amount = float(topup.amount)
 
-        if topup.amount > ad_account_info.get('amount_spent'):
-            decrease_amount = ad_account_info.get('spend_cap') - float(topup.amount)
-            response  = change_spend_cap(decrease_amount, topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
-                                              
-        if response and topup.type == 'decrease':
-            user = topup.ad_account.user
-            wallet = Wallet.objects.get(user=user)
-            wallet.balance += topup.amount
-            wallet.save()
-            topup.status = 'approved'
-            topup.save()
+        # Check if the topup is for a decrease and makes sense
+        if topup.type == 'decrease' and topup_amount < balance:
+            
+            new_spend_cap = spend_cap - topup_amount
+            
+            if new_spend_cap:
+                res = change_spend_cap(new_spend_cap, topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
+
+                if res:
+                    # If API call is successful, update local records
+                    user = topup.ad_account.user
+                    wallet = Wallet.objects.get(user=user)
+                    wallet.balance += topup.amount # Keep Decimal for wallet
+                    wallet.save()
+                    
+                    topup.status = 'approved'
+                    topup.save()
+                else:
+                    messages.error(request, "Failed to update spend cap via API.")
+            else:
+                messages.error(request, "Decrease amount is larger than the current spend cap.")
+        else:
+            messages.info(request, "Top-up request could not be processed.")
+
+        return redirect('admin_dashboard:review_topup')
+
 
     pending_topups = TopupHistory.objects.filter(status='pending').order_by('-date')
     return render(request, 'review_topup.html', {'topups': pending_topups})
