@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User
+from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User, TopupHistory
 from django.contrib import messages
 
 from dashboard.fb_api_reqs import get_ad_account_info
@@ -179,3 +179,21 @@ def manage_user(request):
     
     all_users = User.objects.filter(is_staff=False)
     return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'all_users': all_users})
+
+@login_required(login_url='auth')
+def review_topup(request):
+    if not request.user.is_staff:
+        return redirect('index')
+    if request.method == 'POST':
+        topup_id = request.POST.get('topup_id')
+        topup = get_object_or_404(TopupHistory, id=topup_id)
+        if topup.type == 'decrease':
+            user = topup.ad_account.user
+            wallet = Wallet.objects.get(user=user)
+            wallet.balance += topup.amount
+            wallet.save()
+        topup.status = 'approved'
+        topup.save()
+
+    pending_topups = TopupHistory.objects.filter(status='pending').order_by('-date')
+    return render(request, 'review_topup.html', {'topups': pending_topups})

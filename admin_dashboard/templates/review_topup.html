@@ -1,0 +1,71 @@
+
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'transactions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4 px-4">
+    <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Review Top-up Requests</h2>
+    <div class="bg-white rounded-3 p-3 shadow-sm">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <a href="{% url 'admin_dashboard:review_deposit' %}"  type="button" role="button" class="btn-filter text-decoration-none">
+          Deposits
+        </a>
+        <a href="{% url 'admin_dashboard:review_ad_account' %}" type="button" role="button" class="btn-filter text-decoration-none">
+          Ad Accounts
+        </a>
+        <a href="{% url 'admin_dashboard:review_bm_request' %}" type="button" role="button" class="btn-filter text-decoration-none">
+          BM Requests
+        </a>
+        <a href="{% url 'admin_dashboard:review_topup' %}" type="button" role="button" class="btn-filter text-decoration-none active">
+          Top-ups
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.75rem;">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Ad Account</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th class="pe-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for topup in topups %}
+            <tr>
+              <td style="font-size: 0.75rem;">{{ topup.id }}</td>
+              <td style="font-size: 0.75rem;">
+                {% if topup.ad_account %}{{ topup.ad_account.name }}{% else %}N/A{% endif %}
+              </td>
+              <td style="font-size: 0.75rem;">৳{{ topup.amount }}</td>
+              <td style="font-size: 0.75rem;">{{ topup.type|capfirst }}</td>
+              <td><span class="status-{{ topup.status }}">{{ topup.status|capfirst }}</span></td>
+              <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ topup.date|date:"H:i, d M Y" }}</td>
+              <td class="pe-2">
+                <form action="{% url 'admin_dashboard:review_topup' %}" method="post">
+                  <input type="hidden" name="topup_id" value="{{ topup.id }}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center">No pending top-up requests found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
