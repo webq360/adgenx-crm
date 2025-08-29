@@ -20,7 +20,7 @@
       <div class="col-12 col-sm-4">
         <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
           <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="bg-primary p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+            <div class="bg-primary p-2 rounded text-white d-flex align-items-center justify-content-center">
               <i class="fas fa-wallet"></i>
             </div>
             <h2 class="fs-6 fw-semibold mb-0">Wallet Balance</h2>
@@ -32,7 +32,7 @@
       <div class="col-12 col-sm-4">
         <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
           <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="bg-info p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+            <div class="bg-info p-2 rounded text-white d-flex align-items-center justify-content-center">
               <i class="fas fa-percent"></i>
             </div>
             <h2 class="fs-6 fw-semibold mb-0">Current USD Rate</h2>
@@ -44,7 +44,7 @@
       <div class="col-12 col-sm-4">
         <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
           <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="bg-danger p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+            <div class="bg-danger p-2 rounded text-white d-flex align-items-center justify-content-center">
               <i class="fas fa-file-invoice-dollar"></i>
             </div>
             <h2 class="fs-6 fw-semibold mb-0">Pending Deposit</h2>
@@ -90,11 +90,11 @@
               <section class="flex-grow-1 bank-select">
                 <p class="fw-semibold small mb-2">Select Payment Method</p>
                 <div class="d-flex gap-3 mb-3">
-                    <div id="bank-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2 selected" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
+                    <div id="bank-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2 selected fw-semibold fs-6 text-dark">
                         <img src="https://images.seeklogo.com/logo-png/52/1/pubali-bank-plc-logo-png_seeklogo-522683.png" alt="Pubali Bank logo, red and white color with text City Bank" width="48" height="48" />
                         Bank
                     </div>
-                    <div id="binance-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
+                    <div id="binance-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2 fw-semibold fs-6 text-dark">
                       <img src="https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg" alt="Fundlogo, red and white color with text City Bank" width="35" height="35" />
                         Fund Transfer
                     </div>
@@ -113,7 +113,7 @@
               </section>
 
              <!-- Binance Details -->
-              <section id="binance-details" class="bank-details flex-grow-1" style="display: none;">
+              <section id="binance-details" class="bank-details flex-grow-1 d-none">
                 <p class="fw-semibold text-dark mb-2">Fund Transfer Details</p>
                 <p class="mb-1">Hossain54365</p>
                 <p class="fw-semibold mt-3 mb-1">Instructions:</p>
@@ -127,7 +127,7 @@
             </div>
         </div>
 
-        <div id="step-2" style="display: none;">
+        <div id="step-2" class="d-none">
             <div class="row">
                 <div class="col-lg-5">
                     <div class="form-section p-2">
@@ -183,20 +183,20 @@
             </div>
         </div>
 
-        <div id="step-3" style="display: none;">
+        <div id="step-3" class="d-none">
             <div id="final-details-container"></div>
         </div>
 
       </div>
 
       <!-- Tips -->
-      <aside class="tips flex-shrink-0" style="width: 18rem;">
+      <aside class="tips flex-shrink-0 w-25">
         <div class="title">
           <i class="fas fa-lightbulb"></i>
           Tips
         </div>
         <p class="fw-semibold mb-2">Here's how to proceed with your deposit:</p>
-        <ol class="ps-3 mb-2" style="line-height: 1.2;">
+        <ol class="ps-3 mb-2 lh-sm">
           <li>Review the USD rate.</li>
           <li>Select your preferred payment method.</li>
           <li>Check payment details in the deposit wizard.</li>

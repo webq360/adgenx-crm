@@ -12,7 +12,7 @@
         </p>
         <a href="{% url 'deposit' %}" class="btn-add-balance text-decoration-none" role="button" type="button">
             Add Balance 
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem; margin-left: 0.25rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" class="ms-1">
             <path d="M5 12h14m-7-7l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
         </a>
@@ -34,7 +34,7 @@
         </div>
         <div class="status-bar status-green">
         <div class="status-icon bg-success">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
             <path d="M18.364 5.636a9 9 0 11-12.728 0" stroke-linecap="round" stroke-linejoin="round"></path>
             <path d="M12 3v9l3 3" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
@@ -46,7 +46,7 @@
         <div class="value fs-3 p-2">{{ utils.pending_accounts }}</div>
         </div>
         <div class="status-bar status-purple-light">
-        <div class="status-icon bg-purple text-white fw-bold text-center" style="font-size: 0.75rem;">Ad</div>
+        <div class="status-icon bg-purple text-white fw-bold text-center fs-6">Ad</div>
         <div>
             <div>Share &amp; Remove</div>
             <div>Ad Acc Requests</div>
@@ -55,7 +55,7 @@
         </div>
         <div class="status-bar status-purple">
         <div class="status-icon bg-purple text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
             <path d="M9.75 17L15 12.75 9.75 8.5" stroke-linecap="round" stroke-linejoin="round"></path>
             <path d="M15 12.75H3" stroke-linecap="round" stroke-linejoin="round"></path>
             <path d="M19.5 21V3" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -81,7 +81,7 @@
         </div>
         <div class="status-bar status-red-light">
         <div class="status-icon bg-danger">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
             <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"></circle>
             <line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round" stroke-linejoin="round"></line>
             <line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round" stroke-linejoin="round"></line>
@@ -100,7 +100,7 @@
         <div class="col-12 col-sm-6 col-lg-3">
         <div class="card-small">
             <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem; color: #0369a1;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon text-info" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"></rect>
                 <path d="M16 3h-8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
@@ -112,8 +112,8 @@
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
         <div class="card-small">
-            <div class="card-title" style="color: #0891b2;">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+            <div class="card-title text-info">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
                 <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"></circle>
                 <line x1="8" y1="12" x2="16" y2="12" stroke-linecap="round" stroke-linejoin="round"></line>
                 <line x1="12" y1="8" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"></line>
@@ -126,8 +126,8 @@
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
         <div class="card-small">
-            <div class="card-title" style="color: #7c3aed;">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
+            <div class="card-title text-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
                 <path d="M18 12a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round"></path>
                 <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
@@ -139,8 +139,8 @@
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
         <div class="card-small">
-            <div class="card-title" style="color: #15803d;">
-            <div class="bg-success text-white fw-bold text-center rounded me-1 px-1" style="font-size: 0.75rem; width: 1.25rem; height: 1.25rem; line-height: 1.25rem;">Ad</div>
+            <div class="card-title text-success">
+            <div class="bg-success text-white fw-bold text-center rounded me-1 px-1 fs-6" style="width: 1.25rem; height: 1.25rem; line-height: 1.25rem;">Ad</div>
             Active Ad Accounts
             </div>
             <p class="card-value mb-1">{{ utils.active_accounts }}</p>
@@ -161,14 +161,14 @@
                     role="button">
                     Create Ad Account
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24" aria-hidden="true" style="width: 1rem; height: 1rem;">
+                        viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
                         <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </a>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table table-borderless align-middle mb-0" style="font-size: 0.75rem;">
+            <table class="table table-borderless align-middle mb-0 fs-6">
                 <thead class="bg-light border border-secondary-subtle">
                     <tr>
                         <th class="border border-secondary-subtle">Ad Account</th>
@@ -190,7 +190,7 @@
                             <!--ad_account name-->
                             <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
                             <!--ad_account_id-->
-                            <p class="text-secondary mb-0" style="line-height: 1.2;">
+                            <p class="text-secondary mb-0 lh-sm">
                                 id - {{ ad_account.acc_id }}<br />
                                 <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer"
                                     class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
