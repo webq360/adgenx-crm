@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount
+from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from django.contrib import messages
 from django.http import JsonResponse
 import json
@@ -232,6 +232,11 @@ def topup(request):
                     return JsonResponse({'success': False, 'error': 'Failed to update spend cap.'})  
                 wallet.balance -= Decimal(amount)
                 wallet.save()
+                TopupHistory.objects.create(
+                    ad_account = ad_account,
+                    amount = amount,
+                    status = 'approved'
+                )
                 return JsonResponse({'success': True})
             else:
                 return JsonResponse({'success': False, 'error': 'Insufficient balance.'})

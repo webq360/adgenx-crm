@@ -80,3 +80,23 @@ class AdminBM(models.Model):
 
     def __str__(self):
         return self.acc_name
+
+
+class TopupHistory(models.Model):
+    TOPUP_TYPES = [
+        ('increase', 'Increase'),
+        ('decrease', 'Decrease'),
+    ]
+    TOPUP_STATUSES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+    ]
+
+    ad_account = models.ForeignKey(AdAccount, on_delete=models.CASCADE, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    type = models.CharField(max_length=10, choices=TOPUP_TYPES, default='increase')
+    status = models.CharField(max_length=10, choices=TOPUP_STATUSES, default='pending')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Topup for {self.ad_account.name} - {self.amount} ({self.type})"
