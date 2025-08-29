@@ -168,15 +168,15 @@ def deposit(request):
 
 @login_required(login_url='auth')
 def deposit_transactions(request):
-    transactions_id = request.GET.get('id')
+    trx_id = request.GET.get('trx_id')
     if request.user.is_staff:
-        if transactions_id:
-            transactions = DepositTransaction.objects.filter(id=transactions_id).order_by('-created_at')
+        if trx_id:
+            transactions = DepositTransaction.objects.filter(trx_id=trx_id).order_by('-created_at')
         else:
             transactions = DepositTransaction.objects.all().order_by('-created_at')
     else:
-        if transactions_id:
-            transactions = DepositTransaction.objects.filter(id=id, user=request.user).order_by('-created_at')
+        if trx_id:
+            transactions = DepositTransaction.objects.filter(trx_id=trx_id, user=request.user).order_by('-created_at')
         else:
             transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'deposit_transactions.html', {'transactions': transactions})
