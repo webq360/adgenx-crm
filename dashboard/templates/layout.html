@@ -123,6 +123,18 @@
         </div>
     </header>
 
+    
+    {% if messages %}
+    <div style="position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 1050; min-width: 250px;">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 
