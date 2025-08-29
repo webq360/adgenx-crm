@@ -145,11 +145,13 @@ def manage_user(request):
 
     user_to_manage = None
     wallet = None
+    ad_accounts =None
     username = request.GET.get('username')
     if username:
         try:
             user_to_manage = User.objects.get(username=username, is_staff=False)
             wallet = Wallet.objects.get(user=user_to_manage)
+            ad_accounts = AdAccount.objects.filter(user=user_to_manage)
         except User.DoesNotExist:
             messages.error(request, f"Normal user with username '{username}' not found.")
         except Wallet.DoesNotExist:
@@ -178,7 +180,7 @@ def manage_user(request):
         return redirect(f'/admin_dashboard/manage_user/')
     
     all_users = User.objects.filter(is_staff=False)
-    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'all_users': all_users})
+    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'ad_accounts':ad_accounts, 'all_users': all_users})
 
 @login_required(login_url='auth')
 def review_topup(request):

@@ -39,6 +39,7 @@
               <div class="mb-3">
                 <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
                 <p><strong>Whatsapp Number:</strong> {{ user_to_manage.phone_number }}</p>
+                <p><strong>Wllet Balance:</strong>{% if wallet %} {{ wallet.balance }}{% endif %}</p>
               </div>
               <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if user_to_manage.is_active %}checked{% endif %}>
@@ -55,6 +56,16 @@
             </form>
           {% elif request.GET.username %}
             <p>User not found.</p>
+          {% endif %}
+          {% if user_to_manage %}
+          <p>Add Accounts</p>
+          <ul>
+            {% for ad_account in ad_accounts %}
+            <li>
+              <a href="{% url 'ad_accounts' %}?search={{ ad_account.name }}">{{ ad_account.name }}</a>
+            </li>
+            {% endfor %}
+          </ul>
           {% endif %}
         </div>
       </div>
