@@ -13,4 +13,5 @@ urlpatterns = [
     path('topup/', views.topup, name='topup'),
     path('request_bm_account/', views.request_bm_account, name='request_bm_account'),
     path('remove_bm_account_request/', views.remove_bm_account_request, name='remove_bm_account_request'),
+    path('request_decrease_limit/', views.request_decrease_limit, name='request_decrease_limit'),
 ]

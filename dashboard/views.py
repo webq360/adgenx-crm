@@ -269,6 +269,28 @@ def topup(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 @login_required(login_url='auth')
+def request_decrease_limit(request):
+    if request.method == 'POST':
+        ad_account_id = request.POST.get('ad_account_id')
+        amount = request.POST.get('amount')
+
+        try:
+            amount = float(amount)
+            ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
+
+            TopupHistory.objects.create(
+                ad_account=ad_account,
+                amount=amount,
+                type='decrease',
+                status='pending'
+            )
+            return JsonResponse({'success': True})
+        except (ValueError, AdAccount.DoesNotExist) as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+@login_required(login_url='auth')
 def request_bm_account(request):
     if request.method == 'POST':
         ad_account_id = request.POST.get('ad_account_id')
