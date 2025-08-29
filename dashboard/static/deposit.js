@@ -47,7 +47,7 @@ const updateStepUI = () => {
 
 const validateStep2 = () => {
     const bdt = parseInt(bdtAmount.value);
-    if (bdtAmount.value && txId.value && !isNaN(bdt) && bdt >= 100 && bdt <= 1000000) {
+    if (bdtAmount.value && txId.value && !isNaN(bdt) && bdt >= 100 && bdt <= 9000000) {
         nextButton2.disabled = false;
     } else {
         nextButton2.disabled = true;
@@ -86,7 +86,7 @@ bdtAmount.addEventListener('input', () => {
     const bdt = parseInt(amount); // Use parseInt for raw numbers
     const dollarRate = parseFloat(bdtAmount.dataset.dollarRate);
 
-    if (!isNaN(bdt) && bdt >= 100 && bdt <= 1000000 && dollarRate > 0) {
+    if (!isNaN(bdt) && bdt >= 100 && bdt <= 9000000 && dollarRate > 0) {
         const usdAmount = (bdt / dollarRate).toFixed(2);
         amountDisplay.textContent = `${usdAmount}`;
         document.getElementById('hidden-usd-amount').value = usdAmount;
