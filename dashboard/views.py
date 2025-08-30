@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from django.contrib import messages
 from django.http import JsonResponse
-import json
+from django.db.models import Sum
 
+from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
 
 # Create your views here.
@@ -14,10 +14,12 @@ def get_utils(user):
     pending_deposits = DepositTransaction.objects.filter(user=user, status='pending').count()
     pending_accounts = AdAccount.objects.filter(user=user, status='inactive').count()
     active_accounts = AdAccount.objects.filter(user=user, status='active').count()
+    total_approved_deposit = DepositTransaction.objects.filter(user=user, status='approved').aggregate(total=Sum('usd_amount'))['total'] or 0
     return {
         'pending_deposits': pending_deposits,
         'pending_accounts': pending_accounts,
         'active_accounts': active_accounts,
+        'total_approved_deposit': total_approved_deposit,
     }
 
 def get_processed_ad_accounts_data(ad_accounts_qs):
