@@ -67,7 +67,7 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
                     info[field] = round(float(info[field]) / 100, 2)
                 except (ValueError, TypeError):
                     info[field] = 0
-        info['balance'] = info.get('spend_cap') - info.get('amount_spent')
+        info['balance'] = round(info.get('spend_cap') - info.get('amount_spent'), 2)
         return info
     except Exception as e:
         print(f'Error getting ad account info:{ad_account_id}', e)
