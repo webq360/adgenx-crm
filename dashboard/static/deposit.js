@@ -47,7 +47,7 @@ const updateStepUI = () => {
 
 const validateStep2 = () => {
     const bdt = parseInt(bdtAmount.value);
-    if (bdtAmount.value && txId.value && !isNaN(bdt) && bdt >= 100 && bdt <= 9000000) {
+    if (bdtAmount.value && txId.value && !isNaN(bdt) && bdt >= 100 && bdt <= 9000000 && receiptFile.files.length > 0) {
         nextButton2.disabled = false;
     } else {
         nextButton2.disabled = true;
@@ -104,6 +104,13 @@ bdtAmount.addEventListener('input', () => {
 });
 
 txId.addEventListener('input', validateStep2);
+
+receiptFile.addEventListener('change', () => {
+    if (receiptFile.files.length > 0) {
+        uploadText.textContent = receiptFile.files[0].name;
+    }
+    validateStep2();
+});
 
 nextButton2.addEventListener('click', () => {
     paymentDetails.bdt_amount = bdtAmount.value;
@@ -178,10 +185,4 @@ nextButton2.addEventListener('click', () => {
 backButton2.addEventListener('click', () => {
     currentStep = 1;
     updateStepUI();
-});
-
-receiptFile.addEventListener('change', () => {
-    if (receiptFile.files.length > 0) {
-        uploadText.textContent = receiptFile.files[0].name;
-    }
 });
