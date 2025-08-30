@@ -72,8 +72,6 @@
                         <td class="border border-secondary-subtle">
                             <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
                         </td>
-                        
-                        {% if not request.user.is_staff %}
                         <td class="border border-secondary-subtle text-center">
                             <div class="dropup">
                                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"strategy":"fixed"}'>
@@ -91,19 +89,17 @@
                                     <li><a href="{% url 'topup_transactions' %}?ad_acc_name={{ ad_account.name }}" 
                                         class="dropdown-item text-decoration-none">Topup History
                                     </a></li>
+                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#decreaseLimitModal" data-ad-account-id="{{ ad_account.id }}">Decrease Limit</button></li>
                                 </ul>
                             </div>
                         </td>
+                        {% if not request.user.is_staff %}
                         <td class="border border-secondary-subtle">
                             <button type="button" class="btn-topup" data-bs-toggle="modal" data-bs-target="#topupModal"
                                 data-ad-account-id="{{ ad_account.id }}">
                                 Top Up
                             </button>
                         </td>
-                        {% else %}
-                            <td class="border border-secondary-subtle text-center">
-                                <a href="{% url 'admin_dashboard:ad_account_details' ad_account.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
-                            </td>
                         {% endif %}
                     </tr>
                     {% empty %}
@@ -195,6 +191,33 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Decrease Limit Modal -->
+<div class="modal fade" id="decreaseLimitModal" tabindex="-1" aria-labelledby="decreaseLimitModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="decreaseLimitModalLabel">Request Decrease Limit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="decrease-limit-form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="ad_account_id" id="decrease-ad-account-id">
+                    <div id="decrease-limit-message" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="decrease-amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="decrease-amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Send Request</button>
                 </div>
             </form>
         </div>
@@ -336,6 +359,41 @@
         } else {
             removeBmAccountMessage.innerHTML = `Error: ${result.error}`;
             removeBmAccountMessage.style.color = 'red';
+        }
+    });
+
+    const decreaseLimitModal = document.getElementById('decreaseLimitModal');
+    const decreaseLimitMessage = document.getElementById('decrease-limit-message');
+
+    decreaseLimitModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const adAccountId = button.getAttribute('data-ad-account-id');
+        const adAccountIdInput = decreaseLimitModal.querySelector('#decrease-ad-account-id');
+        adAccountIdInput.value = adAccountId;
+        decreaseLimitMessage.innerHTML = ''; // Clear previous messages
+        decreaseLimitModal.querySelector('#decrease-amount').value = ''; // Clear previous amount
+    });
+
+    const decreaseLimitForm = document.getElementById('decrease-limit-form');
+    decreaseLimitForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(decreaseLimitForm);
+        const response = await fetch('{% url "request_decrease_limit" %}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            decreaseLimitMessage.innerHTML = 'Decrease limit request sent successfully!';
+            decreaseLimitMessage.style.color = 'green';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            decreaseLimitMessage.innerHTML = `Error: ${result.error}`;
+            decreaseLimitMessage.style.color = 'red';
         }
     });
 </script>
