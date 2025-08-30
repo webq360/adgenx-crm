@@ -126,7 +126,7 @@ nextButton2.addEventListener('click', () => {
             <div class="col-md-6 px-3 px-md-4 py-3 py-md-4">
               <p class="small fw-semibold mb-2">${paymentDetails.payment_method === 'bank' ? 'Bank' : 'Fund Transter'}</p>
               <div class="d-flex align-items-start mb-3">
-                <img alt="" src="${paymentDetails.payment_method === 'bank' ? 'https://images.seeklogo.com/logo-png/52/1/pubali-bank-plc-logo-png_seeklogo-522683.png' : 'https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg'}" width="40" height="40" class="me-3" />
+                <img loading="lazy" alt="" src="${paymentDetails.payment_method === 'bank' ? 'https://images.seeklogo.com/logo-png/52/1/pubali-bank-plc-logo-png_seeklogo-522683.png' : 'https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg'}" width="40" height="40" class="me-3" />
                 <div class="small lh-sm">
                   <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'Pubali bank Limited' : ''}</p>
                   <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'RIFAT HOSSAIN' : ''}</p>

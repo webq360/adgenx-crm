@@ -26,7 +26,7 @@
           {% if transaction.receipt %}
           <p><strong>Receipt:</strong></p>
           <a href="{{ transaction.receipt.url }}" target="_blank">
-            <img src="{{ transaction.receipt.url }}" alt="Receipt" class="img-fluid" style="max-height: 300px;">
+            <img src="{{ transaction.receipt.url }}" alt="Receipt" class="img-fluid" loading="lazy" style="max-height: 300px;">
           </a>
           {% else %}
           <p><strong>Receipt:</strong> N/A</p>
