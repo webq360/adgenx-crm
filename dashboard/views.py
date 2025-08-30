@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
@@ -174,6 +177,15 @@ def deposit(request):
         receipt = request.FILES.get('receipt')
         usd_amount = request.POST.get('usd_amount')
 
+        if receipt:
+            img = Image.open(receipt)
+            img.thumbnail((800, 800))
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=85)
+            receipt = InMemoryUploadedFile(
+                buffer, None, receipt.name, 'image/jpeg', buffer.getbuffer().nbytes, None
+            )
+
         try:
             deposit_transaction = DepositTransaction.objects.create(
                 user=request.user,
@@ -190,7 +202,7 @@ def deposit(request):
             return redirect('index') # Redirect to transactions page after successful submission
         except Exception as e:
             messages.error(request, f'Error submitting deposit request: {e}')
-            return redirect('deposit', {'wallet': wallet, 'utils':utils}) # Redirect back to deposit page on error
+            return redirect('deposit')
         
     return render(request, 'deposit.html', {'wallet': wallet, 'utils':utils})
 
@@ -261,7 +273,6 @@ def request_ad_account(request):
         messages.success(request, 'Ad account request submitted successfully!')
         return redirect('index')
     return render(request, 'request_ad_account.html')
-
 
 
 def logout_view(request):
