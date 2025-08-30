@@ -64,7 +64,7 @@ def get_ad_account_info(ad_account_id, admin_bm_id):
         for field in ['spend_cap', 'amount_spent']:
             if field in info:
                 try:
-                    info[field] = float(info[field]) / 100
+                    info[field] = round(float(info[field]) / 100, 2)
                 except (ValueError, TypeError):
                     info[field] = 0
         info['balance'] = info.get('spend_cap') - info.get('amount_spent')
