@@ -23,7 +23,7 @@
         <nav class="nav flex-column mt-3 px-3 gap-2" aria-label="Main Menu">
 
         {% if not request.user.is_staff %}
-        <a href="{% url 'index' %}" class="nav-link active d-flex align-items-center gap-2" aria-current="page">
+        <a href="{% url 'index' %}" class="nav-link d-flex align-items-center gap-2" aria-current="page">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="3" y="3" width="7" height="7" rx="1" ry="1"></rect>
             <rect x="14" y="3" width="7" height="7" rx="1" ry="1"></rect>
@@ -52,6 +52,16 @@
         {% endif %}
         
         {% if request.user.is_staff %}
+        <a href="{% url 'admin_dashboard:admin_overview' %}" class="nav-link d-flex align-items-center gap-2" aria-current="page">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" ry="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1" ry="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1" ry="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1" ry="1"></rect>
+            </svg>
+            Overview
+        </a>
+
         <a href="{% url 'admin_dashboard:review_deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
             <path d="M18.364 5.636a9 9 0 11-12.728 0" stroke-linecap="round" stroke-linejoin="round"></path>

@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User, TopupHistory
 from django.contrib import messages
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import timedelta
 
 from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
 
@@ -228,3 +231,48 @@ def review_topup(request):
 
     pending_topups = TopupHistory.objects.filter(status='pending').order_by('-date')
     return render(request, 'review_topup.html', {'topups': pending_topups})
+
+@login_required(login_url='auth')
+def admin_overview(request):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    period = request.GET.get('period', 'daily') # Changed default to 'daily'
+    end_date = timezone.now()
+    start_date = None
+
+    if period == 'daily':
+        start_date = end_date - timedelta(days=1)
+    elif period == 'weekly':
+        start_date = end_date - timedelta(weeks=1)
+    elif period == 'monthly':
+        start_date = end_date - timedelta(days=30)
+
+    # System-wide stats
+    pending_deposits = DepositTransaction.objects.filter(status='pending').count()
+    pending_accounts = AdAccount.objects.filter(status='inactive').count()
+    active_accounts = AdAccount.objects.filter(status='active').count()
+
+    # Filtered and aggregated data
+    deposit_qs = DepositTransaction.objects.filter(status='approved', created_at__gte=start_date)
+    topup_qs = TopupHistory.objects.filter(status='approved', type='increase', date__gte=start_date)
+
+    total_bdt_deposit = deposit_qs.aggregate(total=Sum('bdt_amount'))['total'] or 0
+    total_usd_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
+    total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
+
+    utils = {
+        'pending_deposits': pending_deposits,
+        'pending_accounts': pending_accounts,
+        'active_accounts': active_accounts,
+    }
+
+    context = {
+        'utils': utils,
+        'total_bdt_deposit': total_bdt_deposit,
+        'total_usd_deposit': total_usd_deposit,
+        'total_topup_increase': total_topup_increase,
+        'period': period,
+    }
+
+    return render(request, 'admin_overview.html', context)

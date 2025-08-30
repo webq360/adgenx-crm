@@ -4,6 +4,7 @@ from . import views
 app_name = 'admin_dashboard'
 
 urlpatterns = [
+    path('overview/', views.admin_overview, name='admin_overview'),
     path('review/deposit/', views.review_deposit, name='review_deposit'),
     path('review/deposit/<int:transaction_id>/', views.review_deposit_details, name='review_deposit_details'),
     path('review/ad_account/', views.review_ad_account, name='review_ad_account'),
