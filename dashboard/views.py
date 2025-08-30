@@ -4,9 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
-from PIL import Image
-from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
@@ -176,15 +173,6 @@ def deposit(request):
         tx_id = request.POST.get('tx_id')
         receipt = request.FILES.get('receipt')
         usd_amount = request.POST.get('usd_amount')
-
-        if receipt:
-            img = Image.open(receipt)
-            img.thumbnail((800, 800))
-            buffer = BytesIO()
-            img.save(buffer, format='JPEG', quality=85)
-            receipt = InMemoryUploadedFile(
-                buffer, None, receipt.name, 'image/jpeg', buffer.getbuffer().nbytes, None
-            )
 
         try:
             deposit_transaction = DepositTransaction.objects.create(
