@@ -51,7 +51,7 @@
               <td class="text-secondary">{{ topup.date|date:"H:i, d M Y" }}</td>
               <td class="fs-6" >
                 {% if request.user.is_staff %}
-                    <a href="{% url 'admin_dashboard:ad_account_details' topup.ad_account.id %}">
+                    <a href="{% url 'ad_accounts' %}?search={{ topup.ad_account.name }}">
                         {{ topup.ad_account.name }}
                     </a>
                 {% else %}

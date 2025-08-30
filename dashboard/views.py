@@ -197,16 +197,19 @@ def deposit(request):
 @login_required(login_url='auth')
 def deposit_transactions(request):
     trx_id = request.GET.get('trx_id')
+    email = request.GET.get('email')
+    
     if request.user.is_staff:
+        transactions = DepositTransaction.objects.all().order_by('-created_at')
         if trx_id:
-            transactions = DepositTransaction.objects.filter(trx_id=trx_id).order_by('-created_at')
-        else:
-            transactions = DepositTransaction.objects.all().order_by('-created_at')
+            transactions = transactions.filter(trx_id=trx_id)
+        if email:
+            transactions = transactions.filter(user__email__icontains=email)
     else:
+        transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
         if trx_id:
-            transactions = DepositTransaction.objects.filter(trx_id=trx_id, user=request.user).order_by('-created_at')
-        else:
-            transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
+            transactions = transactions.filter(trx_id=trx_id)
+
     return render(request, 'deposit_transactions.html', {'transactions': transactions})
 
 @login_required(login_url='auth')

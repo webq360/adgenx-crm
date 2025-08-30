@@ -43,7 +43,9 @@
             <tr>
               <td style="font-size: 0.75rem;">{{ topup.id }}</td>
               <td style="font-size: 0.75rem;">
-                {% if topup.ad_account %}{{ topup.ad_account.name }}{% else %}N/A{% endif %}
+                <a href="{% url 'ad_accounts' %}?search={{ topup.ad_account.name }}" class="text-decoration-none">
+                    {{ topup.ad_account.name }}
+                </a>
               </td>
               <td style="font-size: 0.75rem;">৳{{ topup.amount }}</td>
               <td style="font-size: 0.75rem;">{{ topup.type|capfirst }}</td>
