@@ -66,7 +66,7 @@ def get_processed_ad_accounts_data(ad_accounts_qs):
 @login_required(login_url='auth')
 def index(request):
     if request.user.is_staff:
-        return redirect('admin_dashboard:review_deposit')  # Redirect staff to review deposits
+        return redirect('admin_dashboard:admin_overview')
     wallet = Wallet.objects.get(user=request.user)
     ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
     
@@ -158,6 +158,9 @@ def auth(request):
 
 @login_required(login_url='auth')
 def deposit(request):
+    if request.user.is_staff:
+        return redirect('admin_dashboard:admin_overview')
+    
     wallet = Wallet.objects.get(user=request.user)
     utils = get_utils(request.user)
     if request.method == 'POST':
@@ -222,6 +225,9 @@ def topup_transactions(request):
 
 @login_required(login_url='auth')
 def request_ad_account(request):
+    if request.user.is_staff:
+        return redirect('admin_dashboard:admin_overview')
+    
     if request.method == 'POST':
         name = request.POST.get('accountName')
         bm_client_id = request.POST.get('bmId')
