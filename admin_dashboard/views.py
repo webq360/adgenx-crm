@@ -95,6 +95,7 @@ def ad_account_details(request, ad_account_id):
             bm_account_id = action.split('_')[-1]
             bm_account = get_object_or_404(BMAccount, id=bm_account_id)
             ad_account.bm_accounts.remove(bm_account)
+            bm_account.delete()
             messages.success(request, 'BM account has been removed.')
 
         elif action == 'activate':
