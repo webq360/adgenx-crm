@@ -38,7 +38,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for ad_account in ad_accounts_date %}
+                    {% for ad_account in ad_accounts_data %}
                     <tr class="border border-secondary-subtle align-top">
                         <td class="border border-secondary-subtle">
                             <!--ad_account name-->
@@ -118,9 +118,9 @@
         <div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
             <nav aria-label="Page navigation">
               <ul class="pagination mb-0">
-                {% if ad_accounts_pagination.has_previous %}
+                {% if ad_accountshas_previous %}
                   <li class="page-item">
-                    <a class="page-link" href="?page={{ ad_accounts_pagination.previous_page_number }}" aria-label="Previous">
+                    <a class="page-link" href="?page={{ ad_accountsprevious_page_number }}" aria-label="Previous">
                       <i class="fas fa-chevron-left"></i>
                     </a>
                   </li>
@@ -130,17 +130,17 @@
                   </li>
                 {% endif %}
     
-                {% for i in ad_accounts_pagination.paginator.page_range %}
-                  {% if ad_accounts_pagination.number == i %}
+                {% for i in ad_accountspaginator.page_range %}
+                  {% if ad_accountsnumber == i %}
                     <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
                   {% else %}
                     <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
                   {% endif %}
                 {% endfor %}
     
-                {% if ad_accounts_pagination.has_next %}
+                {% if ad_accountshas_next %}
                   <li class="page-item">
-                    <a class="page-link" href="?page={{ ad_accounts_pagination.next_page_number }}" aria-label="Next">
+                    <a class="page-link" href="?page={{ ad_accountsnext_page_number }}" aria-label="Next">
                       <i class="fas fa-chevron-right"></i>
                     </a>
                   </li>

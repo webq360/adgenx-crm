@@ -40,7 +40,7 @@ def ad_accounts(request):
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_paginated.object_list)
 
     return render(request, 'ad_accounts.html', {
-        'ad_accounts_pagination': ad_accounts_paginated, 
+        'ad_accounts': ad_accounts_paginated, 
         'ad_accounts_data': ad_accounts_data,
         'search_query': search_query
     })
