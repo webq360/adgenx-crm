@@ -119,14 +119,18 @@
                 </svg>
             </button>
             
-            {% if request.user.is_staff %}
+            {% if  request.user.is_staff %}
             <div class="d-flex align-items-center gap-2">
                 <div class="input-group">
                 <input type="number" class="form-control form-control-sm" id="rateInput" placeholder="Rate" aria-label="Rate">
                 <input type="number" class="form-control form-control-sm" id="amountInput" placeholder="Amount" aria-label="Amount">
             </div>
-            {% endif %}
             <div id="resultDisplay" class="fw-bold text-primary">0.00</div>
+            {% else %}
+                <div class="position-relative">
+                    <input type="search" class="input-search" placeholder="Search anything..." aria-label="Search anything" />
+                <div class="position-absolute top-50 end-0 translate-middle-y pe-2 text-secondary small" style="user-select:none;"></div>
+            {% endif %}
             </div>
         </div>
         <div class="topbar-right d-flex align-items-center gap-3 position-relative">
