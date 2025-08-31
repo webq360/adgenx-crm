@@ -8,7 +8,7 @@
 {% block content %}
 
   <div class="container-fluid py-4 px-4">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center w-full">
       <div class="col-md-8">
         <div class="bg-white rounded-3 p-3 shadow-sm">
           <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Manage User</h2>
@@ -74,9 +74,21 @@
               {% csrf_token %}
               <input type="hidden" name="user_id" value="{{ user_to_manage.id }}">
               <div class="mb-3">
-                <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
-                <p><strong>Whatsapp Number:</strong> {{ user_to_manage.phone_number }}</p>
-                <p><strong>Wllet Balance:</strong>{% if wallet %} {{ wallet.balance }}{% endif %}</p>
+                  <div class="row">
+                      <div class="col-md-6">
+                          <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
+                          <p><strong>Whatsapp Number:</strong> {{ user_to_manage.phone_number }}</p>
+                          <p><strong>Wallet Balance:</strong>{% if wallet %} {{ wallet.balance }}{% endif %}</p>
+                      </div>
+                      {% if utils %}
+                      <div class="col-md-6">
+                          <p><strong>Pending Deposits:</strong> {{ utils.pending_deposits }}</p>
+                          <p><strong>Pending Accounts:</strong> {{ utils.pending_accounts }}</p>
+                          <p><strong>Active Accounts:</strong> {{ utils.active_accounts }}</p>
+                          <p><strong>Deposit Amount:</strong> ${{ utils.total_approved_deposit }}</p>
+                      </div>
+                      {% endif %}
+                  </div>
               </div>
               <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if user_to_manage.is_active %}checked{% endif %}>

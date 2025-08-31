@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import timedelta, datetime
 
 from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
-from dashboard.utils import paginate_data
+from dashboard.utils import paginate_data, get_user_utils
 
 
 @login_required(login_url='auth')
@@ -211,12 +211,14 @@ def manage_user(request):
     user_to_manage = None
     wallet = None
     ad_accounts =None
+    utils = None
     username = request.GET.get('username')
     if username:
         try:
             user_to_manage = User.objects.get(username=username, is_staff=False)
             wallet = Wallet.objects.get(user=user_to_manage)
             ad_accounts = AdAccount.objects.filter(user=user_to_manage)
+            utils = get_user_utils(user_to_manage)
         except User.DoesNotExist:
             messages.error(request, f"Normal user with username '{username}' not found.")
         except Wallet.DoesNotExist:
@@ -246,7 +248,7 @@ def manage_user(request):
     
     all_users_list = User.objects.filter(is_staff=False)
     all_users = paginate_data(request, all_users_list, 5)
-    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'ad_accounts':ad_accounts, 'all_users': all_users})
+    return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'ad_accounts':ad_accounts, 'all_users': all_users, 'utils': utils})
 
 @login_required(login_url='auth')
 def review_topup(request):
