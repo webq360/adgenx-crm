@@ -15,8 +15,8 @@ def index(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:admin_overview')
     wallet = Wallet.objects.get(user=request.user)
-    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')[:5]
     
+    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')[:5]
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 
     utils = get_user_utils(request.user)
@@ -36,8 +36,8 @@ def ad_accounts(request):
             name__icontains=search_query
         ).order_by('-start_date')
     
-    ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
-    ad_accounts_paginated = paginate_data(request, ad_accounts_data, 5)
+    ad_accounts_paginated = paginate_data(request, ad_accounts_qs, 5)
+    ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_paginated.object_list)
 
     return render(request, 'ad_accounts.html', {
         'ad_accounts': ad_accounts_paginated, 
