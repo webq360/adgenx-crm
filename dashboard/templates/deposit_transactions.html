@@ -50,6 +50,7 @@
               {% if request.user.is_staff %}
               <th>Transaction ID</th>
               <th>User Info</th>
+              <th>Dollar Rate</th>
               {% endif %}
               <th class="ps-2">Timestamp</th>
               <th>Method</th>
@@ -73,6 +74,7 @@
               <td class="fs-6">
                 {{ transaction.user.first_name }} {{ transaction.user.last_name }} ({{ transaction.user.username }})
               </td>
+              <td class="fs-6">${{ transaction.user_dollar_rate }}</td>
               {% endif %}
               <td class="ps-2 fs-6 text-secondary">{{ transaction.created_at|date:"H:i, d M Y" }}</td>
               <td class="fs-6">{{ transaction.method }}</td>

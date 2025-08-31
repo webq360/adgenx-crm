@@ -155,6 +155,14 @@ def deposit_transactions(request):
             transactions_list = transactions_list.filter(trx_id=trx_id)
         if email:
             transactions_list = transactions_list.filter(user__email__icontains=email)
+        
+        # Fetch wallet dollar rate for each user if staff
+        for transaction in transactions_list:
+            try:
+                wallet = Wallet.objects.get(user=transaction.user)
+                transaction.user_dollar_rate = wallet.dollar_rate
+            except Wallet.DoesNotExist:
+                transaction.user_dollar_rate = 'N/A' # Or handle as appropriate
     else:
         transactions_list = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
         if trx_id:
