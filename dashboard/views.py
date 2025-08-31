@@ -42,7 +42,7 @@ def ad_accounts(request):
     return render(request, 'ad_accounts.html', {
         'ad_accounts': ad_accounts, 
         'search_query': search_query
-    })       
+    })
 
 def auth(request):
     if request.user.is_authenticated:
