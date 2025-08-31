@@ -7,13 +7,15 @@ from django.utils import timezone
 from datetime import timedelta
 
 from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
+from dashboard.utils import paginate_data
 
 
 @login_required(login_url='auth')
 def review_deposit(request):
     if not request.user.is_staff:
         return redirect('index')
-    pending_transactions = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
+    pending_transactions_list = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
+    pending_transactions = paginate_data(request, pending_transactions_list, 5)
     return render(request, 'review_deposit.html', {'transactions': pending_transactions})
 
 @login_required(login_url='auth')
@@ -125,7 +127,8 @@ def review_ad_account(request):
     if not request.user.is_staff:
         return redirect('index')
 
-    pending_ad_accounts = AdAccount.objects.filter(status='inactive').order_by('-start_date')
+    pending_ad_accounts_list = AdAccount.objects.filter(status='inactive').order_by('-start_date')
+    pending_ad_accounts = paginate_data(request, pending_ad_accounts_list, 5)
 
     return render(request, 'review_ad_account.html', {'ad_accounts': pending_ad_accounts})
 
@@ -137,7 +140,8 @@ def review_bm_request(request):
         return redirect('index')
 
     pending_bm_accounts = BMAccount.objects.filter(status='pending')
-    ad_accounts = AdAccount.objects.filter(bm_accounts__in=pending_bm_accounts, status='active').distinct()
+    ad_accounts_list = AdAccount.objects.filter(bm_accounts__in=pending_bm_accounts, status='active').distinct()
+    ad_accounts = paginate_data(request, ad_accounts_list, 5)
 
     return render(request, 'review_bm_request.html', {'ad_accounts': ad_accounts})
 
@@ -183,7 +187,8 @@ def manage_user(request):
         messages.success(request, 'User details updated successfully.')
         return redirect(f'/admin_dashboard/manage_user/')
     
-    all_users = User.objects.filter(is_staff=False)
+    all_users_list = User.objects.filter(is_staff=False)
+    all_users = paginate_data(request, all_users_list, 5)
     return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'ad_accounts':ad_accounts, 'all_users': all_users})
 
 @login_required(login_url='auth')
@@ -230,7 +235,8 @@ def review_topup(request):
 
         return redirect('admin_dashboard:review_topup')
 
-    pending_topups = TopupHistory.objects.filter(status='pending').order_by('-date')
+    pending_topups_list = TopupHistory.objects.filter(status='pending').order_by('-date')
+    pending_topups = paginate_data(request, pending_topups_list, 5)
     return render(request, 'review_topup.html', {'topups': pending_topups})
 
 @login_required(login_url='auth')
