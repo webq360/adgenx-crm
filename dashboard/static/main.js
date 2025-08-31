@@ -12,6 +12,29 @@ document.addEventListener('DOMContentLoaded', function() {
             bsAlert.close();
         }, 5000);
     });
+
+    // Calculator logic
+   const amountInput = document.getElementById('amountInput');
+    const rateInput = document.getElementById('rateInput');
+    const resultDisplay = document.getElementById('resultDisplay');
+
+    function calculateResult() {
+        const amount = parseFloat(amountInput.value);
+        const rate = parseFloat(rateInput.value);
+
+        if (!isNaN(amount) && !isNaN(rate)) {
+            const result = amount * rate;
+            resultDisplay.textContent = `${result.toFixed(2)}`;
+        } else {
+            resultDisplay.textContent = '0.00'; // Set to 0.00 if inputs are invalid
+        }
+    }
+
+    if (amountInput && rateInput && resultDisplay) {
+        amountInput.addEventListener('input', calculateResult);
+        rateInput.addEventListener('input', calculateResult);
+        calculateResult(); // Initial call
+    }
 });
 
 const developer_info = () => {

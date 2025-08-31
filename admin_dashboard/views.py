@@ -72,7 +72,16 @@ def review_deposit(request):
     if not request.user.is_staff:
         return redirect('index')
     pending_transactions_list = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
+    
+    for transaction in pending_transactions_list:
+        try:
+            wallet = Wallet.objects.get(user=transaction.user)
+            transaction.user_dollar_rate = wallet.dollar_rate
+        except Wallet.DoesNotExist:
+            transaction.user_dollar_rate = 'N/A'
+    
     pending_transactions = paginate_data(request, pending_transactions_list, 5)
+    
     return render(request, 'review_deposit.html', {'transactions': pending_transactions})
 
 @login_required(login_url='auth')

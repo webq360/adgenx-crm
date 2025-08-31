@@ -46,6 +46,7 @@
               <td style="font-size: 0.75rem;">{{ transaction.id }}</td>
               <td style="font-size: 0.75rem;">
                 {{ transaction.user.first_name }} {{ transaction.user.last_name }} ({{ transaction.user.username }})
+                {{ transaction.user_dollar_rate }}
               </td>
               {% endif %}
               <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ transaction.created_at|date:"H:i, d M Y" }}</td>
