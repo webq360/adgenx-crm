@@ -3,78 +3,23 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Sum
 
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
+from .utils import paginate_data, get_user_utils, get_processed_ad_accounts_data
 
 # Create your views here.
-
-def get_utils(user):
-    pending_deposits = DepositTransaction.objects.filter(user=user, status='pending').count()
-    pending_accounts = AdAccount.objects.filter(user=user, status='inactive').count()
-    active_accounts = AdAccount.objects.filter(user=user, status='active').count()
-    total_approved_deposit = DepositTransaction.objects.filter(user=user, status='approved').aggregate(total=Sum('usd_amount'))['total'] or 0
-    return {
-        'pending_deposits': pending_deposits,
-        'pending_accounts': pending_accounts,
-        'active_accounts': active_accounts,
-        'total_approved_deposit': total_approved_deposit,
-    }
-
-def get_processed_ad_accounts_data(ad_accounts_qs):
-    ad_accounts_data = []
-    for acc in ad_accounts_qs:
-        if acc.admin_bm and acc.status == 'active':
-            ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.acc_id)
-            if ad_info:
-                acc_balance = ad_info.get('balance', 0)
-                acc_total_spent = ad_info.get('amount_spent', 0)
-                acc_limit = ad_info.get('spend_cap', 0)
-            else:
-                acc_balance = 'N/A'
-                acc_limit = 'N/A'
-                acc_total_spent = 'N/A'
-        else:
-            acc_balance = 'N/A'
-            acc_limit = 'N/A'
-            acc_total_spent = 'N/A'
-
-        bm_accounts_list = []
-        for bm in acc.bm_accounts.all():
-            bm_accounts_list.append({
-                'id': bm.id,
-                'acc_name': bm.acc_name,
-                'acc_id': bm.acc_id,
-                'status': bm.status,
-                'request_type': bm.request_type,
-            })
-
-        ad_accounts_data.append({
-            'id': acc.id,
-            'name': acc.name,
-            'acc_id': acc.acc_id,
-            'acc_link': acc.acc_link,
-            'start_date': str(acc.start_date), # Convert date to string
-            'monthly_budget': str(acc.monthly_budget), # Convert Decimal to string
-            'status': acc.status,
-            'balance': acc_balance,
-            'limit': acc_limit,
-            'total_spent': acc_total_spent,
-            'bm_accounts': bm_accounts_list,
-        })
-    return ad_accounts_data
 
 @login_required(login_url='auth')
 def index(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:admin_overview')
     wallet = Wallet.objects.get(user=request.user)
-    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
+    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')[:5]
     
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 
-    utils = get_utils(request.user)
+    utils = get_user_utils(request.user)
     return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts_data, 'utils': utils})
 
 
@@ -92,8 +37,13 @@ def ad_accounts(request):
         ).order_by('-start_date')
     
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
+    ad_accounts_paginated = paginate_data(request, ad_accounts_data, 5)
 
-    return render(request, 'ad_accounts.html', {'ad_accounts': ad_accounts_data, 'search_query': search_query})       
+    return render(request, 'ad_accounts.html', {
+        'ad_accounts': ad_accounts_paginated, 
+        'ad_accounts_data': ad_accounts_data,
+        'search_query': search_query
+    })       
 
 def auth(request):
     if request.user.is_authenticated:
@@ -164,7 +114,7 @@ def deposit(request):
         return redirect('admin_dashboard:admin_overview')
     
     wallet = Wallet.objects.get(user=request.user)
-    utils = get_utils(request.user)
+    utils = get_user_utils(request.user)
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method').capitalize()
         if payment_method == 'Binance':
@@ -200,16 +150,17 @@ def deposit_transactions(request):
     email = request.GET.get('email')
     
     if request.user.is_staff:
-        transactions = DepositTransaction.objects.all().order_by('-created_at')
+        transactions_list = DepositTransaction.objects.all().order_by('-created_at')
         if trx_id:
-            transactions = transactions.filter(trx_id=trx_id)
+            transactions_list = transactions_list.filter(trx_id=trx_id)
         if email:
-            transactions = transactions.filter(user__email__icontains=email)
+            transactions_list = transactions_list.filter(user__email__icontains=email)
     else:
-        transactions = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
+        transactions_list = DepositTransaction.objects.filter(user=request.user).order_by('-created_at')
         if trx_id:
-            transactions = transactions.filter(trx_id=trx_id)
+            transactions_list = transactions_list.filter(trx_id=trx_id)
 
+    transactions = paginate_data(request, transactions_list, 5)
     return render(request, 'deposit_transactions.html', {'transactions': transactions})
 
 @login_required(login_url='auth')
@@ -217,15 +168,16 @@ def topup_transactions(request):
     ad_acc_name = request.GET.get('ad_acc_name')
     if request.user.is_staff:
         if ad_acc_name:
-            topups = TopupHistory.objects.filter(ad_account__name__icontains=ad_acc_name).order_by('-date')
+            topups_list = TopupHistory.objects.filter(ad_account__name__icontains=ad_acc_name).order_by('-date')
         else:
-            topups = TopupHistory.objects.all().order_by('-date')
+            topups_list = TopupHistory.objects.all().order_by('-date')
     else:
         ad_acc_name = request.GET.get('ad_acc_name')
         if ad_acc_name:
-            topups = TopupHistory.objects.filter(ad_account__name__icontains=ad_acc_name, ad_account__user=request.user).order_by('-date')
+            topups_list = TopupHistory.objects.filter(ad_account__name__icontains=ad_acc_name, ad_account__user=request.user).order_by('-date')
         else:
-            topups = topups = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
+            topups_list = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
+    topups = paginate_data(request, topups_list, 5)
     return render(request, 'topup_transactions.html', {'topups': topups})
 
 @login_required(login_url='auth')
