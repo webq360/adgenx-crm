@@ -4,11 +4,68 @@ from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, A
 from django.contrib import messages
 from django.db.models import Sum
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
 from dashboard.utils import paginate_data
 
+
+@login_required(login_url='auth')
+def admin_overview(request):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if not start_date_str:
+        start_date_str = timezone.now().strftime('%Y-%m-%d')
+
+    start_date, end_date = None, None
+
+    if start_date_str:
+        try:
+            start_date = timezone.make_aware(datetime.strptime(start_date_str, '%Y-%m-%d'))
+            if end_date_str:
+                end_date = timezone.make_aware(datetime.strptime(end_date_str, '%Y-%m-%d')) + timedelta(days=1)
+            else:
+                end_date = start_date + timedelta(days=1)
+        except (ValueError, TypeError):
+            start_date, end_date = None, None
+
+    # System-wide stats
+    pending_deposits = DepositTransaction.objects.filter(status='pending').count()
+    pending_accounts = AdAccount.objects.filter(status='inactive').count()
+    active_accounts = AdAccount.objects.filter(status='active').count()
+
+    # Filtered and aggregated data
+    deposit_qs = DepositTransaction.objects.filter(status='approved')
+    topup_qs = TopupHistory.objects.filter(status='approved', type='increase')
+
+    if start_date:
+        deposit_qs = deposit_qs.filter(created_at__gte=start_date, created_at__lt=end_date)
+        topup_qs = topup_qs.filter(date__gte=start_date, date__lt=end_date)
+
+    total_bdt_deposit = deposit_qs.aggregate(total=Sum('bdt_amount'))['total'] or 0
+    total_usd_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
+    total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
+
+    utils = {
+        'pending_deposits': pending_deposits,
+        'pending_accounts': pending_accounts,
+        'active_accounts': active_accounts,
+    }
+
+    context = {
+        'utils': utils,
+        'total_bdt_deposit': total_bdt_deposit,
+        'total_usd_deposit': total_usd_deposit,
+        'total_topup_increase': total_topup_increase,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+    }
+
+    return render(request, 'admin_overview.html', context)
 
 @login_required(login_url='auth')
 def review_deposit(request):
@@ -238,48 +295,3 @@ def review_topup(request):
     pending_topups_list = TopupHistory.objects.filter(status='pending').order_by('-date')
     pending_topups = paginate_data(request, pending_topups_list, 5)
     return render(request, 'review_topup.html', {'topups': pending_topups})
-
-@login_required(login_url='auth')
-def admin_overview(request):
-    if not request.user.is_staff:
-        return redirect('index')
-
-    period = request.GET.get('period', 'daily') # Changed default to 'daily'
-    end_date = timezone.now()
-    start_date = None
-
-    if period == 'daily':
-        start_date = end_date - timedelta(days=1)
-    elif period == 'weekly':
-        start_date = end_date - timedelta(weeks=1)
-    elif period == 'monthly':
-        start_date = end_date - timedelta(days=30)
-
-    # System-wide stats
-    pending_deposits = DepositTransaction.objects.filter(status='pending').count()
-    pending_accounts = AdAccount.objects.filter(status='inactive').count()
-    active_accounts = AdAccount.objects.filter(status='active').count()
-
-    # Filtered and aggregated data
-    deposit_qs = DepositTransaction.objects.filter(status='approved', created_at__gte=start_date)
-    topup_qs = TopupHistory.objects.filter(status='approved', type='increase', date__gte=start_date)
-
-    total_bdt_deposit = deposit_qs.aggregate(total=Sum('bdt_amount'))['total'] or 0
-    total_usd_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
-    total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
-
-    utils = {
-        'pending_deposits': pending_deposits,
-        'pending_accounts': pending_accounts,
-        'active_accounts': active_accounts,
-    }
-
-    context = {
-        'utils': utils,
-        'total_bdt_deposit': total_bdt_deposit,
-        'total_usd_deposit': total_usd_deposit,
-        'total_topup_increase': total_topup_increase,
-        'period': period,
-    }
-
-    return render(request, 'admin_overview.html', context)
