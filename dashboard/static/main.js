@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.querySelector('[aria-label="Toggle sidebar"]');
+
+    if (sidebar && sidebarToggle) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('show');
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (sidebar.classList.contains('show') && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+            sidebar.classList.remove('show');
+        }
+    });
+
     const alerts = document.querySelectorAll('.alert.alert-dismissible');
     alerts.forEach(function(alert) {
         // Add 'show' class to trigger fade-in
@@ -14,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Calculator logic
-   const amountInput = document.getElementById('amountInput');
+    const amountInput = document.getElementById('amountInput');
     const rateInput = document.getElementById('rateInput');
     const resultDisplay = document.getElementById('resultDisplay');
 

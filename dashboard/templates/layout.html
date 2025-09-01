@@ -113,37 +113,43 @@
     <!-- Topbar -->
     <header class="topbar d-flex justify-content-between align-items-center px-3">
         <div class="topbar-left d-flex align-items-center gap-2">
-            <button type="button" aria-label="Toggle sidebar" class="btn-icon" style="padding: 0.375rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+            <button type="button" aria-label="Toggle sidebar" class="btn btn-outline-secondary btn-toggle-sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="25" viewBox="0 0 50 50" class="btn-toggle-sidebar-svg">
+                <path d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 L 0 7.5 z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 L 0 22.5 z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 L 0 37.5 z"></path>
                 </svg>
             </button>
             
             {% if  request.user.is_staff %}
-            <div class="d-flex align-items-center gap-2">
-                <div class="input-group">
-                <input type="number" class="form-control form-control-sm" id="rateInput" placeholder="Rate" aria-label="Rate">
-                <input type="number" class="form-control form-control-sm" id="amountInput" placeholder="Amount" aria-label="Amount">
+            <div class="d-flex align-items-center gap-2 w-100">
+                <div style="width: 70%;">
+                    <div class="input-group">
+                    <input type="number" class="form-control form-control-sm" id="rateInput" placeholder="Rate" aria-label="Rate">
+                    <input type="number" class="form-control form-control-sm" id="amountInput" placeholder="Amount" aria-label="Amount">
+                </div>
+                </div>
+                <div id="resultDisplay" class="fw-bold text-primary">0.00</div>
+                {% else %}
+                    <div class="position-relative d-none d-sm-block">
+                        <input type="search" class="input-search" placeholder="Search anything..." aria-label="Search anything" />
+                    <div class="position-absolute top-50 end-0 translate-middle-y pe-2 text-secondary small" style="user-select:none;"></div>
+                {% endif %}
+                </div>
             </div>
-            <div id="resultDisplay" class="fw-bold text-primary">0.00</div>
-            {% else %}
-                <div class="position-relative">
-                    <input type="search" class="input-search" placeholder="Search anything..." aria-label="Search anything" />
-                <div class="position-absolute top-50 end-0 translate-middle-y pe-2 text-secondary small" style="user-select:none;"></div>
-            {% endif %}
-            </div>
-        </div>
-        <div class="topbar-right d-flex align-items-center gap-3 position-relative">
+        <div class="topbar-right d-flex align-items-center gap-2 position-relative">
+            {% if not request.user.is_staff %}
             <button type="button" class="btn-support">
-                <i class="fas fa-headphones-alt"></i> Support
+                <i class="fas fa-headphones-alt"></i> <span class="d-none d-sm-inline">Support</span>
             </button>
+            {% endif %}
             <button type="button" aria-label="Notifications" class="btn-icon position-relative">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge"></span>
             </button>
+            {% if not request.user.is_staff %}
             <button type="button" aria-label="User menu" class="avatar">
                 <img loading="lazy" src="https://img.icons8.com/?size=100&id=60655&format=png&color=000000" alt="User profile picture, circular avatar with gray background and text 'User'" />
             </button>
+            {% endif %}
         </div>
     </header>
 
