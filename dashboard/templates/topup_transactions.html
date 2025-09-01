@@ -17,9 +17,9 @@
         <a type="button" class="btn-filter text-decoration-none">Withdrawals</a>
 
         <div class="ms-auto">
-          <form method="get" accept="{% url 'deposit_transactions' %}" class="d-flex align-items-center">
+          <form method="get" action="{% url 'topup_transactions' %}" class="d-flex align-items-center">
             <input type="text" class="input-search" placeholder="Ad Account Name" name="ad_acc_name" 
-            value="" autocomplete="off" />
+            value="{% if ad_acc_name %} {{ ad_acc_name }} {% endif %}" autocomplete="off" />
 
             <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -79,7 +79,7 @@
           <ul class="pagination mb-0">
             {% if topups.has_previous %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ topups.previous_page_number }}" aria-label="Previous">
+                <a class="page-link" href="?page={{ topups.previous_page_number }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" aria-label="Previous">
                   <i class="fas fa-chevron-left"></i>
                 </a>
               </li>
@@ -93,13 +93,13 @@
               {% if topups.number == i %}
                 <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
               {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ i }}</a></li>
               {% endif %}
             {% endfor %}
 
             {% if topups.has_next %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ topups.next_page_number }}" aria-label="Next">
+                <a class="page-link" href="?page={{ topups.next_page_number }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" aria-label="Next">
                   <i class="fas fa-chevron-right"></i>
                 </a>
               </li>

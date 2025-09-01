@@ -19,7 +19,7 @@
         <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
           <form method="get" action="{% url 'deposit_transactions' %}" class="d-flex align-items-center">
             <input type="text" class="input-search" placeholder="Trx Id" name="trx_id" 
-            value="{{ request.GET.trx_id }}" autocomplete="off" />
+            value="{% if trx_id %}{{ trx_id }}{% endif %}" autocomplete="off" />
 
             <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -31,7 +31,7 @@
         {% if request.user.is_staff %}
           <form method="get" action="{% url 'deposit_transactions' %}" class="d-flex align-items-center">
             <input type="text" class="input-search" placeholder="User email" name="email" 
-            value="{{ request.GET.email }}" autocomplete="off" />
+            value="{% if email %}{{ email }}{% endif %}" autocomplete="off" />
 
             <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -115,7 +115,8 @@
           <ul class="pagination mb-0">
             {% if transactions.has_previous %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ transactions.previous_page_number }}" aria-label="Previous">
+                <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}"
+                aria-label="Previous">
                   <i class="fas fa-chevron-left"></i>
                 </a>
               </li>
@@ -129,13 +130,14 @@
               {% if transactions.number == i %}
                 <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
               {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}">{{ i }}</a></li>
               {% endif %}
             {% endfor %}
 
             {% if transactions.has_next %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ transactions.next_page_number }}" aria-label="Next">
+                <a class="page-link" href="?page={{ transactions.next_page_number }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}"
+                aria-label="Next">
                   <i class="fas fa-chevron-right"></i>
                 </a>
               </li>

@@ -169,7 +169,7 @@ def deposit_transactions(request):
             transactions_list = transactions_list.filter(trx_id=trx_id)
 
     transactions = paginate_data(request, transactions_list, 5)
-    return render(request, 'deposit_transactions.html', {'transactions': transactions})
+    return render(request, 'deposit_transactions.html', {'transactions': transactions, 'trx_id': trx_id, 'email': email})
 
 @login_required(login_url='auth')
 def topup_transactions(request):
@@ -186,7 +186,7 @@ def topup_transactions(request):
         else:
             topups_list = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
     topups = paginate_data(request, topups_list, 5)
-    return render(request, 'topup_transactions.html', {'topups': topups})
+    return render(request, 'topup_transactions.html', {'topups': topups, 'ad_acc_name': ad_acc_name})
 
 @login_required(login_url='auth')
 def request_ad_account(request):
