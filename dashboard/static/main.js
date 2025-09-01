@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rate = parseFloat(rateInput.value);
 
         if (!isNaN(amount) && !isNaN(rate)) {
-            const result = amount / rate;
+            const result = amount * rate;
             resultDisplay.textContent = `${result.toFixed(2)}`;
         } else {
             resultDisplay.textContent = '0.00'; // Set to 0.00 if inputs are invalid
