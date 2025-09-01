@@ -95,17 +95,7 @@
 
         </nav>
     </div>
-    <div class="others-menu mt-auto px-3 pb-3">
-        <p class="text-secondary small fw-semibold mb-2">Others Menu</p>
-        <a href="{% url 'logout' %}" class="d-flex align-items-center gap-2 fw-semibold text-dark text-decoration-none mb-2">
-        <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
-        <a href="#" class="d-flex align-items-center gap-2 fw-semibold text-dark text-decoration-none">
-        <i class="fas fa-cog"></i>
-            Settings
-        </a>
-    </div>
+    
     </aside>
 
     <!-- Main content -->
@@ -145,11 +135,20 @@
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge"></span>
             </button>
-            {% if not request.user.is_staff %}
-            <button type="button" aria-label="User menu" class="avatar">
-                <img loading="lazy" src="https://img.icons8.com/?size=100&id=60655&format=png&color=000000" alt="User profile picture, circular avatar with gray background and text 'User'" />
-            </button>
-            {% endif %}
+            <!-- Profile Dropdown -->
+            <div class="dropdown">
+                <button type="button" aria-label="User menu" class="avatar" onclick="toggleDropdown()">
+                    <img loading="lazy" src="https://img.icons8.com/?size=100&id=60655&format=png&color=000000" alt="User profile picture, circular avatar with gray background and text 'User'" />
+                </button>
+                <div id="profileDropdown" class="dropdown-content">
+                    <a href="#" class="gap-2">
+                        <i class="fas fa-cog m-2"></i>Settings
+                    </a>
+                    <a href="{% url 'logout' %}" class="gap-2">
+                        <i class="fas fa-sign-out-alt m-2"></i>Logout
+                    </a>
+                </div>
+            </div>
         </div>
     </header>
 
