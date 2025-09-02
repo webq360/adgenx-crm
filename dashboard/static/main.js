@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!isNaN(amount) && !isNaN(rate)) {
             const result = amount * rate;
-            resultDisplay.textContent = `${result.toFixed(2)}`;
+            resultDisplay.textContent = `${result.toFixed(0)}`;
         } else {
-            resultDisplay.textContent = '0.00'; // Set to 0.00 if inputs are invalid
+            resultDisplay.textContent = '0';
         }
     }
 
