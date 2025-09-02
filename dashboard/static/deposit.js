@@ -1,7 +1,10 @@
-const bankButton = document.getElementById('bank-button');
-const binanceButton = document.getElementById('binance-button');
-const bankDetails = document.getElementById('bank-details');
-const binanceDetails = document.getElementById('binance-details');
+const pubaliBankButton = document.getElementById('pubali-bank-button');
+const oneBankButton = document.getElementById('one-bank-button');
+const fundTransferButton = document.getElementById('fund-transfer-button');
+
+const pubaliBankDetails = document.getElementById('pubali-bank-details');
+const oneBankDetails = document.getElementById('one-bank-details');
+const fundTransferDetails = document.getElementById('fund-transfer-details');
 
 const step1 = document.getElementById('step-1');
 const step2 = document.getElementById('step-2');
@@ -29,7 +32,7 @@ const amountDisplay = document.querySelector('.amount-display');
 
 
 let currentStep = 1;
-const paymentDetails = {payment_method: 'bank'};
+const paymentDetails = {payment_method: 'pubali_bank'};
 
 const updateStepUI = () => {
     step1.style.display = currentStep === 1 ? 'block' : 'none';
@@ -54,20 +57,34 @@ const validateStep2 = () => {
     }
 };
 
-bankButton.addEventListener('click', () => {
-    paymentDetails.payment_method = 'bank';
-    bankDetails.style.display = 'block';
-    binanceDetails.style.display = 'none';
-    bankButton.classList.add('selected');
-    binanceButton.classList.remove('selected');
+pubaliBankButton.addEventListener('click', () => {
+    paymentDetails.payment_method = 'pubali_bank';
+    pubaliBankDetails.style.display = 'block';
+    oneBankDetails.style.display = 'none';
+    fundTransferDetails.style.display = 'none';
+    pubaliBankButton.classList.add('selected');
+    oneBankButton.classList.remove('selected');
+    fundTransferButton.classList.remove('selected');
 });
 
-binanceButton.addEventListener('click', () => {
-    paymentDetails.payment_method = 'binance';
-    bankDetails.style.display = 'none';
-    binanceDetails.style.display = 'block';
-    bankButton.classList.remove('selected');
-    binanceButton.classList.add('selected');
+oneBankButton.addEventListener('click', () => {
+    paymentDetails.payment_method = 'one_bank';
+    pubaliBankDetails.style.display = 'none';
+    oneBankDetails.style.display = 'block';
+    fundTransferDetails.style.display = 'none';
+    pubaliBankButton.classList.remove('selected');
+    oneBankButton.classList.add('selected');
+    fundTransferButton.classList.remove('selected');
+});
+
+fundTransferButton.addEventListener('click', () => {
+    paymentDetails.payment_method = 'fund_transfer';
+    pubaliBankDetails.style.display = 'none';
+    oneBankDetails.style.display = 'none';
+    fundTransferDetails.style.display = 'block';
+    pubaliBankButton.classList.remove('selected');
+    oneBankButton.classList.remove('selected');
+    fundTransferButton.classList.add('selected');
 });
 
 nextButton1.addEventListener('click', () => {
@@ -120,28 +137,46 @@ nextButton2.addEventListener('click', () => {
     paymentDetails.usd_amount = (parseFloat(bdtAmount.value) / dollarRate).toFixed(2); // Calculate USD amount
     currentStep = 3;
     updateStepUI();
+
+    let paymentMethodName = '';
+    let paymentMethodDetails = '';
+    let paymentMethodLogo = '';
+
+    if (paymentDetails.payment_method === 'pubali_bank') {
+        paymentMethodName = 'Pubali Bank';
+        paymentMethodLogo = 'https://images.seeklogo.com/logo-png/52/1/pubali-bank-plc-logo-png_seeklogo-522683.png';
+        paymentMethodDetails = `
+            <p class="mb-0 fw-semibold">Pubali bank Limited</p>
+            <p class="mb-0">RIFAT HOSSAIN</p>
+            <p class="mb-0">0038101011970</p>
+            <p class="mb-0">Araihazar</p>
+        `;
+    } else if (paymentDetails.payment_method === 'one_bank') {
+        paymentMethodName = 'One Bank';
+        paymentMethodLogo = 'https://play-lh.googleusercontent.com/qXBGJ9drgUPuIODaHKrwIC0DweZDsk324E_1GH_JX6Huwty4ikYQcvjfCXvonev6Xpah';
+        paymentMethodDetails = `
+            <p class="mb-0 fw-semibold">One Bank</p>
+            <p class="mb-0">MD RIFAT HOSSAIN</p>
+            <p class="mb-0">5041480003759</p>
+            <p class="mb-0">Araihazar</p>
+        `;
+    } else if (paymentDetails.payment_method === 'fund_transfer') {
+        paymentMethodName = 'Fund Transfer';
+        paymentMethodLogo = 'https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg';
+        paymentMethodDetails = `
+            <p class="mb-0">Hossain54365</p>
+        `;
+    }
+
     const finalDetailsHtml = `
         <div class="container py-4">
           <div class="row border border-0 border-md border-secondary-subtle rounded">
             <div class="col-md-6 px-3 px-md-4 py-3 py-md-4">
-              <p class="small fw-semibold mb-2">${paymentDetails.payment_method === 'bank' ? 'Bank' : 'Fund Transter'}</p>
+              <p class="small fw-semibold mb-2">${paymentMethodName}</p>
               <div class="d-flex align-items-start mb-3">
-                <img loading="lazy" alt="" src="${paymentDetails.payment_method === 'bank' ? 'https://images.seeklogo.com/logo-png/52/1/pubali-bank-plc-logo-png_seeklogo-522683.png' : 'https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg'}" width="40" height="40" class="me-3" />
+                <img loading="lazy" alt="" src="${paymentMethodLogo}" width="40" height="40" class="me-3" />
                 <div class="small lh-sm">
-                  <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'Pubali bank Limited' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'RIFAT HOSSAIN' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? '0038101011970' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Araihazar' : ''}</p>
-                </div>
-              </div>
-              <hr>
-              <div class="d-flex align-items-start mb-3">
-                <img loading="lazy" alt="" src="${paymentDetails.payment_method === 'bank' ? 'https://play-lh.googleusercontent.com/qXBGJ9drgUPuIODaHKrwIC0DweZDsk324E_1GH_JX6Huwty4ikYQcvjfCXvonev6Xpah' : ''}" width="40" height="40" class="me-3" />
-                <div class="small lh-sm">
-                  <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'One Bank1' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'MD.RIFAT HOSSAIN' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? '5041480003759' : ''}</p>
-                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Araihazar' : ''}</p>
+                  ${paymentMethodDetails}
                 </div>
               </div>
 
