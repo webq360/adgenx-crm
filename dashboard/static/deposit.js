@@ -134,6 +134,16 @@ nextButton2.addEventListener('click', () => {
                   <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Araihazar' : ''}</p>
                 </div>
               </div>
+              <hr>
+              <div class="d-flex align-items-start mb-3">
+                <img loading="lazy" alt="" src="${paymentDetails.payment_method === 'bank' ? 'https://play-lh.googleusercontent.com/qXBGJ9drgUPuIODaHKrwIC0DweZDsk324E_1GH_JX6Huwty4ikYQcvjfCXvonev6Xpah' : ''}" width="40" height="40" class="me-3" />
+                <div class="small lh-sm">
+                  <p class="mb-0 fw-semibold">${paymentDetails.payment_method === 'bank' ? 'One Bank1' : ''}</p>
+                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'MD.RIFAT HOSSAIN' : ''}</p>
+                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? '5041480003759' : ''}</p>
+                  <p class="mb-0">${paymentDetails.payment_method === 'bank' ? 'Araihazar' : ''}</p>
+                </div>
+              </div>
 
               <p class="small fw-semibold mb-1">Amount in BDT</p>
               <p class="small mb-3">৳ ${paymentDetails.bdt_amount}</p>
