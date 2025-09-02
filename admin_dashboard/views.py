@@ -71,18 +71,29 @@ def admin_overview(request):
 def review_deposit(request):
     if not request.user.is_staff:
         return redirect('index')
-    pending_transactions_list = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
-    
+
+    search_query = request.GET.get('search', '')
+    if search_query:
+        pending_transactions_list = DepositTransaction.objects.filter(
+            status='pending',
+            user__email__icontains=search_query
+        ).order_by('-created_at')
+    else:
+        pending_transactions_list = DepositTransaction.objects.filter(status='pending').order_by('-created_at')
+
     for transaction in pending_transactions_list:
         try:
             wallet = Wallet.objects.get(user=transaction.user)
             transaction.user_dollar_rate = wallet.dollar_rate
         except Wallet.DoesNotExist:
             transaction.user_dollar_rate = 'N/A'
-    
+
     pending_transactions = paginate_data(request, pending_transactions_list, 5)
-    
-    return render(request, 'review_deposit.html', {'transactions': pending_transactions})
+
+    return render(request, 'review_deposit.html', {
+        'transactions': pending_transactions,
+        'search_query': search_query
+    })
 
 @login_required(login_url='auth')
 def review_deposit_details(request, transaction_id):
@@ -193,10 +204,21 @@ def review_ad_account(request):
     if not request.user.is_staff:
         return redirect('index')
 
-    pending_ad_accounts_list = AdAccount.objects.filter(status='inactive').order_by('-start_date')
+    search_query = request.GET.get('search', '')
+    if search_query:
+        pending_ad_accounts_list = AdAccount.objects.filter(
+            status='inactive',
+            name__icontains=search_query
+        ).order_by('-start_date')
+    else:
+        pending_ad_accounts_list = AdAccount.objects.filter(status='inactive').order_by('-start_date')
+
     pending_ad_accounts = paginate_data(request, pending_ad_accounts_list, 5)
 
-    return render(request, 'review_ad_account.html', {'ad_accounts': pending_ad_accounts})
+    return render(request, 'review_ad_account.html', {
+        'ad_accounts': pending_ad_accounts,
+        'search_query': search_query
+    })
 
 
 
@@ -205,11 +227,19 @@ def review_bm_request(request):
     if not request.user.is_staff:
         return redirect('index')
 
+    search_query = request.GET.get('search', '')
     pending_bm_accounts = BMAccount.objects.filter(status='pending')
     ad_accounts_list = AdAccount.objects.filter(bm_accounts__in=pending_bm_accounts, status='active').distinct()
+
+    if search_query:
+        ad_accounts_list = ad_accounts_list.filter(name__icontains=search_query)
+
     ad_accounts = paginate_data(request, ad_accounts_list, 5)
 
-    return render(request, 'review_bm_request.html', {'ad_accounts': ad_accounts})
+    return render(request, 'review_bm_request.html', {
+        'ad_accounts': ad_accounts,
+        'search_query': search_query
+    })
 
 
 @login_required(login_url='auth')
@@ -303,6 +333,17 @@ def review_topup(request):
 
         return redirect('admin_dashboard:review_topup')
 
-    pending_topups_list = TopupHistory.objects.filter(status='pending').order_by('-date')
+    search_query = request.GET.get('search', '')
+    if search_query:
+        pending_topups_list = TopupHistory.objects.filter(
+            status='pending',
+            ad_account__name__icontains=search_query
+        ).order_by('-date')
+    else:
+        pending_topups_list = TopupHistory.objects.filter(status='pending').order_by('-date')
+
     pending_topups = paginate_data(request, pending_topups_list, 5)
-    return render(request, 'review_topup.html', {'topups': pending_topups})
+    return render(request, 'review_topup.html', {
+        'topups': pending_topups,
+        'search_query': search_query
+    })
