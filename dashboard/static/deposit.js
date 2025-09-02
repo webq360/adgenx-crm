@@ -149,6 +149,7 @@ nextButton2.addEventListener('click', () => {
             <p class="mb-0 fw-semibold">Pubali bank Limited</p>
             <p class="mb-0">RIFAT HOSSAIN</p>
             <p class="mb-0">0038101011970</p>
+            <p class="mb-0">Narayanganj</p>
             <p class="mb-0">Araihazar</p>
         `;
     } else if (paymentDetails.payment_method === 'one_bank') {
@@ -158,6 +159,7 @@ nextButton2.addEventListener('click', () => {
             <p class="mb-0 fw-semibold">One Bank</p>
             <p class="mb-0">MD RIFAT HOSSAIN</p>
             <p class="mb-0">5041480003759</p>
+            <p class="mb-0">Narayanganj</p>
             <p class="mb-0">Araihazar</p>
         `;
     } else if (paymentDetails.payment_method === 'fund_transfer') {
