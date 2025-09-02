@@ -89,13 +89,43 @@
               </li>
             {% endif %}
 
-            {% for i in topups.paginator.page_range %}
-              {% if topups.number == i %}
-                <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+            {% with topups.number as current_page %}
+            {% with topups.paginator.num_pages as total_pages %}
+              {% if total_pages > 5 %}
+                {% if current_page > 3 %}
+                  <li class="page-item"><a class="page-link" href="?page=1{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">1</a></li>
+                  {% if current_page > 4 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+                {% endif %}
+
+                {% for i in topups.paginator.page_range %}
+                  {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
+                    {% if current_page == i %}
+                      <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                      <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if current_page < total_pages|add:'-2' %}
+                  {% if current_page < total_pages|add:'-3' %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+                  <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ total_pages }}</a></li>
+                {% endif %}
               {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ i }}</a></li>
+                {% for i in topups.paginator.page_range %}
+                  {% if topups.number == i %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                  {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ i }}</a></li>
+                  {% endif %}
+                {% endfor %}
               {% endif %}
-            {% endfor %}
+            {% endwith %}
+            {% endwith %}
 
             {% if topups.has_next %}
               <li class="page-item">

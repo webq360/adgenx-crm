@@ -96,13 +96,43 @@
               </li>
             {% endif %}
 
-            {% for i in ad_accounts.paginator.page_range %}
-              {% if ad_accounts.number == i %}
-                <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+            {% with ad_accounts.number as current_page %}
+            {% with ad_accounts.paginator.num_pages as total_pages %}
+              {% if total_pages > 5 %}
+                {% if current_page > 3 %}
+                  <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">1</a></li>
+                  {% if current_page > 4 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+                {% endif %}
+
+                {% for i in ad_accounts.paginator.page_range %}
+                  {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
+                    {% if current_page == i %}
+                      <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                      <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if current_page < total_pages|add:'-2' %}
+                  {% if current_page < total_pages|add:'-3' %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+                  <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ total_pages }}</a></li>
+                {% endif %}
               {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+                {% for i in ad_accounts.paginator.page_range %}
+                  {% if ad_accounts.number == i %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                  {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+                  {% endif %}
+                {% endfor %}
               {% endif %}
-            {% endfor %}
+            {% endwith %}
+            {% endwith %}
 
             {% if ad_accounts.has_next %}
               <li class="page-item">
