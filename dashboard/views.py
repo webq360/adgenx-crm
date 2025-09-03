@@ -3,6 +3,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.core.files.base import ContentFile
+from PIL import Image
+from io import BytesIO
 
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
@@ -123,6 +126,32 @@ def deposit(request):
         tx_id = request.POST.get('tx_id')
         receipt = request.FILES.get('receipt')
         usd_amount = request.POST.get('usd_amount')
+
+        if receipt:
+            try:
+                # Open the image
+                img = Image.open(receipt)
+
+                # Create a BytesIO object to hold the compressed image data
+                img_io = BytesIO()
+
+                # Resize and save the image with compression
+                # Adjust width as needed, height will be proportional
+                new_width = 800
+                ratio = new_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                
+                # Save as JPEG with quality setting
+                img.save(img_io, format='JPEG', quality=70)
+                img_io.seek(0)
+
+                # Create a new Django File object
+                receipt = ContentFile(img_io.read(), name=receipt.name)
+
+            except Exception as e:
+                messages.error(request, f"Error processing image: {e}")
+                return redirect('deposit')
 
         try:
             deposit_transaction = DepositTransaction.objects.create(
