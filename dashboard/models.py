@@ -16,8 +16,8 @@ class DepositTransaction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     method = models.CharField(max_length=100)
-    trx_id = models.CharField(max_length=100, unique=True)
-    vendor_trx_id = models.CharField(max_length=100, unique=True)
+    trx_id = models.CharField(max_length=100)
+    vendor_trx_id = models.CharField(max_length=100)
     receipt = models.ImageField(upload_to='receipts/')
     bdt_amount = models.DecimalField(max_digits=10, decimal_places=2)
     usd_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -76,7 +76,7 @@ class AdAccount(models.Model):
 
 class AdminBM(models.Model):
     acc_name = models.CharField(max_length=100)
-    acc_id = models.IntegerField()
+    acc_id = models.IntegerField(unique=True)
 
     def __str__(self):
         return self.acc_name

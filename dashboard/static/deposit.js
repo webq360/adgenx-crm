@@ -220,6 +220,11 @@ nextButton2.addEventListener('click', () => {
         updateStepUI();
     });
     finishButton.addEventListener('click', () => {
+        finishButton.disabled = true;
+        finishButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Processing...
+        `;
         document.getElementById('hidden-payment-method').value = paymentDetails.payment_method;
         document.getElementById('hidden-bdt-amount').value = paymentDetails.bdt_amount;
         document.getElementById('hidden-tx-id').value = paymentDetails.tx_id;
