@@ -125,16 +125,20 @@
     </div>
 
     <!-- Administrative Tasks -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Administrative Tasks</h6>
-        </div>
-        <div class="card-body">
-            <p>There are <strong class="text-danger">{{ old_receipts_count }}</strong> receipt images older than one month that can be deleted.</p>
-            <form action="{% url 'admin_dashboard:delete_old_receipts' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Delete Old Receipts</button>
-            </form>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Administrative Tasks</h6>
+                </div>
+                <div class="card-body">
+                    <p>There are <strong class="text-danger">{{ old_receipts_count }}</strong> receipt images older than one month that can be deleted.</p>
+                    <form action="{% url 'admin_dashboard:delete_old_receipts' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete Old Receipts</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </main>
