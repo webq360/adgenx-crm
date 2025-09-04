@@ -18,7 +18,7 @@ class DepositTransaction(models.Model):
     method = models.CharField(max_length=100)
     trx_id = models.CharField(max_length=100)
     vendor_trx_id = models.CharField(max_length=100)
-    receipt = models.ImageField(upload_to='receipts/')
+    receipt = models.ImageField(upload_to='receipts/', null=True, blank=True)
     bdt_amount = models.DecimalField(max_digits=10, decimal_places=2)
     usd_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')

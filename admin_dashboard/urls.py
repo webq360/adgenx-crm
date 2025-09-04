@@ -12,4 +12,5 @@ urlpatterns = [
     path('review/bm_request/', views.review_bm_request, name='review_bm_request'),
     path('manage_user/', views.manage_user, name='manage_user'),
     path('review/topup/', views.review_topup, name='review_topup'),
+    path('delete_old_receipts/', views.delete_old_receipts, name='delete_old_receipts'),
 ]

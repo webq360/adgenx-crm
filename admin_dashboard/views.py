@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db.models import Sum
 from django.utils import timezone
 from datetime import timedelta, datetime
+import os
 
 from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
 from dashboard.utils import paginate_data, get_user_utils
@@ -50,6 +51,12 @@ def admin_overview(request):
     total_usd_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
     total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
 
+    one_month_ago = timezone.now() - timedelta(days=30)
+    old_receipts_count = DepositTransaction.objects.filter(
+        status__in=['approved', 'rejected'],
+        created_at__lt=one_month_ago
+    ).exclude(receipt='').count()
+
     utils = {
         'pending_deposits': pending_deposits,
         'pending_accounts': pending_accounts,
@@ -63,6 +70,7 @@ def admin_overview(request):
         'total_topup_increase': total_topup_increase,
         'start_date': start_date_str,
         'end_date': end_date_str,
+        'old_receipts_count': old_receipts_count,
     }
 
     return render(request, 'admin_overview.html', context)
@@ -269,7 +277,6 @@ def manage_user(request):
         
         is_active = request.POST.get('is_active') == 'on'
         dollar_rate = request.POST.get('dollar_rate')
-        print(dollar_rate)
 
         user_to_manage.is_active = is_active
         user_to_manage.save()
@@ -347,3 +354,33 @@ def review_topup(request):
         'topups': pending_topups,
         'search_query': search_query
     })
+
+@login_required(login_url='auth')
+def delete_old_receipts(request):
+    if not request.user.is_staff:
+        return redirect('index')
+
+    if request.method == 'POST':
+        one_month_ago = timezone.now() - timedelta(days=30)
+        transactions_to_delete = DepositTransaction.objects.filter(
+            status__in=['approved', 'rejected'],
+            created_at__lt=one_month_ago
+        ).exclude(receipt='')
+        
+        deleted_count = 0
+        for transaction in transactions_to_delete:
+            if transaction.receipt:
+                if os.path.exists(transaction.receipt.path):
+                    os.remove(transaction.receipt.path)
+                    transaction.receipt = ''
+                    transaction.save()
+                    deleted_count += 1
+
+        if deleted_count > 0:
+            messages.success(request, f'Successfully deleted {deleted_count} old receipt images.')
+        else:
+            messages.info(request, 'No old receipt images to delete.')
+
+        return redirect('admin_dashboard:admin_overview')
+
+    return redirect('admin_dashboard:admin_overview')
