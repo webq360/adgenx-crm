@@ -13,12 +13,10 @@ def get_user_utils(user):
     pending_deposits = DepositTransaction.objects.filter(user=user, status='pending').count()
     pending_accounts = AdAccount.objects.filter(user=user, status='inactive').count()
     active_accounts = AdAccount.objects.filter(user=user, status='active').count()
-    total_approved_deposit = DepositTransaction.objects.filter(user=user, status='approved').aggregate(total=Sum('usd_amount'))['total'] or 0
     return {
         'pending_deposits': pending_deposits,
         'pending_accounts': pending_accounts,
         'active_accounts': active_accounts,
-        'total_approved_deposit': total_approved_deposit,
     }
 
 def get_processed_ad_accounts_data(ad_accounts_qs):

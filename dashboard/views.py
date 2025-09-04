@@ -6,6 +6,10 @@ from django.http import JsonResponse
 from django.core.files.base import ContentFile
 from PIL import Image
 from io import BytesIO
+import datetime
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum
 
 from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
@@ -18,12 +22,49 @@ def index(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:admin_overview')
     wallet = Wallet.objects.get(user=request.user)
-    
+
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if not start_date_str:
+        start_date_str = timezone.now().strftime('%Y-%m-%d')
+
+    start_date, end_date = None, None
+
+    if start_date_str:
+        try:
+            start_date = timezone.make_aware(datetime.datetime.strptime(start_date_str, '%Y-%m-%d'))
+            if end_date_str:
+                end_date = timezone.make_aware(datetime.datetime.strptime(end_date_str, '%Y-%m-%d')) + timedelta(days=1)
+            else:
+                end_date = start_date + timedelta(days=1)
+        except (ValueError, TypeError):
+            start_date, end_date = None, None
+
+    # Filtered and aggregated data
+    deposit_qs = DepositTransaction.objects.filter(user=request.user, status='approved')
+    topup_qs = TopupHistory.objects.filter(ad_account__user=request.user, status='approved', type='increase')
+
+    if start_date:
+        deposit_qs = deposit_qs.filter(created_at__gte=start_date, created_at__lt=end_date)
+        topup_qs = topup_qs.filter(date__gte=start_date, date__lt=end_date)
+
+    total_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
+    total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
+
     ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')[:5]
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 
     utils = get_user_utils(request.user)
-    return render(request, 'index.html', {'wallet': wallet, 'ad_accounts': ad_accounts_data, 'utils': utils})
+    return render(request, 'index.html', {
+        'wallet': wallet,
+        'ad_accounts': ad_accounts_data,
+        'utils': utils,
+        'total_deposit': total_deposit,
+        'total_topup_increase': total_topup_increase,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+    })
 
 
 @login_required(login_url='auth')
