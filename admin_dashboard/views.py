@@ -96,7 +96,7 @@ def review_deposit(request):
         except Wallet.DoesNotExist:
             transaction.user_dollar_rate = 'N/A'
 
-    pending_transactions = paginate_data(request, pending_transactions_list, 5)
+    pending_transactions = paginate_data(request, pending_transactions_list, 10)
 
     return render(request, 'review_deposit.html', {
         'transactions': pending_transactions,
@@ -242,7 +242,7 @@ def review_bm_request(request):
     if search_query:
         ad_accounts_list = ad_accounts_list.filter(name__icontains=search_query)
 
-    ad_accounts = paginate_data(request, ad_accounts_list, 5)
+    ad_accounts = paginate_data(request, ad_accounts_list, 10)
 
     return render(request, 'review_bm_request.html', {
         'ad_accounts': ad_accounts,
@@ -293,7 +293,7 @@ def manage_user(request):
         return redirect(f'/admin_dashboard/manage_user/')
     
     all_users_list = User.objects.filter(is_staff=False)
-    all_users = paginate_data(request, all_users_list, 5)
+    all_users = paginate_data(request, all_users_list, 10)
     return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'ad_accounts':ad_accounts, 'all_users': all_users, 'utils': utils})
 
 @login_required(login_url='auth')
@@ -349,7 +349,7 @@ def review_topup(request):
     else:
         pending_topups_list = TopupHistory.objects.filter(status='pending').order_by('-date')
 
-    pending_topups = paginate_data(request, pending_topups_list, 5)
+    pending_topups = paginate_data(request, pending_topups_list, 10)
     return render(request, 'review_topup.html', {
         'topups': pending_topups,
         'search_query': search_query

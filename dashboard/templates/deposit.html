@@ -90,52 +90,29 @@
               <section class="flex-grow-1 bank-select p-1">
                 <p class="fw-semibold small mb-2">Select Payment Method</p>
                 <div class="d-flex gap-3 mb-3">
-                    <div id="pubali-bank-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2 selected" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
-                        <img loading="lazy" src="https://images.seeklogo.com/logo-png/52/1/pubali-bank-plc-logo-png_seeklogo-522683.png" alt="Pubali Bank logo" width="48" height="48" />
-                        Pubali Bank
-                    </div>
-                    <div id="one-bank-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
-                        <img loading="lazy" src="https://play-lh.googleusercontent.com/qXBGJ9drgUPuIODaHKrwIC0DweZDsk324E_1GH_JX6Huwty4ikYQcvjfCXvonev6Xpah" alt="One Bank logo" width="48" height="48" />
-                        One Bank
-                    </div>
-                    <div id="fund-transfer-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-2 d-flex align-items-center gap-2" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;">
-                      <img loading="lazy" src="https://img.freepik.com/free-vector/mobile-with-cashback-concept_23-2148457933.jpg" alt="Fund Transfer logo" width="35" height="35" />
-                        Fund Transfer
-                    </div>
+                    {% for method in payment_methods %}
+                        <div id="{{ method.method_name|slugify }}-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-3 d-flex align-items-center gap-2 {% if forloop.first %}selected{% endif %}" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;" data-method-id="{{ method.id }}">
+                            {% if method.method_logo %}
+                                <img loading="lazy" src="{{ method.method_logo.url }}" alt="{{ method.method_name }} logo" width="48" height="48" />
+                            {% endif %}
+                            {{ method.method_name }}
+                        </div>
+                    {% endfor %}
                 </div>
               </section>
 
-              <!-- Pubali Bank Details -->
-              <section id="pubali-bank-details" class="bank-details flex-grow-1">
-                <p class="fw-semibold text-dark mb-2">Bank Details</p>
-                <p class="fw-semibold text-dark mb-1">Pubali bank Limited</p>
-                <p class="mb-1">Acc Name: MD RIFAT HOSSAIN</p>
-                <p class="mb-1">Acc Number: 0038101011970</p>
-                <p class="mb-1">District: Narayanganj</p>
-                <p class="">Branch Name: Araihazar</p>
-                <p class="fw-semibold mt-3 mb-1">Instructions:</p>
-                <p>Must attach a transaction screenshort</p>
-              </section>
-
-              <!-- One Bank Details -->
-              <section id="one-bank-details" class="bank-details flex-grow-1" style="display: none;">
-                <p class="fw-semibold text-dark mb-2">Bank Details</p>
-                <p class="fw-semibold text-dark mb-1">One Bank</p>
-                <p class="mb-1">Acc Name: MD RIFAT HOSSAIN</p>
-                <p class="mb-1">Acc Number: 5041480003759</p>
-                <p class="mb-1">District: Narayanganj</p>
-                <p class="mb-1">Branch Name: Araihazar</p>
-                <p class="fw-semibold mt-3 mb-1">Instructions:</p>
-                <p>Must attach a transaction screenshort</p>
-              </section>
-
-             <!-- Fund Transfer Details -->
-              <section id="fund-transfer-details" class="bank-details flex-grow-1" style="display: none;">
-                <p class="fw-semibold text-dark mb-2">Fund Transfer Details</p>
-                <p class="mb-1">Hossain54365</p>
-                <p class="fw-semibold mt-3 mb-1">Instructions:</p>
-                <p>Must attach a transaction screenshort</p>
-              </section>
+              <!-- Bank Details -->
+                {% for method in payment_methods %}
+                    <section id="{{ method.method_name|slugify }}-details" class="bank-details flex-grow-1" {% if not forloop.first %}style="display: none;"{% endif %}>
+                        <p class="fw-semibold text-dark mb-2">{{ method.method_name }} Details</p>
+                        {% if method.account_name %}<p class="mb-1">Acc Name: {{ method.account_name }}</p>{% endif %}
+                        {% if method.account_number %}<p class="mb-1">Acc Number: {{ method.account_number }}</p>{% endif %}
+                        {% if method.district %}<p class="mb-1">District: {{ method.district }}</p>{% endif %}
+                        {% if method.branch_name %}<p class="">Branch Name: {{ method.branch_name }}</p>{% endif %}
+                        <p class="fw-semibold mt-3 mb-1">Instructions:</p>
+                        <p>Must attach a transaction screenshort</p>
+                    </section>
+                {% endfor %}
             </div>
             <div class="d-flex justify-content-end mt-4">
               <button id="next-button-1" type="button" class="btn btn-primary align-items-center gap-1">

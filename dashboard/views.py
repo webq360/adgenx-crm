@@ -11,7 +11,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum
 
-from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory
+from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory, PaymentMethod
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
 from .utils import paginate_data, get_user_utils, get_processed_ad_accounts_data
 
@@ -159,14 +159,16 @@ def deposit(request):
     
     wallet = Wallet.objects.get(user=request.user)
     utils = get_user_utils(request.user)
+    payment_methods = PaymentMethod.objects.filter(is_active=True)
+
     if request.method == 'POST':
-        payment_method = request.POST.get('payment_method').capitalize()
-        if payment_method == 'Binance':
-            payment_method = 'Fund Transfer'
+        payment_method_id = request.POST.get('payment_method')
         bdt_amount = request.POST.get('bdt_amount')
         tx_id = request.POST.get('tx_id')
         receipt = request.FILES.get('receipt')
         usd_amount = request.POST.get('usd_amount')
+
+        payment_method = get_object_or_404(PaymentMethod, id=payment_method_id)
 
         if receipt:
             try:
@@ -197,7 +199,7 @@ def deposit(request):
         try:
             deposit_transaction = DepositTransaction.objects.create(
                 user=request.user,
-                method=payment_method,
+                method=payment_method.method_name,
                 trx_id=tx_id,
                 vendor_trx_id=tx_id, # Assuming vendor_trx_id is same as trx_id for now
                 receipt=receipt,
@@ -212,7 +214,7 @@ def deposit(request):
             messages.error(request, f'Error submitting deposit request: {e}')
             return redirect('deposit')
         
-    return render(request, 'deposit.html', {'wallet': wallet, 'utils':utils})
+    return render(request, 'deposit.html', {'wallet': wallet, 'utils':utils, 'payment_methods': payment_methods})
 
 @login_required(login_url='auth')
 def deposit_transactions(request):
@@ -238,7 +240,7 @@ def deposit_transactions(request):
         if trx_id:
             transactions_list = transactions_list.filter(trx_id=trx_id)
 
-    transactions = paginate_data(request, transactions_list, 5)
+    transactions = paginate_data(request, transactions_list, 10)
     return render(request, 'deposit_transactions.html', {'transactions': transactions, 'trx_id': trx_id, 'email': email})
 
 @login_required(login_url='auth')
@@ -255,7 +257,7 @@ def topup_transactions(request):
             topups_list = TopupHistory.objects.filter(ad_account__name__icontains=ad_acc_name, ad_account__user=request.user).order_by('-date')
         else:
             topups_list = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
-    topups = paginate_data(request, topups_list, 5)
+    topups = paginate_data(request, topups_list, 10)
     return render(request, 'topup_transactions.html', {'topups': topups, 'ad_acc_name': ad_acc_name})
 
 @login_required(login_url='auth')

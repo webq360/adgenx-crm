@@ -100,3 +100,15 @@ class TopupHistory(models.Model):
 
     def __str__(self):
         return f"Topup for {self.ad_account.name} - {self.amount} ({self.type})"
+
+class PaymentMethod(models.Model):
+    method_name = models.CharField(max_length=100)
+    method_logo = models.ImageField(upload_to='logos/', null=True, blank=True)
+    account_name = models.CharField(max_length=100, null=True, blank=True)
+    account_number = models.CharField(max_length=100, null=True, blank=True)
+    district = models.CharField(max_length=100, null=True, blank=True)
+    branch_name = models.CharField(max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.method_name
