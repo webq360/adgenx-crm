@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block styles %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'transactions.css' %}">
 {% endblock %}
 
@@ -39,7 +40,7 @@
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table align-middle mb-0" style="border-collapse: separate; border-spacing: 0 0.75rem;">
+        <table class="table align-middle mb-0">
           <thead>
             <tr>
               <th>ID</th>

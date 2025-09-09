@@ -3,7 +3,12 @@ body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       color: #212B36;
     }
-    .btn-filter {
+    .table-nowrap th,
+.table-nowrap td {
+    white-space: nowrap;
+}
+
+.btn-filter {
       font-weight: 600;
       font-size: 0.75rem;
       border-radius: 50px;

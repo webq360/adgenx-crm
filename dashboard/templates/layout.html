@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" >
     <link rel="stylesheet" href="{% static 'styles.css' %}">
     {% block styles %}
+    <link rel="stylesheet" href="{% static 'dark-theme.css' %}">
     {% endblock %}
     <script src="{% static 'main.js' %}" defer></script>
 </head>
@@ -120,7 +121,6 @@
                 <div id="resultDisplay" class="fw-bold text-primary">0.00</div>
                 {% else %}
                     <div class="position-relative d-none d-sm-block">
-                        <input type="search" class="input-search" placeholder="Search anything..." aria-label="Search anything" />
                     <div class="position-absolute top-50 end-0 translate-middle-y pe-2 text-secondary small" style="user-select:none;"></div>
                 {% endif %}
                 </div>

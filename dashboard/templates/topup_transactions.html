@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block styles %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'transactions.css' %}">
 {% endblock %}
 
@@ -32,10 +33,10 @@
 
       </div>
       <div class="table-responsive">
-        <table class="table align-middle mb-0">
+        <table class="table align-middle mb-0 table-nowrap">
           <thead>
             <tr>
-              <th class="ps-2">Date</th>
+              <th class="ps-2 date-column">Date</th>
               <th>Ad Account</th>
               <th>Amount</th>
               <th>Type</th>
@@ -48,7 +49,7 @@
           <tbody>
             {% for topup in topups %}
             <tr>
-              <td class="text-secondary">{{ topup.date|date:"H:i, d M Y" }}</td>
+              <td class="text-secondary date-column">{{ topup.date|date:"H:i, d M Y" }}</td>
               <td class="fs-6" >
                 {% if request.user.is_staff %}
                     <a href="{% url 'ad_accounts' %}?search={{ topup.ad_account.name }}">
