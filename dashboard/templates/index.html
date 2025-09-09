@@ -137,7 +137,7 @@
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-2 gap-3">
             <h2 class="fw-semibold text-secondary fs-6 mb-0">Ad Accounts</h2>
             <div class="d-flex gap-2 w-100 w-sm-auto">
-                <a href="{% url 'request_ad_account' %}" type="button" class="btn-create text-decoration-none"
+                <a href="{% url 'request_ad_account' %}" type="button" class="btn-create btn-primary text-decoration-none"
                     role="button">
                     Create Ad Account
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
@@ -212,7 +212,7 @@
                                         data-ad-account-id="{{ ad_account.id }}">Remove BM Account
                                     </button></li>
                                     <li><a href="{% url 'topup_transactions' %}?ad_acc_name={{ ad_account.name }}" 
-                                        class="dropdown-item text-decoration-none">Topup History
+                                        class="dropdown-item text-white text-decoration-none">Topup History
                                     </a></li>
                                     <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#decreaseLimitModal" data-ad-account-id="{{ ad_account.id }}">Decrease Limit</button></li>
                                 </ul>
