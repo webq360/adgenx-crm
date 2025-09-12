@@ -7,7 +7,7 @@
             <div>
                 <h1 class="fs-5 fw-semibold mb-1">Overview</h1>
                 <p class="small mb-4">
-                    {{ request.user.first_name }} {{ request.user.last_name }}.
+                    Hello, {{ request.user.first_name }} {{ request.user.last_name }}.
                 </p>
             </div>
             <div>
@@ -374,6 +374,8 @@
     const topupForm = document.getElementById('topup-form');
     topupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitButton = topupForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
         const formData = new FormData(topupForm);
         const response = await fetch('/topup/', {
             method: 'POST',
@@ -391,6 +393,7 @@
         } else {
             topupMessage.innerHTML = `Error: ${result.error}`;
             topupMessage.style.color = 'red';
+            submitButton.disabled = false;
         }
     });
 
@@ -414,6 +417,8 @@
     const adMbAccountForm = document.getElementById('ad-mb-account-form');
     adMbAccountForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitButton = adMbAccountForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
         const formData = new FormData(adMbAccountForm);
         const response = await fetch('/request_bm_account/', {
             method: 'POST',
@@ -431,6 +436,7 @@
         } else {
             adMbAccountMessage.innerHTML = `Error: ${result.error}`;
             adMbAccountMessage.style.color = 'red';
+            submitButton.disabled = false;
         }
     });
 
@@ -473,6 +479,8 @@
     const removeBmAccountForm = document.getElementById('remove-bm-account-form');
     removeBmAccountForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitButton = removeBmAccountForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
         const formData = new FormData(removeBmAccountForm);
         const response = await fetch('/remove_bm_account_request/', { // New URL for backend
             method: 'POST',
@@ -490,6 +498,7 @@
         } else {
             removeBmAccountMessage.innerHTML = `Error: ${result.error}`;
             removeBmAccountMessage.style.color = 'red';
+            submitButton.disabled = false;
         }
     });
 
@@ -508,6 +517,8 @@
     const decreaseLimitForm = document.getElementById('decrease-limit-form');
     decreaseLimitForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitButton = decreaseLimitForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
         const formData = new FormData(decreaseLimitForm);
         const response = await fetch('{% url "request_decrease_limit" %}', {
             method: 'POST',
@@ -525,6 +536,7 @@
         } else {
             decreaseLimitMessage.innerHTML = `Error: ${result.error}`;
             decreaseLimitMessage.style.color = 'red';
+            submitButton.disabled = false;
         }
     });
 </script>
