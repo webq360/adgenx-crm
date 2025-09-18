@@ -1,11 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path('', include('authentication.urls')),
     path('', views.index, name='index'),
     path('ad_accounts/', views.ad_accounts, name='ad_accounts'),
-    path('auth/', views.auth, name='auth'),
-    path('logout/', views.logout_view, name='logout'),
     path('deposit/', views.deposit, name='deposit'),
     path('transactions/deposit/', views.deposit_transactions, name='deposit_transactions'),
     path('transactions/topup/', views.topup_transactions, name='topup_transactions'),
