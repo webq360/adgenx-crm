@@ -292,7 +292,7 @@ def manage_user(request):
         messages.success(request, 'User details updated successfully.')
         return redirect(f'/admin_dashboard/manage_user/')
     
-    all_users_list = User.objects.filter(is_staff=False)
+    all_users_list = User.objects.filter(is_staff=False).order_by('-id')
     all_users = paginate_data(request, all_users_list, 10)
     return render(request, 'manage_user.html', {'user_to_manage': user_to_manage, 'wallet': wallet, 'ad_accounts':ad_accounts, 'all_users': all_users, 'utils': utils})
 
