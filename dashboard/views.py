@@ -327,3 +327,7 @@ def remove_bm_account_request(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+@login_required(login_url='auth')
+def account_settings(request):
+    return render(request, 'account_settings.html')

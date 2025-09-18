@@ -7,9 +7,47 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+
 from dashboard.models import User
 from dashboard.models import Wallet
 from .tokens import account_activation_token
+
+password_reset_token = PasswordResetTokenGenerator()
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user = None
+
+        if user is not None:
+            # Send verification email
+            current_site = request.get_host()
+            mail_subject = 'Reset your password.'
+            message = render_to_string('password_reset_email.html', {
+                'user': user,
+                'domain': current_site,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': password_reset_token.make_token(user),
+            })
+            to_email = email
+            send_mail(
+                mail_subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [to_email],
+                fail_silently=False,
+            )
+            messages.success(request, 'A password reset link has been sent to your email.')
+        else:
+            messages.error(request, 'No user found with that email address.')
+
+        return redirect('forgot_password')
+
+    return render(request, 'forgot_password.html')
 
 def auth_view(request):
     if request.user.is_authenticated:
@@ -113,3 +151,33 @@ def activate(request, uidb64, token):
 def logout_view(request):
     logout(request)
     return redirect('auth')
+
+def password_reset(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and password_reset_token.check_token(user, token):
+        if request.method == 'POST':
+            password = request.POST.get('password')
+            password2 = request.POST.get('password2')
+
+            if password != password2:
+                messages.error(request, 'Passwords do not match.')
+                return redirect('password_reset', uidb64=uidb64, token=token)
+            
+            if len(password) < 8:
+                messages.error(request, 'Password must be at least 8 characters long.')
+                return redirect('password_reset', uidb64=uidb64, token=token)
+
+            user.set_password(password)
+            user.save()
+            messages.success(request, 'Your password has been reset successfully. You can now log in.')
+            return redirect('auth')
+        else:
+            return render(request, 'password_reset.html')
+    else:
+        messages.error(request, 'Password reset link is invalid!')
+        return redirect('auth')

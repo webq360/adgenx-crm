@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mt-5">
+                <div class="card-header">
+                    <h2>Account Settings</h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>First Name:</strong> {{ user.first_name }}</p>
+                    <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+                    <a href="{% url 'forgot_password' %}" class="btn btn-warning text-decoration-none">Reset Password</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
