@@ -78,6 +78,7 @@
                   <div class="row">
                       <div class="col-md-6">
                           <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
+                          <p><strong>Verified:</strong> {{ user_to_manage.is_verified }}</p>
                           <p><strong>Whatsapp Number:</strong> {{ user_to_manage.phone_number }}</p>
                           <p><strong>Wallet Balance:</strong>{% if wallet %} {{ wallet.balance }}{% endif %}</p>
                       </div>
