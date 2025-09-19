@@ -14,10 +14,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         unverified_users = User.objects.filter(is_verified=False)
         for user in unverified_users:
-            current_site = 'http://127.0.0.1:8000/'
+            protocol = 'https'
+            current_site = 'www.adgenx.agency'
             mail_subject = 'Activate your CRM account.'
             message = render_to_string('acc_active_email.html', {
                 'user': user,
+                'protocol': protocol,
                 'domain': current_site,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': account_activation_token.make_token(user),

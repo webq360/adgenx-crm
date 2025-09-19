@@ -25,10 +25,12 @@ def forgot_password(request):
 
         if user is not None:
             # Send verification email
+            protocol = 'https' if request.is_secure() else 'http'
             current_site = request.get_host()
             mail_subject = 'Reset your password.'
             message = render_to_string('password_reset_email.html', {
                 'user': user,
+                'protocol': protocol,
                 'domain': current_site,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': password_reset_token.make_token(user),
@@ -109,10 +111,12 @@ def auth_view(request):
             Wallet.objects.create(user=user)
 
             # Send verification email
+            protocol = 'https' if request.is_secure() else 'http'
             current_site = request.get_host()
             mail_subject = 'Activate your CRM account.'
             message = render_to_string('acc_active_email.html', {
                 'user': user,
+                'protocol': protocol,
                 'domain': current_site,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': account_activation_token.make_token(user),
@@ -131,7 +135,7 @@ def auth_view(request):
 
     return render(request, 'auth.html')
 
-def activate(request, uidb64, token):
+def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -141,7 +145,7 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token):
         user.is_verified = True
         user.save()
-        messages.success(request, 'Your account has been successfully verified.')
+        messages.success(request, 'Your email has been successfully verified. A staff member will activate your account shortly.')
         return redirect('auth')
     else:
         messages.error(request, 'Activation link is invalid!')
