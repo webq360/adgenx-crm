@@ -1,0 +1,399 @@
+{% extends 'layout.html' %}
+{% block content %}
+<main class="flex-grow-1 overflow-auto p-4">
+
+  {% if messages %}
+  <div style="position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:1050;min-width:300px;">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+      {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <h2 class="fw-bold fs-4 mb-0">Appearance</h2>
+    <span class="badge bg-primary">Landing Page</span>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4" id="appearanceTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-general">General</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-about">About</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-contact">Contact & Social</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-faq">FAQ</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-testimonials">Testimonials</a></li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- ── General / Hero ── -->
+    <div class="tab-pane fade show active" id="tab-general">
+      <div class="bg-white rounded-3 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Hero Section</h5>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="site_settings">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Badge Text</label>
+              <input type="text" name="hero_badge_text" class="form-control" value="{{ settings.hero_badge_text }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Hero Title Line 1</label>
+              <input type="text" name="hero_title_line1" class="form-control" value="{{ settings.hero_title_line1 }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Hero Title Line 2 <small class="text-muted">(gradient text)</small></label>
+              <input type="text" name="hero_title_line2" class="form-control" value="{{ settings.hero_title_line2 }}">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Hero Subtitle</label>
+              <textarea name="hero_subtitle" class="form-control" rows="3">{{ settings.hero_subtitle }}</textarea>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Stat — Active Users</label>
+              <input type="text" name="stat_users" class="form-control" value="{{ settings.stat_users }}" placeholder="e.g. 500+">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Stat — Ad Spend</label>
+              <input type="text" name="stat_ad_spend" class="form-control" value="{{ settings.stat_ad_spend }}" placeholder="e.g. $2M+">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Footer Tagline</label>
+              <input type="text" name="footer_tagline" class="form-control" value="{{ settings.footer_tagline }}">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary mt-4">Save General Settings</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── About ── -->
+    <div class="tab-pane fade" id="tab-about">
+      <div class="bg-white rounded-3 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">About Us Section</h5>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="site_settings">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Section Title</label>
+              <input type="text" name="about_title" class="form-control" value="{{ settings.about_title }}">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Paragraph 1</label>
+              <textarea name="about_body1" class="form-control" rows="3">{{ settings.about_body1 }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Paragraph 2</label>
+              <textarea name="about_body2" class="form-control" rows="3">{{ settings.about_body2 }}</textarea>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Founded Year</label>
+              <input type="text" name="about_founded_year" class="form-control" value="{{ settings.about_founded_year }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Clients Stat</label>
+              <input type="text" name="about_stat_clients" class="form-control" value="{{ settings.about_stat_clients }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Ad Spend Stat</label>
+              <input type="text" name="about_stat_spend" class="form-control" value="{{ settings.about_stat_spend }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Uptime Stat</label>
+              <input type="text" name="about_stat_uptime" class="form-control" value="{{ settings.about_stat_uptime }}">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary mt-4">Save About Settings</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Contact & Social ── -->
+    <div class="tab-pane fade" id="tab-contact">
+      <div class="bg-white rounded-3 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Contact Information & Social Links</h5>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="site_settings">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold"><i class="fab fa-whatsapp text-success me-1"></i> WhatsApp Number</label>
+              <input type="text" name="whatsapp_number" class="form-control" value="{{ settings.whatsapp_number }}" placeholder="e.g. 8801XXXXXXXXX">
+              <small class="text-muted">Without + sign. Used for wa.me link.</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold"><i class="fas fa-envelope text-primary me-1"></i> Support Email</label>
+              <input type="email" name="email_support" class="form-control" value="{{ settings.email_support }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold"><i class="fab fa-facebook text-primary me-1"></i> Facebook Page URL</label>
+              <input type="url" name="facebook_url" class="form-control" value="{{ settings.facebook_url }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold"><i class="fab fa-telegram text-info me-1"></i> Telegram URL</label>
+              <input type="url" name="telegram_url" class="form-control" value="{{ settings.telegram_url }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold"><i class="fab fa-tiktok me-1"></i> TikTok URL</label>
+              <input type="url" name="tiktok_url" class="form-control" value="{{ settings.tiktok_url }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold"><i class="fab fa-instagram text-danger me-1"></i> Instagram URL</label>
+              <input type="url" name="instagram_url" class="form-control" value="{{ settings.instagram_url }}">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary mt-4">Save Contact Settings</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── FAQ ── -->
+    <div class="tab-pane fade" id="tab-faq">
+      <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-4">Add New FAQ</h5>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="add_faq">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Question</label>
+              <input type="text" name="question" class="form-control" required placeholder="Enter question">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Answer</label>
+              <textarea name="answer" class="form-control" rows="3" required placeholder="Enter answer"></textarea>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Order</label>
+              <input type="number" name="order" class="form-control" value="0" min="0">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="is_active" id="faq_active" checked>
+                <label class="form-check-label fw-semibold" for="faq_active">Active</label>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success mt-3"><i class="fas fa-plus me-1"></i> Add FAQ</button>
+        </form>
+      </div>
+
+      <!-- FAQ List -->
+      <div class="bg-white rounded-3 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Existing FAQs <span class="badge bg-secondary">{{ faqs.count }}</span></h5>
+        {% if faqs %}
+        <div class="d-flex flex-column gap-3">
+          {% for faq in faqs %}
+          <div class="border rounded-3 p-3 {% if not faq.is_active %}opacity-50{% endif %}">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div class="fw-semibold">{{ faq.question }}</div>
+              <div class="d-flex gap-2 flex-shrink-0">
+                <span class="badge {% if faq.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                  {% if faq.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaqModal{{ faq.id }}">Edit</button>
+                <form method="post" class="d-inline" onsubmit="return confirm('Delete this FAQ?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="section" value="delete_faq">
+                  <input type="hidden" name="faq_id" value="{{ faq.id }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+            <p class="text-muted mb-0 small">{{ faq.answer|truncatechars:120 }}</p>
+          </div>
+
+          <!-- Edit Modal -->
+          <div class="modal fade" id="editFaqModal{{ faq.id }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit FAQ</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="section" value="edit_faq">
+                  <input type="hidden" name="faq_id" value="{{ faq.id }}">
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Question</label>
+                      <input type="text" name="question" class="form-control" value="{{ faq.question }}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Answer</label>
+                      <textarea name="answer" class="form-control" rows="4" required>{{ faq.answer }}</textarea>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <label class="form-label fw-semibold">Order</label>
+                        <input type="number" name="order" class="form-control" value="{{ faq.order }}">
+                      </div>
+                      <div class="col-6 d-flex align-items-end">
+                        <div class="form-check mb-1">
+                          <input class="form-check-input" type="checkbox" name="is_active" {% if faq.is_active %}checked{% endif %}>
+                          <label class="form-check-label">Active</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No FAQs yet. Add one above.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── Testimonials ── -->
+    <div class="tab-pane fade" id="tab-testimonials">
+      <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-4">Add New Testimonial</h5>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="add_testimonial">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Client Name</label>
+              <input type="text" name="name" class="form-control" required placeholder="e.g. Rafiq Khan">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Role / Company</label>
+              <input type="text" name="role" class="form-control" required placeholder="e.g. E-commerce Advertiser">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Initials</label>
+              <input type="text" name="avatar_initials" class="form-control" maxlength="3" required placeholder="RK">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Avatar Color</label>
+              <input type="color" name="avatar_color" class="form-control form-control-color w-100" value="#4f46e5">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Rating (1-5)</label>
+              <input type="number" name="rating" class="form-control" min="1" max="5" value="5">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Order</label>
+              <input type="number" name="order" class="form-control" value="0">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Review Content</label>
+              <textarea name="content" class="form-control" rows="3" required placeholder="Client's review text..."></textarea>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="is_active" checked>
+                <label class="form-check-label fw-semibold">Active</label>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success mt-3"><i class="fas fa-plus me-1"></i> Add Testimonial</button>
+        </form>
+      </div>
+
+      <!-- Testimonial List -->
+      <div class="bg-white rounded-3 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Existing Testimonials <span class="badge bg-secondary">{{ testimonials.count }}</span></h5>
+        {% if testimonials %}
+        <div class="row g-3">
+          {% for t in testimonials %}
+          <div class="col-md-6">
+            <div class="border rounded-3 p-3 h-100 {% if not t.is_active %}opacity-50{% endif %}">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <div style="width:40px;height:40px;border-radius:50%;background:{{ t.avatar_color }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0;">{{ t.avatar_initials }}</div>
+                <div>
+                  <div class="fw-semibold">{{ t.name }}</div>
+                  <div class="text-muted small">{{ t.role }}</div>
+                </div>
+                <span class="badge ms-auto {% if t.is_active %}bg-success{% else %}bg-secondary{% endif %}">{% if t.is_active %}Active{% else %}Inactive{% endif %}</span>
+              </div>
+              <div class="text-warning mb-2" style="font-size:.85rem;">{% for i in "12345" %}{% if forloop.counter <= t.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+              <p class="text-muted small mb-3">{{ t.content|truncatechars:100 }}</p>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editTestimonialModal{{ t.id }}">Edit</button>
+                <form method="post" class="d-inline" onsubmit="return confirm('Delete?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="section" value="delete_testimonial">
+                  <input type="hidden" name="testimonial_id" value="{{ t.id }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Modal -->
+          <div class="modal fade" id="editTestimonialModal{{ t.id }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Testimonial</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="section" value="edit_testimonial">
+                  <input type="hidden" name="testimonial_id" value="{{ t.id }}">
+                  <div class="modal-body">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ t.name }}" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Role</label>
+                        <input type="text" name="role" class="form-control" value="{{ t.role }}" required>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label fw-semibold">Initials</label>
+                        <input type="text" name="avatar_initials" class="form-control" value="{{ t.avatar_initials }}" maxlength="3">
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label fw-semibold">Color</label>
+                        <input type="color" name="avatar_color" class="form-control form-control-color w-100" value="{{ t.avatar_color }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label fw-semibold">Rating</label>
+                        <input type="number" name="rating" class="form-control" min="1" max="5" value="{{ t.rating }}">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label fw-semibold">Order</label>
+                        <input type="number" name="order" class="form-control" value="{{ t.order }}">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label fw-semibold">Content</label>
+                        <textarea name="content" class="form-control" rows="4" required>{{ t.content }}</textarea>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="is_active" {% if t.is_active %}checked{% endif %}>
+                          <label class="form-check-label">Active</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No testimonials yet. Add one above.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div><!-- tab-content -->
+</main>
+{% endblock %}

@@ -25,6 +25,7 @@
             <table class="table table-borderless align-middle mb-0 fs-6">
                 <thead class="bg-light border border-secondary-subtle">
                     <tr>
+                        <th class="border border-secondary-subtle">#</th>
                         <th class="border border-secondary-subtle">Ad Account</th>
                         <th class="border border-secondary-subtle">Connected BM</th>
                         <th class="border border-secondary-subtle">Remaining Balance</th>
@@ -39,7 +40,10 @@
                 </thead>
                 <tbody>
                     {% for ad_account in ad_accounts_data %}
-                    <tr class="border border-secondary-subtle align-top">
+                    <tr class="border border-secondary-subtle align-top" data-account-id="{{ ad_account.id }}" data-has-bm="{{ ad_account.has_admin_bm }}">
+                        <td class="border border-secondary-subtle text-secondary">
+                            {{ ad_accounts.start_index|add:forloop.counter0 }}
+                        </td>
                         <td class="border border-secondary-subtle">
                             <!--ad_account name-->
                             <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
@@ -65,9 +69,15 @@
                                 <p class="text-secondary mb-0">No BM accounts</p>
                             {% endfor %}
                         </td>
-                        <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
-                        <td class="border border-secondary-subtle">${{ ad_account.total_spent }}</td>
-                        <td class="border border-secondary-subtle">${{ ad_account.limit }}</td>
+                        <td class="border border-secondary-subtle fb-balance" data-id="{{ ad_account.id }}">
+                            {% if ad_account.has_admin_bm %}<span class="text-secondary fst-italic">Loading...</span>{% else %}N/A{% endif %}
+                        </td>
+                        <td class="border border-secondary-subtle fb-spent" data-id="{{ ad_account.id }}">
+                            {% if ad_account.has_admin_bm %}<span class="text-secondary fst-italic">Loading...</span>{% else %}N/A{% endif %}
+                        </td>
+                        <td class="border border-secondary-subtle fb-limit" data-id="{{ ad_account.id }}">
+                            {% if ad_account.has_admin_bm %}<span class="text-secondary fst-italic">Loading...</span>{% else %}N/A{% endif %}
+                        </td>
                         <td class="border border-secondary-subtle">
                             <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
                         </td>
@@ -109,7 +119,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center">No ad accounts found.</td>
+                        <td colspan="9" class="text-center">No ad accounts found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -300,6 +310,31 @@
 <script>
     const ad_accounts_data_element = document.getElementById('ad_accounts_data_json');
     const ad_accounts_data = JSON.parse(ad_accounts_data_element.textContent);
+
+    // Load FB balance/spent/limit async for each row
+    document.querySelectorAll('tr[data-account-id][data-has-bm="True"]').forEach(row => {
+        const accId = row.dataset.accountId;
+        fetch(`/ad_accounts/fb_info/${accId}/`)
+            .then(res => res.json())
+            .then(data => {
+                const fmt = v => (v === 'N/A' ? 'N/A' : `$${v}`);
+                const balanceCell = document.querySelector(`.fb-balance[data-id="${accId}"]`);
+                const spentCell   = document.querySelector(`.fb-spent[data-id="${accId}"]`);
+                const limitCell   = document.querySelector(`.fb-limit[data-id="${accId}"]`);
+                if (balanceCell) balanceCell.textContent = fmt(data.balance);
+                if (spentCell)   spentCell.textContent   = fmt(data.total_spent);
+                if (limitCell)   limitCell.textContent   = fmt(data.limit);
+            })
+            .catch(() => {
+                const balanceCell = document.querySelector(`.fb-balance[data-id="${accId}"]`);
+                const spentCell   = document.querySelector(`.fb-spent[data-id="${accId}"]`);
+                const limitCell   = document.querySelector(`.fb-limit[data-id="${accId}"]`);
+                if (balanceCell) balanceCell.textContent = 'N/A';
+                if (spentCell)   spentCell.textContent   = 'N/A';
+                if (limitCell)   limitCell.textContent   = 'N/A';
+            });
+    });
+
     const topupModal = document.getElementById('topupModal');
     const topupMessage = document.getElementById('topup-message');
 

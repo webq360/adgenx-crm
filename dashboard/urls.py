@@ -3,8 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', include('authentication.urls')),
-    path('', views.index, name='index'),
+    path('', views.landing, name='landing'),
+    path('dashboard/', views.index, name='index'),
     path('ad_accounts/', views.ad_accounts, name='ad_accounts'),
+    path('ad_accounts/fb_info/<int:ad_account_id>/', views.get_ad_account_fb_info, name='get_ad_account_fb_info'),
     path('deposit/', views.deposit, name='deposit'),
     path('transactions/deposit/', views.deposit_transactions, name='deposit_transactions'),
     path('transactions/topup/', views.topup_transactions, name='topup_transactions'),

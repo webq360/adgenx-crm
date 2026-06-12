@@ -44,7 +44,8 @@
             <tr>
               <th>Ad Account</th>
               <th>User Info</th>
-              <th>Connected BM</th>
+              <th>BM Account Details</th>
+              <th>Request Type</th>
               <th>Status</th>
               <th class="pe-2">Action</th>
             </tr>
@@ -63,10 +64,35 @@
                 </td>
                 <td style="font-size: 0.75rem;">
                     {% for bm_account in ad_account.bm_accounts.all %}
-                        <p class="fw-semibold mb-0">{{ bm_account.acc_name }}</p>
-                        <p class="text-secondary mb-1" style="line-height: 1.2;">{{ bm_account.acc_id }}</p>
+                        {% if bm_account.status == 'pending' %}
+                        <div class="mb-2">
+                            <p class="fw-semibold mb-1">{{ bm_account.acc_name }}</p>
+                            <p class="text-secondary mb-0" style="line-height: 1.2;">ID: {{ bm_account.acc_id }}</p>
+                        </div>
+                        {% endif %}
                     {% empty %}
-                        <p class="text-secondary mb-0">No BM accounts</p>
+                        <p class="text-secondary mb-0">No pending BM requests</p>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for bm_account in ad_account.bm_accounts.all %}
+                        {% if bm_account.status == 'pending' %}
+                        <div class="mb-2">
+                            {% if bm_account.request_type == 'add' %}
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="fas fa-plus-circle"></i> ADD REQUEST
+                                </span>
+                            {% elif bm_account.request_type == 'remove' %}
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="fas fa-minus-circle"></i> REMOVE REQUEST
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6 px-3 py-2">
+                                    {{ bm_account.request_type|upper }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     {% endfor %}
                 </td>
                 <td><span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span></td>
@@ -76,7 +102,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="5" class="text-center">No pending ad account requests found.</td>
+              <td colspan="6" class="text-center">No pending ad account requests found.</td>
             </tr>
             {% endfor %}
           </tbody>

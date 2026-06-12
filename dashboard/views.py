@@ -11,17 +11,35 @@ from datetime import timedelta
 from django.db.models import Sum
 from decimal import Decimal
 
-from .models import DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory, PaymentMethod
+from .models import DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory, PaymentMethod, ActivityLog
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
-from .utils import paginate_data, get_user_utils, get_processed_ad_accounts_data
+from .utils import paginate_data, get_user_utils, get_processed_ad_accounts_data, log_activity
 
 # Create your views here.
+
+def landing(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+    from admin_dashboard.models import SiteSettings, FAQ, Testimonial
+    settings = SiteSettings.get()
+    faqs = FAQ.objects.filter(is_active=True).order_by('order')
+    testimonials = Testimonial.objects.filter(is_active=True).order_by('order')
+    return render(request, 'landing.html', {
+        'settings': settings,
+        'faqs': faqs,
+        'testimonials': testimonials,
+    })
 
 @login_required(login_url='auth')
 def index(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:admin_overview')
-    wallet = Wallet.objects.get(user=request.user)
+    
+    # Use get_or_create to prevent DoesNotExist errors
+    wallet, created = Wallet.objects.get_or_create(
+        user=request.user,
+        defaults={'balance': 0.00, 'dollar_rate': 127.00}
+    )
 
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
@@ -52,7 +70,7 @@ def index(request):
     total_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
     total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
 
-    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')[:5]
+    ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 
     utils = get_user_utils(request.user)
@@ -80,8 +98,31 @@ def ad_accounts(request):
             name__icontains=search_query
         ).order_by('-start_date')
     
-    ad_accounts_paginated = paginate_data(request, ad_accounts_qs, 5)
-    ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_paginated.object_list)
+    ad_accounts_paginated = paginate_data(request, ad_accounts_qs, 20)
+
+    # Build lightweight account data (no FB API call here)
+    ad_accounts_data = []
+    for acc in ad_accounts_paginated.object_list:
+        bm_accounts_list = []
+        for bm in acc.bm_accounts.all():
+            bm_accounts_list.append({
+                'id': bm.id,
+                'acc_name': bm.acc_name,
+                'acc_id': bm.acc_id,
+                'status': bm.status,
+                'request_type': bm.request_type,
+            })
+        ad_accounts_data.append({
+            'id': acc.id,
+            'name': acc.name,
+            'acc_id': acc.acc_id,
+            'acc_link': acc.acc_link,
+            'start_date': str(acc.start_date),
+            'monthly_budget': str(acc.monthly_budget),
+            'status': acc.status,
+            'has_admin_bm': bool(acc.admin_bm and acc.status == 'active'),
+            'bm_accounts': bm_accounts_list,
+        })
 
     return render(request, 'ad_accounts.html', {
         'ad_accounts': ad_accounts_paginated, 
@@ -91,11 +132,37 @@ def ad_accounts(request):
 
 
 @login_required(login_url='auth')
+def get_ad_account_fb_info(request, ad_account_id):
+    """Returns live FB balance/spent/limit for a single ad account via AJAX."""
+    try:
+        if request.user.is_staff:
+            ad_account = get_object_or_404(AdAccount, id=ad_account_id)
+        else:
+            ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
+
+        if ad_account.admin_bm and ad_account.status == 'active':
+            ad_info = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.acc_id)
+            if ad_info:
+                return JsonResponse({
+                    'success': True,
+                    'balance': ad_info.get('balance', 'N/A'),
+                    'total_spent': ad_info.get('amount_spent', 'N/A'),
+                    'limit': ad_info.get('spend_cap', 'N/A'),
+                })
+        return JsonResponse({'success': True, 'balance': 'N/A', 'total_spent': 'N/A', 'limit': 'N/A'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'balance': 'N/A', 'total_spent': 'N/A', 'limit': 'N/A'})
+
+
+@login_required(login_url='auth')
 def deposit(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:admin_overview')
     
-    wallet = Wallet.objects.get(user=request.user)
+    wallet, created = Wallet.objects.get_or_create(
+        user=request.user,
+        defaults={'balance': 0.00, 'dollar_rate': 127.00}
+    )
     utils = get_user_utils(request.user)
     payment_methods = PaymentMethod.objects.filter(is_active=True)
 
@@ -105,6 +172,23 @@ def deposit(request):
         tx_id = request.POST.get('tx_id')
         receipt = request.FILES.get('receipt')
         usd_amount = request.POST.get('usd_amount')
+
+        # Input validation
+        try:
+            from decimal import Decimal, InvalidOperation
+            bdt_amount = Decimal(str(bdt_amount))
+            usd_amount = Decimal(str(usd_amount))
+            
+            if bdt_amount <= 0 or usd_amount <= 0:
+                messages.error(request, 'Amount must be positive.')
+                return redirect('deposit')
+            
+            if bdt_amount > 999999999 or usd_amount > 999999999:
+                messages.error(request, 'Amount too large.')
+                return redirect('deposit')
+        except (ValueError, InvalidOperation, TypeError):
+            messages.error(request, 'Invalid amount entered.')
+            return redirect('deposit')
 
         payment_method = get_object_or_404(PaymentMethod, id=payment_method_id)
 
@@ -240,27 +324,74 @@ def topup(request):
         amount = request.POST.get('amount')
 
         try:
-            amount = float(amount)
+            from decimal import Decimal, InvalidOperation
+            from django.db import transaction
+            from django.db.models import F
+            
+            amount = Decimal(str(amount))
+            
+            if amount <= 0:
+                return JsonResponse({'success': False, 'error': 'Amount must be positive.'})
+            
             ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
-            wallet = get_object_or_404(Wallet, user=request.user)
-
-            if wallet.balance > 0.01 and wallet.balance >= Decimal(amount):
-                ad_account_limit = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None).get('spend_cap', 0)
+            
+            # Atomic transaction to prevent race conditions
+            with transaction.atomic():
+                wallet = Wallet.objects.select_for_update().get(user=request.user)
+                old_balance = wallet.balance
+                
+                if wallet.balance >= amount:
+                    admin_bm_id = ad_account.admin_bm.acc_id if ad_account.admin_bm else None
+                    ad_info = get_ad_account_info(ad_account.acc_id, admin_bm_id)
                     
-                request = change_spend_cap(ad_account_limit + amount, ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None)
-                if not request:
-                    return JsonResponse({'success': False, 'error': 'Topup failed.'})  
-                wallet.balance -= Decimal(amount)
-                wallet.save()
-                TopupHistory.objects.create(
-                    ad_account = ad_account,
-                    amount = amount,
-                    status = 'approved'
-                )
-                return JsonResponse({'success': True})
-            else:
-                return JsonResponse({'success': False, 'error': 'Insufficient balance.'})
-        except (ValueError, AdAccount.DoesNotExist, Wallet.DoesNotExist) as e:
+                    if not ad_info:
+                        return JsonResponse({'success': False, 'error': 'Failed to fetch account info.'})
+                    
+                    ad_account_limit = float(ad_info.get('spend_cap', 0))
+                    
+                    api_result = change_spend_cap(ad_account_limit + float(amount), ad_account.acc_id, admin_bm_id)
+                    
+                    if not api_result:
+                        return JsonResponse({'success': False, 'error': 'Topup failed.'})
+                    
+                    wallet.balance = F('balance') - amount
+                    wallet.save()
+                    wallet.refresh_from_db()
+                    new_balance = wallet.balance
+                    
+                    TopupHistory.objects.create(
+                        ad_account=ad_account,
+                        amount=amount,
+                        status='approved'
+                    )
+                    
+                    # Log activity with detailed wallet balance tracking
+                    user_info = f"{request.user.first_name} {request.user.last_name} ({request.user.username})"
+                    log_activity(
+                        performed_by=request.user,
+                        activity_type='topup_increase',
+                        description=f"[USER: {user_info}] Top-up ${amount} to {ad_account.name} ({ad_account.acc_id}). Wallet before: ${old_balance}, Wallet after: ${new_balance}, Remaining balance: ${new_balance}",
+                        target_user=request.user,
+                        old_value={
+                            'wallet_balance_before_topup': str(old_balance),
+                            'ad_account': ad_account.name,
+                            'ad_account_id': ad_account.acc_id,
+                            'timestamp': timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                        },
+                        new_value={
+                            'wallet_balance_after_topup': str(new_balance),
+                            'topup_amount': str(amount),
+                            'remaining_balance': str(new_balance),
+                            'ad_account': ad_account.name
+                        },
+                        request=request
+                    )
+                    
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False, 'error': 'Insufficient balance.'})
+                    
+        except (ValueError, InvalidOperation, AdAccount.DoesNotExist, Wallet.DoesNotExist) as e:
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})

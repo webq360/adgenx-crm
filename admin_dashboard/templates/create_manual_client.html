@@ -1,0 +1,165 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block styles %}
+{{ block.super }}
+<style>
+.create-client-card {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-section {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-4">
+    <div class="create-client-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">
+                <i class="fas fa-user-plus text-primary"></i> Create Manual Client
+            </h2>
+            <a href="{% url 'admin_dashboard:manage_user' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST" id="createClientForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-user"></i> Basic Information
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">First Name *</label>
+                                <input type="text" name="first_name" class="form-control" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Last Name *</label>
+                                <input type="text" name="last_name" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Email *</label>
+                                <input type="email" name="email" class="form-control" required>
+                                <small class="text-muted">Will be used as username</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Phone Number</label>
+                                <input type="text" name="phone_number" class="form-control" placeholder="+880 1XXX-XXXXXX">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password *</label>
+                            <input type="password" name="password" class="form-control" required>
+                            <small class="text-muted">Minimum 8 characters</small>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Configuration -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-wallet"></i> Wallet Configuration
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Initial USD Balance</label>
+                                <input type="number" step="0.01" name="usd_balance" class="form-control" value="0.00">
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Initial BDT Balance</label>
+                                <input type="number" step="0.01" name="bdt_balance" class="form-control" value="0.00">
+                                <small class="text-muted">Will be converted to USD</small>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Dollar Rate (BDT)</label>
+                                <input type="number" step="0.01" name="dollar_rate" class="form-control" value="127.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Settings -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-cog"></i> Additional Settings
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Notes</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Internal notes about this client..."></textarea>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+                            <label class="form-check-label fw-semibold" for="is_active">
+                                Activate account immediately
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="is_verified" id="is_verified" checked>
+                            <label class="form-check-label fw-semibold" for="is_verified">
+                                Mark as verified
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="include_in_profit_reports" id="include_in_profit_reports" checked>
+                            <label class="form-check-label fw-semibold" for="include_in_profit_reports">
+                                Include in profit reports
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'admin_dashboard:manage_user' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i> Create Client
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('createClientForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+});
+</script>
+{% endblock %}

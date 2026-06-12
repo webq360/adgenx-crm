@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adgenx - Scale Your Ads</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --light-bg: #f8fafc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--dark); overflow-x: hidden; }
+
+        /* ── Navbar ── */
+        .navbar-custom {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e2e8f0;
+            padding: .9rem 0;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .navbar-brand-text {
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .nav-links a { color: var(--gray); text-decoration: none; font-weight: 500; font-size: .95rem; transition: color .2s; }
+        .nav-links a:hover { color: var(--primary); }
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff; border: none; padding: .5rem 1.5rem; border-radius: 8px;
+            font-weight: 600; text-decoration: none; transition: transform .2s, box-shadow .2s;
+        }
+        .btn-login:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79,70,229,.35); }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 92vh; display: flex; align-items: center;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(79,70,229,.25) 0%, transparent 70%);
+            top: -100px; right: -100px; border-radius: 50%;
+        }
+        .hero::after {
+            content: ''; position: absolute; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(6,182,212,.15) 0%, transparent 70%);
+            bottom: -50px; left: -50px; border-radius: 50%;
+        }
+        .hero-content { position: relative; z-index: 2; }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(79,70,229,.2); border: 1px solid rgba(79,70,229,.4);
+            color: #a5b4fc; padding: .35rem 1rem; border-radius: 50px;
+            font-size: .85rem; font-weight: 600; margin-bottom: 1.5rem;
+        }
+        .hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 1.5rem; }
+        .hero h1 span {
+            background: linear-gradient(135deg, #a5b4fc, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero p { font-size: 1.15rem; color: #94a3b8; max-width: 520px; line-height: 1.7; margin-bottom: 2rem; }
+        .btn-hero-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff; padding: .85rem 2.2rem; border-radius: 10px; font-weight: 700;
+            font-size: 1.05rem; text-decoration: none; display: inline-flex; align-items: center;
+            gap: .5rem; transition: transform .2s, box-shadow .2s; border: none;
+        }
+        .btn-hero-primary:hover { color: #fff; transform: translateY(-3px); box-shadow: 0 12px 30px rgba(79,70,229,.45); }
+        .btn-hero-secondary {
+            background: transparent; color: #e2e8f0; padding: .85rem 2.2rem;
+            border-radius: 10px; font-weight: 600; font-size: 1.05rem; text-decoration: none;
+            display: inline-flex; align-items: center; gap: .5rem;
+            border: 1px solid rgba(255,255,255,.2); transition: border-color .2s, color .2s;
+        }
+        .btn-hero-secondary:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+        .hero-stats { display: flex; gap: 2.5rem; margin-top: 3rem; flex-wrap: wrap; }
+        .hero-stat .num { font-size: 1.9rem; font-weight: 800; color: #fff; }
+        .hero-stat .lbl { font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+        .float-card {
+            background: rgba(255,255,255,.08); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.12); border-radius: 16px;
+            padding: 1.25rem 1.5rem; color: #fff; position: absolute; min-width: 180px;
+        }
+        .float-card .card-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+        .float-card .card-val { font-size: 1.4rem; font-weight: 800; }
+        .float-card .card-lbl { font-size: .75rem; color: #94a3b8; }
+        .fc-1 { top: 10%; right: 5%; animation: floatAnim 4s ease-in-out infinite; }
+        .fc-2 { top: 45%; right: -5%; animation: floatAnim 4s ease-in-out infinite .8s; }
+        .fc-3 { bottom: 15%; right: 10%; animation: floatAnim 4s ease-in-out infinite 1.6s; }
+        @keyframes floatAnim { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+        /* ── Shared Section Styles ── */
+        .section-tag {
+            display: inline-block; background: #ede9fe; color: var(--primary);
+            padding: .3rem .9rem; border-radius: 50px; font-size: .8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem;
+        }
+        .section-title { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800; color: var(--dark); margin-bottom: 1rem; }
+        .section-sub { color: var(--gray); font-size: 1.05rem; max-width: 540px; margin: 0 auto 3rem; }
+
+        /* ── Platforms ── */
+        .platforms-section { padding: 6rem 0; background: var(--light-bg); }
+        .platform-card {
+            background: #fff; border-radius: 20px; padding: 2.5rem 2rem;
+            border: 1px solid #e2e8f0; transition: transform .3s, box-shadow .3s, border-color .3s; height: 100%;
+        }
+        .platform-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,.1); border-color: var(--primary); }
+        .platform-icon-wrap { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; }
+        .fb-icon { background: #e8f0fe; } .tt-icon { background: #fce4ec; } .gg-icon { background: #e8f5e9; }
+        .platform-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: .75rem; }
+        .platform-card p { color: var(--gray); line-height: 1.7; font-size: .95rem; }
+        .feature-list { list-style: none; padding: 0; margin: 1.25rem 0 0; }
+        .feature-list li { display: flex; align-items: center; gap: .6rem; color: var(--gray); font-size: .9rem; margin-bottom: .5rem; }
+        .feature-list li i { color: #22c55e; font-size: .8rem; }
+
+        /* ── About Us ── */
+        .about-section { padding: 6rem 0; background: #fff; }
+        .about-img-wrap {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 24px; padding: 3rem 2rem; text-align: center; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;
+        }
+        .about-stat-box { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 1.5rem 2rem; width: 100%; }
+        .about-stat-box .val { font-size: 2.2rem; font-weight: 900; background: linear-gradient(135deg, #a5b4fc, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .about-stat-box .lbl { color: #94a3b8; font-size: .85rem; }
+        .about-text h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 1.25rem; }
+        .about-text p { color: var(--gray); line-height: 1.8; margin-bottom: 1rem; font-size: .97rem; }
+        .about-value { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+        .about-value-icon { width: 44px; height: 44px; background: #ede9fe; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.1rem; flex-shrink: 0; }
+        .about-value h5 { font-weight: 700; margin-bottom: .25rem; font-size: 1rem; }
+        .about-value p { color: var(--gray); font-size: .88rem; margin: 0; line-height: 1.5; }
+
+        /* ── How it works ── */
+        .how-section { padding: 6rem 0; background: var(--light-bg); }
+        .step-num { width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; margin: 0 auto 1.25rem; }
+        .step-card { text-align: center; padding: 1rem; }
+        .step-card h4 { font-weight: 700; margin-bottom: .5rem; }
+        .step-card p { color: var(--gray); font-size: .9rem; line-height: 1.6; }
+
+        /* ── Testimonials ── */
+        .testimonials-section { padding: 6rem 0; background: #fff; }
+        .testimonial-card {
+            background: var(--light-bg); border-radius: 20px; padding: 2rem;
+            border: 1px solid #e2e8f0; height: 100%; transition: box-shadow .3s;
+        }
+        .testimonial-card:hover { box-shadow: 0 12px 35px rgba(0,0,0,.08); }
+        .stars { color: #f59e0b; font-size: .9rem; margin-bottom: 1rem; letter-spacing: .1em; }
+        .testimonial-text { color: #334155; font-size: .95rem; line-height: 1.75; margin-bottom: 1.5rem; font-style: italic; }
+        .testimonial-author { display: flex; align-items: center; gap: .9rem; }
+        .author-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+        .av-1 { background: linear-gradient(135deg, #4f46e5, #06b6d4); }
+        .av-2 { background: linear-gradient(135deg, #ec4899, #f59e0b); }
+        .av-3 { background: linear-gradient(135deg, #10b981, #06b6d4); }
+        .av-4 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+        .av-5 { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+        .av-6 { background: linear-gradient(135deg, #3b82f6, #10b981); }
+        .author-name { font-weight: 700; font-size: .95rem; margin-bottom: .1rem; }
+        .author-role { color: var(--gray); font-size: .8rem; }
+
+        /* ── FAQ ── */
+        .faq-section { padding: 6rem 0; background: var(--light-bg); }
+        .faq-wrap { max-width: 760px; margin: 0 auto; }
+        .accordion-button { font-weight: 600; font-size: .97rem; color: var(--dark); background: #fff; }
+        .accordion-button:not(.collapsed) { color: var(--primary); background: #f5f3ff; box-shadow: none; }
+        .accordion-button:focus { box-shadow: none; }
+        .accordion-button::after { filter: none; }
+        .accordion-item { border: 1px solid #e2e8f0; border-radius: 12px !important; margin-bottom: .75rem; overflow: hidden; }
+        .accordion-body { color: var(--gray); line-height: 1.75; font-size: .93rem; }
+
+        /* ── CTA ── */
+        .cta-section {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            padding: 6rem 0; text-align: center; position: relative; overflow: hidden;
+        }
+        .cta-section::before {
+            content: ''; position: absolute; width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(79,70,229,.2) 0%, transparent 70%);
+            top: 50%; left: 50%; transform: translate(-50%,-50%); border-radius: 50%;
+        }
+        .cta-section h2 { color: #fff; font-size: clamp(1.8rem,3vw,2.8rem); font-weight: 800; margin-bottom: 1rem; position: relative; z-index: 1; }
+        .cta-section p  { color: #94a3b8; font-size: 1.05rem; margin-bottom: 2rem; position: relative; z-index: 1; }
+        .cta-badges { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 2.5rem; position: relative; z-index: 1; }
+        .cta-badge { display: flex; align-items: center; gap: .5rem; color: #94a3b8; font-size: .88rem; }
+        .cta-badge i { color: #22c55e; }
+
+        /* ── Contact ── */
+        .contact-section { padding: 6rem 0; background: #fff; }
+        .contact-card { background: var(--light-bg); border-radius: 20px; padding: 2.5rem; border: 1px solid #e2e8f0; height: 100%; }
+        .contact-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1.25rem; }
+        .ci-blue   { background: #e8f0fe; color: #1877f2; }
+        .ci-green  { background: #dcfce7; color: #16a34a; }
+        .ci-purple { background: #ede9fe; color: #7c3aed; }
+        .contact-card h5 { font-weight: 700; margin-bottom: .4rem; }
+        .contact-card p { color: var(--gray); font-size: .9rem; margin-bottom: .75rem; line-height: 1.6; }
+        .contact-card a { color: var(--primary); font-weight: 600; text-decoration: none; font-size: .93rem; }
+        .contact-card a:hover { text-decoration: underline; }
+        .contact-form-wrap { background: #fff; border-radius: 20px; padding: 2.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,.05); }
+        .contact-form-wrap h3 { font-weight: 800; margin-bottom: 1.5rem; font-size: 1.4rem; }
+        .form-control-custom {
+            border: 1px solid #e2e8f0; border-radius: 10px; padding: .75rem 1rem;
+            font-size: .93rem; transition: border-color .2s, box-shadow .2s; width: 100%;
+        }
+        .form-control-custom:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12); outline: none; }
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff; border: none; padding: .8rem 2rem; border-radius: 10px;
+            font-weight: 700; font-size: .97rem; cursor: pointer; transition: transform .2s, box-shadow .2s; width: 100%;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79,70,229,.35); }
+
+        /* ── Footer ── */
+        .footer-main { background: var(--dark); padding: 4rem 0 2rem; }
+        .footer-brand { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #a5b4fc, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .footer-desc { color: #64748b; font-size: .9rem; line-height: 1.7; margin-top: .75rem; max-width: 280px; }
+        .footer-heading { color: #e2e8f0; font-weight: 700; font-size: .95rem; margin-bottom: 1.25rem; }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: .6rem; }
+        .footer-links a { color: #64748b; text-decoration: none; font-size: .88rem; transition: color .2s; }
+        .footer-links a:hover { color: #e2e8f0; }
+        .footer-social { display: flex; gap: .75rem; margin-top: 1rem; }
+        .social-btn { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; color: #94a3b8; text-decoration: none; font-size: .9rem; transition: background .2s, color .2s; }
+        .social-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,.07); padding-top: 1.5rem; margin-top: 3rem; }
+        .footer-bottom p { color: #475569; font-size: .85rem; margin: 0; }
+
+        @media (max-width: 991px) {
+            .hero-visual { display: none; }
+        }
+        @media (max-width: 767px) {
+            .hero-stats { gap: 1.5rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar-custom">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="#" class="navbar-brand-text text-decoration-none">Adgenx</a>
+        <div class="nav-links d-none d-md-flex gap-4 align-items-center">
+            <a href="#platforms">Platforms</a>
+            <a href="#about">About</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="#faq">FAQ</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div class="d-flex gap-3 align-items-center">
+            <a href="{% url 'auth' %}?tab=register" class="text-decoration-none text-secondary fw-semibold d-none d-sm-inline" style="font-size:.93rem;">Sign Up</a>
+            <a href="{% url 'auth' %}" class="btn-login">Login</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 hero-content">
+                <div class="hero-badge"><i class="fas fa-bolt me-1"></i> {{ settings.hero_badge_text }}</div>
+                <h1>{{ settings.hero_title_line1 }}<br /><span>{{ settings.hero_title_line2 }}</span></h1>
+                <p>{{ settings.hero_subtitle }}</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'auth' %}?tab=register" class="btn-hero-primary"><i class="fas fa-rocket"></i> Get Started Free</a>
+                    <a href="#platforms" class="btn-hero-secondary"><i class="fas fa-arrow-down"></i> Learn More</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="num">{{ settings.stat_users }}</div><div class="lbl">Active Users</div></div>
+                    <div class="hero-stat"><div class="num">3</div><div class="lbl">Platforms</div></div>
+                    <div class="hero-stat"><div class="num">{{ settings.stat_ad_spend }}</div><div class="lbl">Ad Spend Managed</div></div>
+                    <div class="hero-stat"><div class="num">24/7</div><div class="lbl">Support</div></div>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-visual position-relative" style="min-height:420px;">
+                <div class="float-card fc-1"><div class="card-icon">📘</div><div class="card-val">Facebook Ads</div><div class="card-lbl">Premium BM Accounts</div></div>
+                <div class="float-card fc-2"><div class="card-icon">🎵</div><div class="card-val">TikTok Ads</div><div class="card-lbl">High Spend Accounts</div></div>
+                <div class="float-card fc-3"><div class="card-icon">🎯</div><div class="card-val">Google Ads</div><div class="card-lbl">Verified Ad Accounts</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Platforms ── -->
+<section class="platforms-section" id="platforms">
+    <div class="container">
+        <div class="text-center">
+            <span class="section-tag">Platforms</span>
+            <h2 class="section-title">One Platform, Three Powerhouses</h2>
+            <p class="section-sub">Manage all your ad accounts across the world's top advertising platforms from a single dashboard.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="platform-card">
+                    <div class="platform-icon-wrap fb-icon"><i class="fab fa-facebook-f" style="color:#1877f2;"></i></div>
+                    <h3>Facebook Ads</h3>
+                    <p>Access premium Business Manager accounts with high spending limits. Scale your campaigns without account restrictions.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Premium BM accounts</li>
+                        <li><i class="fas fa-check-circle"></i> High spend limits</li>
+                        <li><i class="fas fa-check-circle"></i> Instant top-up</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time monitoring</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="platform-card">
+                    <div class="platform-icon-wrap tt-icon"><i class="fab fa-tiktok" style="color:#000;"></i></div>
+                    <h3>TikTok Ads</h3>
+                    <p>Tap into TikTok's massive audience with verified ad accounts. Run campaigns reaching millions of engaged users daily.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Verified ad accounts</li>
+                        <li><i class="fas fa-check-circle"></i> Global reach</li>
+                        <li><i class="fas fa-check-circle"></i> Fast approval</li>
+                        <li><i class="fas fa-check-circle"></i> Dedicated support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="platform-card">
+                    <div class="platform-icon-wrap gg-icon"><i class="fab fa-google" style="color:#34a853;"></i></div>
+                    <h3>Google Ads</h3>
+                    <p>Run Search, Display and YouTube campaigns with trusted Google Ads accounts. Maximize ROI with unlimited scaling.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Trusted accounts</li>
+                        <li><i class="fas fa-check-circle"></i> All campaign types</li>
+                        <li><i class="fas fa-check-circle"></i> No spend limits</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time balance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── About Us ── -->
+<section class="about-section" id="about">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5">
+                <div class="about-img-wrap">
+                    <div class="about-stat-box">
+                        <div class="val">{{ settings.about_founded_year }}</div>
+                        <div class="lbl">Founded — Built by advertisers, for advertisers</div>
+                    </div>
+                    <div class="row g-3 w-100">
+                        <div class="col-6">
+                            <div class="about-stat-box text-center">
+                                <div class="val">{{ settings.about_stat_clients }}</div>
+                                <div class="lbl">Happy Clients</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="about-stat-box text-center">
+                                <div class="val">3</div>
+                                <div class="lbl">Ad Platforms</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="about-stat-box text-center">
+                                <div class="val">{{ settings.about_stat_spend }}</div>
+                                <div class="lbl">Ad Spend</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="about-stat-box text-center">
+                                <div class="val">{{ settings.about_stat_uptime }}</div>
+                                <div class="lbl">Uptime</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 about-text">
+                <span class="section-tag">About Us</span>
+                <h2>{{ settings.about_title }}</h2>
+                <p>{{ settings.about_body1 }}</p>
+                <p>{{ settings.about_body2 }}</p>
+                <div class="mt-4">
+                    <div class="about-value">
+                        <div class="about-value-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div>
+                            <h5>Trusted & Secure</h5>
+                            <p>Every account is verified and monitored 24/7. Your funds and campaigns are always protected.</p>
+                        </div>
+                    </div>
+                    <div class="about-value">
+                        <div class="about-value-icon"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <h5>Instant Top-Up</h5>
+                            <p>Deposit funds and top up your ad account balance in minutes — no waiting, no delays.</p>
+                        </div>
+                    </div>
+                    <div class="about-value">
+                        <div class="about-value-icon"><i class="fas fa-headset"></i></div>
+                        <div>
+                            <h5>24/7 Dedicated Support</h5>
+                            <p>Our team is always online to help you resolve issues, answer questions, and keep your campaigns running.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section class="how-section" id="how">
+    <div class="container">
+        <div class="text-center">
+            <span class="section-tag">Process</span>
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-sub">Get up and running in minutes. Simple, fast and transparent.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h4>Register</h4>
+                    <p>Create your account with email verification in under 2 minutes.</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h4>Get Approved</h4>
+                    <p>Our team reviews and activates your account quickly after registration.</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h4>Deposit</h4>
+                    <p>Add funds to your wallet using your preferred payment method.</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="step-card">
+                    <div class="step-num">4</div>
+                    <h4>Launch Ads</h4>
+                    <p>Top up your ad accounts and start running campaigns immediately.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Testimonials ── -->
+<section class="testimonials-section" id="testimonials">
+    <div class="container">
+        <div class="text-center">
+            <span class="section-tag">Testimonials</span>
+            <h2 class="section-title">What Our Clients Say</h2>
+            <p class="section-sub">Hundreds of advertisers trust Adgenx to power their campaigns every day.</p>
+        </div>
+        <div class="row g-4">
+            {% for t in testimonials %}
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="stars">{% for i in "12345" %}{% if forloop.counter <= t.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+                    <p class="testimonial-text">"{{ t.content }}"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background:{{ t.avatar_color }};">{{ t.avatar_initials }}</div>
+                        <div><div class="author-name">{{ t.name }}</div><div class="author-role">{{ t.role }}</div></div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted">No testimonials yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="faq-section" id="faq">
+    <div class="container">
+        <div class="text-center">
+            <span class="section-tag">FAQ</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-sub">Everything you need to know about Adgenx. Can't find an answer? Contact us directly.</p>
+        </div>
+        <div class="faq-wrap">
+            <div class="accordion" id="faqAccordion">
+                {% for faq in faqs %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ faq.id }}">
+                            {{ faq.question }}
+                        </button>
+                    </h2>
+                    <div id="faq{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">{{ faq.answer }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">No FAQs available yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section" id="cta">
+    <div class="container" style="position:relative; z-index:1;">
+        <h2>Ready to Scale Your Advertising?</h2>
+        <p>Join 500+ advertisers already growing with Adgenx. Get started in minutes.</p>
+        <a href="{% url 'auth' %}?tab=register" class="btn-hero-primary">
+            <i class="fas fa-user-plus"></i> Create Free Account
+        </a>
+        <div class="cta-badges">
+            <span class="cta-badge"><i class="fas fa-check-circle"></i> No setup fee</span>
+            <span class="cta-badge"><i class="fas fa-check-circle"></i> Instant activation</span>
+            <span class="cta-badge"><i class="fas fa-check-circle"></i> 24/7 support</span>
+            <span class="cta-badge"><i class="fas fa-check-circle"></i> All platforms</span>
+        </div>
+    </div>
+</section>
+
+<!-- ── Contact ── -->
+<section class="contact-section" id="contact">
+    <div class="container">
+        <div class="text-center">
+            <span class="section-tag">Contact Us</span>
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="section-sub">Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="d-flex flex-column gap-4">
+                    <div class="contact-card">
+                        <div class="contact-icon ci-green"><i class="fab fa-whatsapp"></i></div>
+                        <h5>WhatsApp</h5>
+                        <p>Fastest way to reach us. Available 24/7 for urgent support and queries.</p>
+                        <a href="https://wa.me/{{ settings.whatsapp_number }}" target="_blank"><i class="fas fa-arrow-right me-1"></i> Chat on WhatsApp</a>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon ci-blue"><i class="fas fa-envelope"></i></div>
+                        <h5>Email</h5>
+                        <p>For detailed inquiries, billing issues, or partnership proposals.</p>
+                        <a href="mailto:{{ settings.email_support }}"><i class="fas fa-arrow-right me-1"></i> {{ settings.email_support }}</a>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon ci-purple"><i class="fab fa-facebook-messenger"></i></div>
+                        <h5>Facebook</h5>
+                        <p>Follow us and send us a message on our official Facebook page.</p>
+                        <a href="{{ settings.facebook_url }}" target="_blank"><i class="fas fa-arrow-right me-1"></i> Message on Facebook</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="contact-form-wrap">
+                    <h3>Send Us a Message</h3>
+                    <form id="contactForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-600 mb-1" style="font-size:.88rem; font-weight:600;">Full Name</label>
+                                <input type="text" class="form-control-custom" placeholder="Your name" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-600 mb-1" style="font-size:.88rem; font-weight:600;">Email Address</label>
+                                <input type="email" class="form-control-custom" placeholder="your@email.com" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-600 mb-1" style="font-size:.88rem; font-weight:600;">Subject</label>
+                                <input type="text" class="form-control-custom" placeholder="How can we help?" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-600 mb-1" style="font-size:.88rem; font-weight:600;">Message</label>
+                                <textarea class="form-control-custom" rows="5" placeholder="Write your message here..." required style="resize:vertical;"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane me-2"></i> Send Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="footer-main">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="footer-brand">Adgenx</div>
+                <p class="footer-desc">{{ settings.footer_tagline }}</p>
+                <div class="footer-social">
+                    <a href="{{ settings.facebook_url }}" class="social-btn" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="{{ settings.tiktok_url }}" class="social-btn" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://wa.me/{{ settings.whatsapp_number }}" class="social-btn" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                    <a href="{{ settings.telegram_url }}" class="social-btn" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="{{ settings.instagram_url }}" class="social-btn" target="_blank"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <p class="footer-heading">Platform</p>
+                <ul class="footer-links">
+                    <li><a href="#platforms">Facebook Ads</a></li>
+                    <li><a href="#platforms">TikTok Ads</a></li>
+                    <li><a href="#platforms">Google Ads</a></li>
+                    <li><a href="#how">How It Works</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2">
+                <p class="footer-heading">Company</p>
+                <ul class="footer-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2">
+                <p class="footer-heading">Account</p>
+                <ul class="footer-links">
+                    <li><a href="{% url 'auth' %}">Login</a></li>
+                    <li><a href="{% url 'auth' %}?tab=register">Sign Up</a></li>
+                    <li><a href="{% url 'forgot_password' %}">Forgot Password</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2">
+                <p class="footer-heading">Support</p>
+                <ul class="footer-links">
+                    <li><a href="https://wa.me/8801XXXXXXXXX" target="_blank">WhatsApp</a></li>
+                    <li><a href="mailto:support@adgenx.com">Email Support</a></li>
+                    <li><a href="#faq">Help Center</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <p>© 2025 Adgenx. All rights reserved.</p>
+            <p>Facebook Ads &nbsp;·&nbsp; TikTok Ads &nbsp;·&nbsp; Google Ads</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Contact form — show success toast (no backend yet)
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('.btn-submit');
+        btn.innerHTML = '<i class="fas fa-check me-2"></i> Message Sent!';
+        btn.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Send Message';
+            btn.style.background = '';
+            btn.disabled = false;
+            this.reset();
+        }, 3000);
+    });
+
+    // Navbar active link highlight on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(s => {
+            if (window.scrollY >= s.offsetTop - 120) current = s.getAttribute('id');
+        });
+        navLinks.forEach(a => {
+            a.style.color = a.getAttribute('href') === '#' + current ? 'var(--primary)' : '';
+        });
+    });
+</script>
+</body>
+</html>

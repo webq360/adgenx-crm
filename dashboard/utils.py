@@ -1,7 +1,8 @@
 from django.core.paginator import Paginator
 from django.db.models import Sum
-from .models import DepositTransaction, AdAccount
+from .models import DepositTransaction, AdAccount, ActivityLog
 from .fb_api_reqs import get_ad_account_info
+import json
 
 def paginate_data(request, data, num_per_page):
     paginator = Paginator(data, num_per_page)
@@ -18,6 +19,51 @@ def get_user_utils(user):
         'pending_accounts': pending_accounts,
         'active_accounts': active_accounts,
     }
+
+def log_activity(performed_by, activity_type, description, target_user=None, old_value=None, new_value=None, request=None):
+    """
+    Log user activities for audit trail
+    
+    Args:
+        performed_by: User who performed the action
+        activity_type: Type of activity (from ActivityLog.ACTIVITY_TYPES)
+        description: Human-readable description
+        target_user: User affected by the action (optional)
+        old_value: Previous value (dict or simple value)
+        new_value: New value (dict or simple value)
+        request: HTTP request object for IP and user agent (optional)
+    """
+    try:
+        # Get IP address from request
+        ip_address = None
+        user_agent = None
+        if request:
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip_address = x_forwarded_for.split(',')[0]
+            else:
+                ip_address = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')[:255]
+        
+        # Convert values to JSON-serializable format
+        if old_value is not None and not isinstance(old_value, dict):
+            old_value = {'value': str(old_value)}
+        if new_value is not None and not isinstance(new_value, dict):
+            new_value = {'value': str(new_value)}
+        
+        ActivityLog.objects.create(
+            performed_by=performed_by,
+            target_user=target_user,
+            activity_type=activity_type,
+            description=description,
+            old_value=old_value,
+            new_value=new_value,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+    except Exception as e:
+        # Silently fail to not disrupt main operations
+        print(f"Error logging activity: {e}")
 
 def get_processed_ad_accounts_data(ad_accounts_qs):
     ad_accounts_data = []

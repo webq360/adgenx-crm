@@ -3,124 +3,729 @@
 
 {% block styles %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'transactions.css' %}">
+<style>
+.user-table-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-banned {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-view { background: #dbeafe; color: #1e40af; }
+.btn-view:hover { background: #bfdbfe; }
+
+.btn-edit { background: #fef3c7; color: #92400e; }
+.btn-edit:hover { background: #fde68a; }
+
+.btn-ban { background: #ffe4e6; color: #9f1239; }
+.btn-ban:hover { background: #fecdd3; }
+
+.btn-delete { background: #fee2e2; color: #991b1b; }
+.btn-delete:hover { background: #fecaca; }
+
+.search-box {
+    border-radius: 2rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e5e7eb;
+}
+
+.search-box:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.modal-header-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.info-row {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: #111827;
+    font-size: 0.95rem;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-
-  <div class="container-fluid py-4 px-4">
-    <div class="row justify-content-center w-full">
-      <div class="col-md-8">
-        <div class="bg-white rounded-3 p-3 shadow-sm">
-          <h2 class="fw-semibold mb-3" style="font-size: 1rem;">Manage User</h2>
-          <form method="get" class="mb-3">
-            <div class="input-group">
-              <input type="text" class="form-control" name="username" placeholder="Enter email" value="{{ request.GET.username }}">
-              <button class="btn btn-primary" type="submit">Search</button>
-            </div>
-          </form>
-
-          {% if not user_to_manage and not request.GET.username %}
-          <div class="mt-3">
-            <h3 class="fw-semibold mb-2" style="font-size: 0.9rem;">All Users</h3>
-            <ul class="list-grou">
-              {% for user in all_users %}
-                <li class="list-group-ite">
-                  <a href="?username={{ user.username }}">{{ user.username }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-          <div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
-            <nav aria-label="Page navigation">
-              <ul class="pagination mb-0">
-                {% if all_users.has_previous %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ all_users.previous_page_number }}" aria-label="Previous">
-                      <i class="fas fa-chevron-left"></i>
-                    </a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
-                  </li>
-                {% endif %}
-    
-                {% for i in all_users.paginator.page_range %}
-                  {% if all_users.number == i %}
-                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                  {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                  {% endif %}
-                {% endfor %}
-    
-                {% if all_users.has_next %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ all_users.next_page_number }}" aria-label="Next">
-                      <i class="fas fa-chevron-right"></i>
-                    </a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
-                  </li>
-                {% endif %}
-              </ul>
-            </nav>
-          </div>
-          {% endif %}
-
-          {% if user_to_manage %}
-            <form method="post" class="mt-4">
-              {% csrf_token %}
-              <input type="hidden" name="user_id" value="{{ user_to_manage.id }}">
-              <div class="mb-3">
-                  <div class="row">
-                      <div class="col-md-6">
-                          <p><strong>Email:</strong> {{ user_to_manage.email }}</p>
-                          <p><strong>Verified:</strong> {{ user_to_manage.is_verified }}</p>
-                          <p><strong>Whatsapp Number:</strong> {{ user_to_manage.phone_number }}</p>
-                          <p><strong>Wallet Balance:</strong>{% if wallet %} {{ wallet.balance }}{% endif %}</p>
-                      </div>
-                      {% if utils %}
-                      <div class="col-md-6">
-                          <p><strong>Pending Deposits:</strong> {{ utils.pending_deposits }}</p>
-                          <p><strong>Pending Accounts:</strong> {{ utils.pending_accounts }}</p>
-                          <p><strong>Active Accounts:</strong> {{ utils.active_accounts }}</p>
-                          <p><strong>Deposit Amount:</strong> ${{ utils.total_approved_deposit }}</p>
-                      </div>
-                      {% endif %}
-                  </div>
-              </div>
-              <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if user_to_manage.is_active %}checked{% endif %}>
-                <label class="form-check-label" for="is_active">Active</label>
-              </div>
-              <div class="mb-3">
-                <label for="dollar_rate" class="form-label">Dollar Rate</label>
-                <input type="number" class="form-control" id="dollar_rate" name="dollar_rate" step="0.01" value="{% if wallet %}{{ wallet.dollar_rate }}{% endif %}">
-              </div>
-              <div class="d-flex align-items-center mb-3 justify-content-between">
-                <a href="{% url 'admin_dashboard:manage_user' %}" class="btn btn-secondary text-decoration-none"><i class="fas fa-arrow-left me-2"></i>Back</a>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-              </div>
-            </form>
-          {% elif request.GET.username %}
-            <p>User not found.</p>
-          {% endif %}
-          {% if user_to_manage %}
-          <p>Add Accounts</p>
-          <ul>
-            {% for ad_account in ad_accounts %}
-            <li>
-              <a href="{% url 'ad_accounts' %}?search={{ ad_account.name }}">{{ ad_account.name }}</a>
-            </li>
-            {% endfor %}
-          </ul>
-          {% endif %}
+<div class="container-fluid py-4 px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-users-cog text-primary"></i> Manage Users
+            </h2>
+            <p class="text-muted mb-0">View, edit, and manage all system users</p>
         </div>
-      </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_dashboard:create_manual_client' %}" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Create Manual Client
+            </a>
+            <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
     </div>
-  </div>
 
+    <!-- Search and Filter -->
+    <div class="user-table-card mb-4 p-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" class="form-control search-box" name="search" 
+                       placeholder="🔍 Search by name, email, or phone..." 
+                       value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="user-table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                    <tr>
+                        <th class="px-4 py-3">User</th>
+                        <th class="py-3">Contact</th>
+                        <th class="py-3">Wallet Info</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3">Type</th>
+                        <th class="py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in all_users %}
+                    <tr>
+                        <td class="px-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="user-avatar">
+                                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ user.first_name }} {{ user.last_name }}</div>
+                                    <div class="text-muted small">{{ user.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <div class="small">
+                                <div><i class="fas fa-envelope text-muted"></i> {{ user.email }}</div>
+                                {% if user.phone_number %}
+                                <div><i class="fab fa-whatsapp text-success"></i> {{ user.phone_number }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            {% if user.wallet %}
+                                <div class="small">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted" style="font-size: 0.7rem;">Received:</span>
+                                        <span class="text-primary fw-semibold" style="font-size: 0.8rem;">${{ user.total_received|floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted" style="font-size: 0.7rem;">Spent:</span>
+                                        <span class="text-danger fw-semibold" style="font-size: 0.8rem;">${{ user.total_spent|floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-1 border-top">
+                                        <span class="text-muted fw-semibold" style="font-size: 0.75rem;">Balance:</span>
+                                        <span class="text-success fw-bold" style="font-size: 0.85rem;">${{ user.wallet.balance|floatformat:2 }}</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted small">No wallet</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            {% if user.is_active %}
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-check-circle"></i> Active
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-inactive">
+                                    <i class="fas fa-times-circle"></i> Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            {% if user.is_manual_client %}
+                                <span class="badge bg-info"><i class="fas fa-user-tie"></i> Manual</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-user"></i> Regular</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="action-btn btn-view" 
+                                        onclick="viewUser({{ user.id }})" 
+                                        title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn btn-edit" 
+                                        onclick="editUser({{ user.id }})" 
+                                        title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn btn-ban" 
+                                        onclick="toggleBanUser({{ user.id }}, {{ user.is_active|yesno:'true,false' }})" 
+                                        title="{% if user.is_active %}Ban{% else %}Unban{% endif %} User">
+                                    <i class="fas {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                </button>
+                                <button class="action-btn btn-delete" 
+                                        onclick="deleteUser({{ user.id }}, '{{ user.email }}')" 
+                                        title="Delete User">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-users fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">No users found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if all_users.has_other_pages %}
+        <div class="p-4 border-top">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    {% if all_users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ all_users.previous_page_number }}&search={{ request.GET.search }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ all_users.number }} of {{ all_users.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if all_users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ all_users.next_page_number }}&search={{ request.GET.search }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- View User Modal -->
+<div class="modal fade" id="viewUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title"><i class="fas fa-user-circle"></i> User Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewUserContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Edit User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="editUserForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit_user">
+                <input type="hidden" name="user_id" id="edit_user_id">
+                <div class="modal-body" id="editUserContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Ban/Unban Confirmation Modal -->
+<div class="modal fade" id="banUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" id="banModalHeader" style="background: #fef3c7;">
+                <h5 class="modal-title" id="banModalTitle">
+                    <i class="fas fa-ban"></i> Ban User
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="toggle_ban">
+                <input type="hidden" name="user_id" id="ban_user_id">
+                <input type="hidden" name="is_active" id="ban_is_active">
+                <div class="modal-body">
+                    <p id="banMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" id="banConfirmBtn">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm User Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'admin_dashboard:delete_user' %}">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" id="delete_user_id">
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <strong>⚠️ DANGER:</strong> This action is PERMANENT and cannot be undone!
+                    </div>
+                    <p class="mb-3">You are about to permanently delete this user and all associated data.</p>
+                    <div class="mb-3">
+                        <label for="confirm_email" class="form-label fw-semibold">
+                            Type <code id="delete_user_email"></code> to confirm:
+                        </label>
+                        <input type="text" class="form-control" id="confirm_email" name="confirm_email" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Yes, Delete User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Wallet Balance Modal -->
+<div class="modal fade" id="editWalletModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-wallet"></i> Edit Wallet Balance
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'admin_dashboard:edit_wallet_balance' %}">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" id="wallet_user_id">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong> 
+                        You are about to manually edit the wallet balance. This action will be logged.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">User</label>
+                        <input type="text" class="form-control" id="wallet_username" readonly>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Current Balance</label>
+                            <div class="form-control bg-light" id="wallet_current_balance">$0.00</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">New Balance (USD) *</label>
+                            <input type="number" step="0.01" class="form-control" name="new_balance" id="wallet_new_balance" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 mt-3">
+                        <label class="form-label fw-semibold">Reason for Edit *</label>
+                        <textarea class="form-control" name="admin_reason" rows="3" required placeholder="Explain why you're editing the balance..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Update Balance
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// View user details
+function viewUser(userId) {
+    const apiUrl = `/admin_dashboard/api/user/${userId}/`;
+    console.log('Fetching from:', apiUrl);
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('User data:', data);
+            console.log('Total Received:', data.total_received);
+            console.log('Total Spent:', data.total_spent);
+            console.log('Remaining:', data.remaining_balance);
+            
+            const content = `
+                <div class="row g-0">
+                    <div class="col-md-4 text-center p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="user-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 32px;">
+                            ${data.first_name.charAt(0)}${data.last_name.charAt(0)}
+                        </div>
+                        <h5 class="text-white">${data.first_name} ${data.last_name}</h5>
+                        <p class="text-white-50 small mb-3">${data.username}</p>
+                        ${data.is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>'}
+                        ${data.is_manual_client ? '<span class="badge bg-info ms-2">Manual Client</span>' : ''}
+                    </div>
+                    <div class="col-md-8 p-4">
+                        <h6 class="fw-bold mb-3 text-primary">Contact Information</h6>
+                        <div class="info-row">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${data.email}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value">${data.phone_number || 'Not provided'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Verified</div>
+                            <div class="info-value">${data.is_verified ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-warning">No</span>'}</div>
+                        </div>
+                        
+                        <h6 class="fw-bold mb-3 mt-4 text-primary">Wallet Information</h6>
+                        <div class="info-row">
+                            <div class="info-label">Total Received (Deposits)</div>
+                            <div class="info-value text-primary fw-bold">$${parseFloat(data.total_received).toFixed(2)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Total Spent (Top-ups)</div>
+                            <div class="info-value text-danger fw-bold">$${parseFloat(data.total_spent).toFixed(2)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Current Balance (Remaining)</div>
+                            <div class="info-value text-success fw-bold">$${parseFloat(data.remaining_balance).toFixed(2)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Dollar Rate</div>
+                            <div class="info-value">৳${data.dollar_rate}</div>
+                        </div>
+                        
+                        <h6 class="fw-bold mb-3 mt-4 text-primary">Statistics</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h4 class="text-primary mb-1">${data.stats.pending_deposits}</h4>
+                                    <small class="text-muted">Pending Deposits</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h4 class="text-success mb-1">${data.stats.active_accounts}</h4>
+                                    <small class="text-muted">Active Accounts</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h4 class="text-warning mb-1">${data.stats.pending_accounts}</h4>
+                                    <small class="text-muted">Pending Accounts</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h4 class="text-info mb-1">$${parseFloat(data.stats.total_approved_deposit).toFixed(2)}</h4>
+                                    <small class="text-muted">Total Deposits</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('viewUserContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('viewUserModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('viewUserContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <h5>Error Loading User Details</h5>
+                    <p>${error.message}</p>
+                    <p class="small mb-0">Check browser console for more details.</p>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('viewUserModal')).show();
+        });
+}
+
+// Edit user
+function editUser(userId) {
+    const apiUrl = `/admin_dashboard/api/user/${userId}/`;
+    console.log('Fetching from:', apiUrl);
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('User data:', data);
+            document.getElementById('edit_user_id').value = userId;
+            const content = `
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">First Name</label>
+                    <input type="text" class="form-control" name="first_name" value="${data.first_name}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Last Name</label>
+                    <input type="text" class="form-control" name="last_name" value="${data.last_name}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" class="form-control" name="email" value="${data.email}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Phone Number</label>
+                    <input type="text" class="form-control" name="phone_number" value="${data.phone_number || ''}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Dollar Rate</label>
+                    <input type="number" step="0.01" class="form-control" name="dollar_rate" value="${data.dollar_rate}">
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-wallet"></i> Current Wallet Balance:</strong> $${parseFloat(data.wallet_balance).toFixed(2)}
+                    <button type="button" class="btn btn-sm btn-warning float-end" onclick="openWalletEditModal(${data.id}, '${data.username}', '${data.wallet_balance}')">
+                        <i class="fas fa-edit"></i> Edit Balance
+                    </button>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" name="is_active" id="edit_is_active" ${data.is_active ? 'checked' : ''}>
+                    <label class="form-check-label" for="edit_is_active">Active</label>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" name="is_verified" id="edit_is_verified" ${data.is_verified ? 'checked' : ''}>
+                    <label class="form-check-label" for="edit_is_verified">Verified</label>
+                </div>
+            `;
+            document.getElementById('editUserContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('editUserContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <h5>Error Loading User Details</h5>
+                    <p>${error.message}</p>
+                    <p class="small mb-0">Check browser console for more details.</p>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        });
+}
+
+// Toggle ban user
+function toggleBanUser(userId, isActive) {
+    document.getElementById('ban_user_id').value = userId;
+    document.getElementById('ban_is_active').value = isActive ? 'false' : 'true';
+    
+    const modal = document.getElementById('banUserModal');
+    const header = document.getElementById('banModalHeader');
+    const title = document.getElementById('banModalTitle');
+    const message = document.getElementById('banMessage');
+    const btn = document.getElementById('banConfirmBtn');
+    
+    if (isActive) {
+        header.style.background = '#fef3c7';
+        title.innerHTML = '<i class="fas fa-ban"></i> Ban User';
+        message.textContent = 'Are you sure you want to ban this user? They will not be able to log in.';
+        btn.className = 'btn btn-warning';
+        btn.innerHTML = '<i class="fas fa-ban"></i> Ban User';
+    } else {
+        header.style.background = '#d1fae5';
+        title.innerHTML = '<i class="fas fa-check"></i> Unban User';
+        message.textContent = 'Are you sure you want to unban this user? They will be able to log in again.';
+        btn.className = 'btn btn-success';
+        btn.innerHTML = '<i class="fas fa-check"></i> Unban User';
+    }
+    
+    new bootstrap.Modal(modal).show();
+}
+
+// Delete user
+function deleteUser(userId, email) {
+    document.getElementById('delete_user_id').value = userId;
+    document.getElementById('delete_user_email').textContent = email;
+    document.getElementById('confirm_email').value = '';
+    new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+}
+
+// Open wallet edit modal
+function openWalletEditModal(userId, username, currentBalance) {
+    // Close edit user modal first
+    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+    
+    // Set values
+    document.getElementById('wallet_user_id').value = userId;
+    document.getElementById('wallet_username').value = username;
+    document.getElementById('wallet_current_balance').textContent = '$' + parseFloat(currentBalance).toFixed(2);
+    document.getElementById('wallet_new_balance').value = currentBalance;
+    
+    // Show modal
+    new bootstrap.Modal(document.getElementById('editWalletModal')).show();
+}
+</script>
 {% endblock %}

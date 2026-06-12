@@ -1,0 +1,255 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-money-bill-wave text-success"></i> Withdrawal Requests
+            </h2>
+            <p class="text-muted mb-0">Review and process user withdrawal requests</p>
+        </div>
+        <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" 
+               href="?status=pending">
+                Pending <span class="badge bg-warning text-dark ms-2">{{ pending_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'approved' %}active{% endif %}" 
+               href="?status=approved">
+                Approved <span class="badge bg-success ms-2">{{ approved_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'rejected' %}active{% endif %}" 
+               href="?status=rejected">
+                Rejected <span class="badge bg-danger ms-2">{{ rejected_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status_filter == 'all' %}active{% endif %}" 
+               href="?status=all">
+                All <span class="badge bg-secondary ms-2">{{ total_count }}</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- Withdrawal Requests List -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for withdrawal in withdrawals %}
+                        <tr>
+                            <td>{{ withdrawal.requested_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <strong>{{ withdrawal.user.username }}</strong><br>
+                                <small class="text-muted">{{ withdrawal.user.email }}</small>
+                            </td>
+                            <td>
+                                <strong>${{ withdrawal.amount_usd|floatformat:2 }}</strong><br>
+                                <small class="text-muted">৳{{ withdrawal.amount_bdt|floatformat:2 }}</small>
+                            </td>
+                            <td>{{ withdrawal.payment_method }}</td>
+                            <td>
+                                {% if withdrawal.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif withdrawal.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif withdrawal.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% elif withdrawal.status == 'processed' %}
+                                <span class="badge bg-info">Processed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="viewDetails({{ withdrawal.id }}, '{{ withdrawal.user.username|escapejs }}', '{{ withdrawal.user.email|escapejs }}', '{{ withdrawal.amount_usd }}', '{{ withdrawal.amount_bdt }}', '{{ withdrawal.payment_method|escapejs }}', '{{ withdrawal.account_details|escapejs }}', '{{ withdrawal.status }}', '{{ withdrawal.admin_notes|escapejs }}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No withdrawal requests found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if withdrawals.has_other_pages %}
+            <nav>
+                <ul class="pagination justify-content-center mt-3">
+                    {% if withdrawals.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ withdrawals.previous_page_number }}&status={{ status_filter }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ withdrawals.number }} of {{ withdrawals.paginator.num_pages }}</span>
+                    </li>
+                    {% if withdrawals.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ withdrawals.next_page_number }}&status={{ status_filter }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- View/Process Withdrawal Modal -->
+<div class="modal fade" id="viewWithdrawalModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-money-bill-wave"></i> Withdrawal Request Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">User Information</h6>
+                        <p class="mb-1"><strong>Username:</strong> <span id="detail_username"></span></p>
+                        <p class="mb-1"><strong>Email:</strong> <span id="detail_email"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Amount</h6>
+                        <p class="mb-1"><strong>USD:</strong> $<span id="detail_amount_usd"></span></p>
+                        <p class="mb-1"><strong>BDT:</strong> ৳<span id="detail_amount_bdt"></span></p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold">Payment Details</h6>
+                    <p class="mb-1"><strong>Method:</strong> <span id="detail_payment_method"></span></p>
+                    <p class="mb-1"><strong>Account Details:</strong></p>
+                    <pre class="bg-light p-2 rounded" id="detail_account_details"></pre>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold">Status</h6>
+                    <span id="detail_status_badge"></span>
+                </div>
+
+                <div id="admin_notes_section" class="mb-3" style="display:none;">
+                    <h6 class="fw-bold">Admin Notes</h6>
+                    <p id="detail_admin_notes" class="text-muted"></p>
+                </div>
+
+                <form method="POST" id="processWithdrawalForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="withdrawal_id" id="process_withdrawal_id">
+                    <input type="hidden" name="action" id="process_action">
+                    
+                    <div id="process_section">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Admin Notes (Optional)</label>
+                            <textarea name="admin_notes" class="form-control" rows="2" placeholder="Add notes about this withdrawal..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <div id="action_buttons">
+                    <button type="button" class="btn btn-danger" onclick="processWithdrawal('rejected')">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="processWithdrawal('approved')">
+                        <i class="fas fa-check"></i> Approve
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="processWithdrawal('processed')">
+                        <i class="fas fa-check-double"></i> Mark as Processed
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentWithdrawalId = null;
+let currentStatus = null;
+
+function viewDetails(id, username, email, amountUsd, amountBdt, paymentMethod, accountDetails, status, adminNotes) {
+    currentWithdrawalId = id;
+    currentStatus = status;
+    
+    document.getElementById('detail_username').textContent = username;
+    document.getElementById('detail_email').textContent = email;
+    document.getElementById('detail_amount_usd').textContent = amountUsd;
+    document.getElementById('detail_amount_bdt').textContent = amountBdt;
+    document.getElementById('detail_payment_method').textContent = paymentMethod;
+    document.getElementById('detail_account_details').textContent = accountDetails;
+    document.getElementById('process_withdrawal_id').value = id;
+    
+    // Status badge
+    let statusBadge = '';
+    if (status === 'pending') {
+        statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+    } else if (status === 'approved') {
+        statusBadge = '<span class="badge bg-success">Approved</span>';
+    } else if (status === 'rejected') {
+        statusBadge = '<span class="badge bg-danger">Rejected</span>';
+    } else if (status === 'processed') {
+        statusBadge = '<span class="badge bg-info">Processed</span>';
+    }
+    document.getElementById('detail_status_badge').innerHTML = statusBadge;
+    
+    // Admin notes
+    if (adminNotes && adminNotes !== 'None') {
+        document.getElementById('detail_admin_notes').textContent = adminNotes;
+        document.getElementById('admin_notes_section').style.display = 'block';
+    } else {
+        document.getElementById('admin_notes_section').style.display = 'none';
+    }
+    
+    // Show/hide action buttons based on status
+    if (status === 'pending') {
+        document.getElementById('action_buttons').style.display = 'block';
+        document.getElementById('process_section').style.display = 'block';
+    } else {
+        document.getElementById('action_buttons').style.display = 'none';
+        document.getElementById('process_section').style.display = 'none';
+    }
+    
+    new bootstrap.Modal(document.getElementById('viewWithdrawalModal')).show();
+}
+
+function processWithdrawal(action) {
+    document.getElementById('process_action').value = action;
+    
+    const actionText = action === 'approved' ? 'approve' : (action === 'rejected' ? 'reject' : 'mark as processed');
+    if (confirm(`Are you sure you want to ${actionText} this withdrawal request?`)) {
+        document.getElementById('processWithdrawalForm').submit();
+    }
+}
+</script>
+{% endblock %}

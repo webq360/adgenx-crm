@@ -15,7 +15,7 @@ class Command(BaseCommand):
         unverified_users = User.objects.filter(is_verified=False)
         for user in unverified_users:
             protocol = 'https'
-            current_site = 'www.adgenx.agency'
+            current_site = '127.0.0.1:8000'
             mail_subject = 'Activate your CRM account.'
             message = render_to_string('acc_active_email.html', {
                 'user': user,

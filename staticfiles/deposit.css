@@ -1,0 +1,311 @@
+/* Deposit page specific styles */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f4f9;
+    color: #1e293b;
+}
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+.stepper .step {
+    position: relative;
+    flex: 1;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #1e293b;
+    z-index: 10;
+}
+/* Remove default after from all steps */
+.stepper .step::after {
+    content: none;
+}
+/* Add custom lines between steps */
+.stepper .step:not(:last-child) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.stepper .step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #0c2461;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+/* Fix for the middle step's line to start from center */
+.stepper .step:nth-child(2)::before {
+    left: 50%;
+    right: auto;
+    width: 50%;
+}
+.stepper .circle {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    line-height: 2rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    z-index: 10;
+    position: relative;
+    margin: 0 auto 0.5rem auto;
+    background-color: transparent;
+    border: 2px solid #0c2461;
+    color: #0c2461;
+}
+.stepper .circle.active {
+    background-color: #0c2461;
+    color: white;
+    border: none;
+}
+.bank-details {
+    font-size: 0.75rem;
+    color: #334155;
+    background-color: white;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    border-left: 1px solid #cbd5e1;
+}
+.bank-details strong {
+    color: #1e293b;
+}
+.tips {
+    background-color: #fff7e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    font-size: 0.75rem;
+    color: #334155;
+}
+.tips .title {
+    color: #fbbf24;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.tips a {
+    color: #334155;
+    text-decoration: underline;
+}
+.tips a:hover {
+    color: #2563eb;
+}
+.bank-select label {
+    cursor: pointer;
+}
+.bank-select input[type="radio"] {
+    display: none;
+}
+.bank-select input[type="radio"]:checked + label {
+    border-color: #2563eb;
+    background-color: white;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+.bank-select .bank-option {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #334155;
+    user-select: none;
+}
+.bank-select .bank-option strong {
+    color: #1e293b;
+}
+.bank-select .others .bank-option {
+    justify-content: start;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    font-weight: 600;
+    color: #1e293b;
+}
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+.btn-primary:hover {
+    background-color: #1e40af;
+    border-color: #1e40af;
+}
+.btn-next {
+    background-color: #0c2461;
+    border-color: #0c2461;
+}
+.btn-next:hover {
+    background-color: #081a4a;
+    border-color: #081a4a;
+}
+
+.bank-option.selected {
+    outline: 2px solid #0d6efd;
+}
+
+.step-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 40px 20px;
+        }
+        
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 12px;
+        }
+        
+        .step-circle.active {
+            background-color: #0d6efd;
+        }
+        
+        .step-circle.inactive {
+            background-color: #e9ecef;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: #6c757d;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .step-label.active {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        
+        .step-connector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: 1;
+        }
+        
+        .step-item:last-child .step-connector {
+            display: none;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .step-progress {
+                padding: 20px 10px;
+            }
+            
+            .step-circle {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+            
+            .step-label {
+                font-size: 12px;
+            }
+            
+            .step-connector {
+                top: 17px;
+            }
+
+            .bank-details p {
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .step-label {
+                font-size: 11px;
+                max-width: 80px;
+            }
+        }
+
+.bank-option.selected {
+    outline: 2px solid #0d6efd;
+}
+
+.step-circle.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.upload-area {
+            border: 2px dashed #6c757d;
+            border-radius: 0.375rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+        .upload-icon {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        .form-section {
+            background: white;
+        }
+        .amount-display {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #198754;
+        }
+        .rate-info {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        .container-custom {
+            max-width: 900px;
+        }
+
+
+.bank-option.selected {
+    outline: 2px solid #0d6efd;
+}
+
+.step-circle.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.vertical-line {
+    border-left: 1px solid #dee2e6;
+}

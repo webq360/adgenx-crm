@@ -1,0 +1,480 @@
+body {
+    font-family: "Inter", sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f3f5f9;
+    color: #1e293b;
+}
+.sidebar {
+    width: 14rem;
+    min-height: 100vh;
+    border-right: 1px solid #e5e7eb;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.sidebar .nav-link.active {
+    background-color: #dbeafe;
+    color: #2563eb;
+    font-weight: 600;
+    border-radius: 0.375rem;
+    text-decoration: none;
+}
+.sidebar .nav-link {
+    font-weight: 600;
+    color: #1e293b;
+    text-decoration: none;
+}
+.sidebar .nav-link:hover {
+    color: #2563eb;
+    text-decoration: none;
+}
+/* Specifically for the Ad Accounts nav-link */
+.sidebar .nav-link.ad-accounts-link {
+    text-decoration: none;
+    color: #1e293b;
+    transition: color 0.2s ease-in-out;
+}
+.sidebar .nav-link.ad-accounts-link:hover {
+    color: #2563eb;
+    text-decoration: none;
+}
+.sidebar .menu-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+.status-bar {
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    min-width: 11.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+.status-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+.status-red {
+    background-color: #fca5a5;
+    color: #b91c1c;
+}
+.status-red .status-icon {
+    background-color: #dc2626;
+}
+.status-green {
+    background-color: #bbf7d0;
+    color: #166534;
+}
+.status-green .status-icon {
+    background-color: #15803d;
+}
+.status-purple-light {
+    background-color: #ddd6fe;
+    color: #5b21b6;
+}
+.status-purple-light .status-icon {
+    background-color: #5b21b6;
+}
+.status-purple {
+    background-color: #c4b5fd;
+    color: #4338ca;
+}
+.status-purple .status-icon {
+    background-color: #4338ca;
+}
+.status-yellow {
+    background-color: #fef3c7;
+    color: #b45309;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.status-yellow .status-icon {
+    background-color: #d97706;
+}
+.status-yellow .value {
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+.status-red-light {
+    background-color: #fecaca;
+    color: #991b1b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.status-red-light .status-icon {
+    background-color: #dc2626;
+}
+.status-red-light .value {
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+.card-small {
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    padding: 1rem;
+    background-color: white;
+    font-size: 0.875rem;
+    color: #1e293b;
+}
+.card-small .card-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #0369a1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.card-small .card-title svg {
+    flex-shrink: 0;
+}
+.card-small .card-value {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+.card-small .card-subtext {
+    font-size: 0.75rem;
+    color: #475569;
+}
+.table thead th {
+    font-weight: 600;
+    font-size: 0.75rem;
+    border-color: #e5e7eb;
+    vertical-align: middle;
+}
+.table tbody th {
+    font-weight: normal;
+}
+.table tbody td {
+    font-size: 0.75rem;
+    vertical-align: top;
+    border-color: #e5e7eb;
+}
+.table tbody tr:hover {
+    background-color: #f9fafb;
+}
+.badge-active {
+    background-color: #a7f5c2;
+    color: #175e32;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    user-select: none;
+}
+.badge-inactive {
+    background-color: #e6e494;
+    color: #6f7024;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    user-select: none;
+}
+.status-approved {
+    background-color: #2E7D32;
+    color: white;
+    border-radius: 50px;
+    padding: 0.25rem 1rem;
+    font-weight: 600;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    display: inline-block;
+}
+.status-pending {
+    background-color: #bbba66;
+    color: rgb(245, 243, 231);
+    border-radius: 50px;
+    padding: 0.25rem 1rem;
+    font-weight: 600;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    display: inline-block;
+}
+.btn-topup {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #e2e8f0;
+    color: #475569;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border: none;
+}
+.btn-topup:hover {
+    background-color: #cbd5e1;
+    color: #1e293b;
+}
+.btn-create {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #2563eb;
+    color: white;
+    border-radius: 0.375rem;
+    padding: 0.375rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: none;
+}
+.btn-create:hover {
+    background-color: #1d4ed8;
+    color: white;
+}
+.btn-add-balance {
+    font-weight: 600;
+    font-size: 0.875rem;
+    background-color: #2563eb;
+    color: white;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    border: none;
+}
+.btn-add-balance:hover {
+    background-color: #1d4ed8;
+    color: white;
+}
+.input-search {
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    color: #475569;
+    padding: 0.375rem 0.75rem;
+    width: 16rem;
+}
+.input-search::placeholder {
+    color: #94a3b8;
+}
+.input-search:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgb(59 130 246 / 0.5);
+    background-color: white;
+    color: #1e293b;
+}
+.topbar {
+    height: 4rem;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+}
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.btn-icon {
+    border: 1px solid #d1d5db;
+    background-color: white;
+    color: #475569;
+    border-radius: 0.375rem;
+    padding: 0.275rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.btn-icon:hover {
+    color: #1e293b;
+    border-color: #9ca3af;
+}
+.btn-support {
+    border: 1px solid #d1d5db;
+    background-color: white;
+    color: #475569;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+}
+.btn-support:hover {
+    background-color: #f3f4f6;
+    color: #1e293b;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0.125rem;
+    right: 0.125rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: #dc2626;
+    border-radius: 9999px;
+    border: 2px solid white;
+}
+.avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    border: 1px solid #d1d5db;
+    overflow: hidden;
+    cursor: pointer;
+}
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.btn-dropdown {
+    background: none;
+    border: none;
+    color: #475569;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.25rem;
+}
+.btn-dropdown:hover {
+    color: #1e293b;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+/* Make the others menu container stick to bottom */
+.others-menu {
+    padding: 1rem 1rem 1rem 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.badge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    user-select: none;
+}
+
+
+.btn-toggle-sidebar {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -14rem;
+        bottom: 0;
+        z-index: 100;
+        transition: left 0.3s ease-in-out;
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    .topbar-left{
+        display: block;
+    }
+
+    .btn-toggle-sidebar{
+        display: block !important;
+        outline: none !important;
+        border: none;
+    }
+
+    .input-search {
+        width: 10rem;
+    }
+
+    .table-container-container {
+        padding: 0.5rem !important; /* Reduce padding for main content area */
+    }
+
+    .table-container {
+        padding: 0.5rem !important; /* Reduce padding for table section */
+    }
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+    width: 100%;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .table-responsive table td,
+    .table-responsive table th {
+        white-space: nowrap;
+    }
+}
+
+.flex-grow-1.d-flex.flex-column {
+    overflow: hidden;
+}
+
+.table-responsive table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: auto;
+}
+
+/* Dropdown Button */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0; /* Align to the right of the avatar */
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 8px 10px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #ececec;
+}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.dropdown-content.show {
+    display: block;
+}

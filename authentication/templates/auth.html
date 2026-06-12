@@ -3,124 +3,187 @@
 {% block title %}Authentication{% endblock %}
 
 {% block content %}
-<div id="login-form">
-    <form method="POST" id="login-form-tag">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="login">
-        <!-- Email input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label" for="login-email">Email address</label>
-            <input type="email" name="email" id="login-email" class="form-control form-control-lg"
-                placeholder="Enter a valid email address" required />
+<div class="auth-card">
+    <div id="login-form" class="auth-form-container">
+        <div class="auth-header">
+            <h2 class="auth-title">Welcome Back! 👋</h2>
+            <p class="auth-subtitle">Login to your account</p>
         </div>
 
-        <!-- Password input -->
-        <div data-mdb-input-init class="form-outline mb-1">
-            <label class="form-label">Password</label>
-            <input type="password" autocomplete="off" name="password" class="form-control form-control-lg"
-                placeholder="Enter password" required />
-        </div>
-        
-        <a href="{% url 'forgot_password' %}" class="text-body mb-2 fs-6">Forgot password?</a>
+        <form method="POST" id="login-form-tag">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="login">
+            
+            <div class="form-group-modern mb-3">
+                <label class="form-label-modern" for="login-email">
+                    <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <input type="email" name="email" id="login-email" class="form-control-modern"
+                    placeholder="you@example.com" required />
+            </div>
 
-        
-    
-        <div class="text-center text-lg-start mt-2">
-        <button  type="submit" id="login-button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-md fs-5"
-            style="padding-left: 2rem; padding-right: 2rem;">Login</button>
-        <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <button type="button" class="btn btn-link link-danger" id="show-register">Register</button></p>
-        </div>
+            <div class="form-group-modern mb-3">
+                <label class="form-label-modern">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" autocomplete="off" name="password" class="form-control-modern"
+                    placeholder="Enter your password" required />
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot password?</a>
+            </div>
 
-    </form>
-    
-</div>
+            <button type="submit" id="login-button" class="btn-modern btn-modern-primary w-100 mb-3">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
 
-<div id="register-form" style="display: none;">
-    <form method="POST" id="register-form-tag">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="register">
-        <!-- First name input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label" >First Name</label>
-            <input type="text" name="first_name" class="form-control form-control-lg"
-                placeholder="Enter your first name" required />
-        </div>
-        
-        <!-- Last name input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label" >Last Name</label>
-            <input type="text" name="last_name" class="form-control form-control-lg"
-                placeholder="Enter your last name" required />
-        </div>
+            <div class="auth-footer">
+                <p>Don't have an account? <button type="button" class="btn-link-modern" id="show-register">Create Account</button></p>
+            </div>
+        </form>
+    </div>
 
-        <!-- Email input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label" >Email address</label>
-            <input type="email" name="email" class="form-control form-control-lg"
-                placeholder="Enter a valid email address" required />
+    <div id="register-form" class="auth-form-container" style="display: none;">
+        <div class="auth-header">
+            <h2 class="auth-title">Create Account 🚀</h2>
+            <p class="auth-subtitle">Join us today!</p>
         </div>
 
-        <!-- Phone Number input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label" >Whatsapp Number</label>
-            <input type="text" name="phone_number" class="form-control form-control-lg"
-                placeholder="Enter your phone number" required />
-        </div>
+        <form method="POST" id="register-form-tag">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="register">
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group-modern mb-3">
+                        <label class="form-label-modern">
+                            <i class="fas fa-user"></i> First Name
+                        </label>
+                        <input type="text" name="first_name" class="form-control-modern"
+                            placeholder="John" required />
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group-modern mb-3">
+                        <label class="form-label-modern">
+                            <i class="fas fa-user"></i> Last Name
+                        </label>
+                        <input type="text" name="last_name" class="form-control-modern"
+                            placeholder="Doe" required />
+                    </div>
+                </div>
+            </div>
 
-        <!-- Password input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" autocomplete="off" name="password" class="form-control form-control-lg"
-                placeholder="Enter password" required />
-        </div>
-        
-        <!-- Comfirm Password input -->
-        <div data-mdb-input-init class="form-outline mb-3">
-            <label class="form-label" >Comfirm Password</label>
-            <input type="password" autocomplete="off" name="password2" class="form-control form-control-lg"
-                placeholder="Comfirm password" required />
-        </div>
+            <div class="form-group-modern mb-3">
+                <label class="form-label-modern">
+                    <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <input type="email" name="email" class="form-control-modern"
+                    placeholder="you@example.com" required />
+            </div>
 
-        <div class="text-center text-lg-start mt-2">
-        <button  type="submit" id="register-button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-md fs-5"
-            style="padding-left: 2rem; padding-right: 2rem;">Register</button>
-        <p class="small fw-bold mt-2 pt-1 mb-0">Already have an account? <button type="button" class="btn btn-link link-danger" id="show-login">Login</button></p>
-        </div>
-    </form>
+            <div class="form-group-modern mb-3">
+                <label class="form-label-modern">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Number
+                </label>
+                <input type="text" name="phone_number" class="form-control-modern"
+                    placeholder="+880 1XXX-XXXXXX" required />
+            </div>
+
+            <div class="form-group-modern mb-3">
+                <label class="form-label-modern">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" autocomplete="off" name="password" class="form-control-modern"
+                    placeholder="Min. 8 characters" required />
+            </div>
+            
+            <div class="form-group-modern mb-3">
+                <label class="form-label-modern">
+                    <i class="fas fa-lock"></i> Confirm Password
+                </label>
+                <input type="password" autocomplete="off" name="password2" class="form-control-modern"
+                    placeholder="Re-enter password" required />
+            </div>
+
+            <div class="mb-3">
+                <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+            </div>
+
+            <button type="submit" id="register-button" class="btn-modern btn-modern-primary w-100 mb-3">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+
+            <div class="auth-footer">
+                <p>Already have an account? <button type="button" class="btn-link-modern" id="show-login">Login</button></p>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const showRegister = document.getElementById('show-register');
     const showLogin = document.getElementById('show-login');
 
-    showRegister.addEventListener('click', () => {
+    // Check URL param — ?tab=register থাকলে register form দেখাও
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'register') {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
+    }
+
+    // Smooth transition between forms
+    showRegister.addEventListener('click', () => {
+        loginForm.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            registerForm.style.animation = 'fadeIn 0.3s ease-in';
+        }, 300);
     });
 
     showLogin.addEventListener('click', () => {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
+        registerForm.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            loginForm.style.animation = 'fadeIn 0.3s ease-in';
+        }, 300);
     });
 
+    // Login form submission with loading state
     document.getElementById('login-form-tag').addEventListener('submit', function() {
         const submitButton = document.getElementById('login-button');
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
         }
     });
 
+    // Register form submission with loading state
     document.getElementById('register-form-tag').addEventListener('submit', function() {
         const submitButton = document.getElementById('register-button');
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating Account...';
         }
     });
+
+    // Add fadeOut animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 {% endblock %}

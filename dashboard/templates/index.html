@@ -171,7 +171,11 @@
                             <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
                             <!--ad_account_id-->
                             <p class="text-secondary mb-0 lh-sm">
-                                id - {{ ad_account.acc_id }}<br />
+                                id - {{ ad_account.acc_id }} 
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyToClipboard('{{ ad_account.acc_id }}', this)" title="Copy Account ID">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <br />
                                 <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer"
                                     class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
                             </p>
@@ -181,11 +185,21 @@
                                 {% if bm_account.status == 'approved' %}
                                 <p class="text-success fw-semibold mb-0">Approved</p>
                                     <p class="mb-0">{{ bm_account.acc_name }}</p>
-                                    <p class="mb-1">{{ bm_account.acc_id }}</p>
+                                    <p class="mb-1">
+                                        {{ bm_account.acc_id }} 
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyToClipboard('{{ bm_account.acc_id }}', this)" title="Copy BM ID">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </p>
                                 {% elif bm_account.status == 'pending' %}
                                 <p class="text-warning fw-semibold mb-0">Pending</p>
                                     <p class="mb-0 text-secondary">{{ bm_account.acc_name }}</p>
-                                    <p class="mb-1 text-secondary">{{ bm_account.acc_id }}</p>
+                                    <p class="mb-1 text-secondary">
+                                        {{ bm_account.acc_id }} 
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyToClipboard('{{ bm_account.acc_id }}', this)" title="Copy BM ID">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </p>
                                 {% endif %}
                             {% empty %}
                                 <p class="text-secondary mb-0">No BM accounts</p>
@@ -539,5 +553,22 @@
             submitButton.disabled = false;
         }
     });
+
+    // Copy to clipboard function
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check text-success"></i>';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalIcon;
+                button.disabled = false;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy to clipboard');
+        });
+    }
 </script>
 {% endblock %}

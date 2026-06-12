@@ -22,6 +22,12 @@
           <p><strong>USD Amount:</strong> ${{ transaction.usd_amount }}</p>
           <p><strong>Status:</strong> <span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></p>
           <p><strong>Timestamp:</strong> {{ transaction.created_at|date:"H:i, d M Y" }}</p>
+          <hr>
+          <p class="mb-1"><strong>User's Current Wallet Balance:</strong> <span class="text-success">${{ current_balance }}</span></p>
+          <p class="mb-1"><strong>User's Dollar Rate:</strong> ৳{{ dollar_rate }}</p>
+          {% if transaction.status == 'pending' %}
+          <p class="text-muted"><small>After approval, balance will be: ${{ current_balance|add:transaction.usd_amount }}</small></p>
+          {% endif %}
         </div>
         <div class="col-md-6">
           {% if transaction.receipt %}
@@ -42,15 +48,21 @@
 
         {% if transaction.status == 'pending' %}
         <div class="mt-4">
-          <form action="" method="post" class="d-inline">
+          <form action="" method="post" class="d-inline" id="approveForm">
             {% csrf_token %}
             <input type="hidden" name="action" value="approve">
-            <button type="submit" class="btn btn-success me-2">Approve</button>
+            <button type="submit" class="btn btn-success me-2" id="approveBtn">
+              <span class="btn-text">Approve</span>
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
           </form>
-          <form action="" method="post" class="d-inline">
+          <form action="" method="post" class="d-inline" id="rejectForm">
             {% csrf_token %}
             <input type="hidden" name="action" value="reject">
-            <button type="submit" class="btn btn-danger">Reject</button>
+            <button type="submit" class="btn btn-danger" id="rejectBtn">
+              <span class="btn-text">Reject</span>
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
           </form>
         </div>
         {% endif %}
@@ -59,5 +71,22 @@
 
     </div>
   </div>
+
+<script>
+// Prevent double submission
+document.getElementById('approveForm').addEventListener('submit', function() {
+  const btn = document.getElementById('approveBtn');
+  btn.disabled = true;
+  btn.querySelector('.btn-text').textContent = 'Processing...';
+  btn.querySelector('.spinner-border').classList.remove('d-none');
+});
+
+document.getElementById('rejectForm').addEventListener('submit', function() {
+  const btn = document.getElementById('rejectBtn');
+  btn.disabled = true;
+  btn.querySelector('.btn-text').textContent = 'Processing...';
+  btn.querySelector('.spinner-border').classList.remove('d-none');
+});
+</script>
 
 {% endblock %}

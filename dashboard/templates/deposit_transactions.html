@@ -85,7 +85,9 @@
                 <td class="fs-6">{{ transaction.vendor_trx_id }}</td>
                 <td class="">
                   {% if transaction.receipt %}
-                  <a href="{{ transaction.receipt.url }}" target="_blank"><i class="fas fa-link"></i> View Receipt</a>
+                  <a href="#" onclick="showReceipt('{{ transaction.receipt.url }}'); return false;" class="text-decoration-none">
+                    <i class="fas fa-eye"></i> View Receipt
+                  </a>
                   {% else %}
                   N/A
                   {% endif %}
@@ -182,5 +184,36 @@
       </div>
     </div>
   </div>
+
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h5 class="modal-title">
+          <i class="fas fa-receipt"></i> Receipt Image
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-0">
+        <img id="receiptImage" src="" alt="Receipt" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
+      </div>
+      <div class="modal-footer">
+        <a id="downloadReceipt" href="" download class="btn btn-primary">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showReceipt(receiptUrl) {
+  document.getElementById('receiptImage').src = receiptUrl;
+  document.getElementById('downloadReceipt').href = receiptUrl;
+  new bootstrap.Modal(document.getElementById('receiptModal')).show();
+}
+</script>
 
 {% endblock %}

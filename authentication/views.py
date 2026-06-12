@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
+import requests as http_requests
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
@@ -24,26 +25,29 @@ def forgot_password(request):
             user = None
 
         if user is not None:
-            # Send verification email
-            protocol = 'https' if request.is_secure() else 'http'
-            current_site = request.get_host()
-            mail_subject = 'Reset your password.'
-            message = render_to_string('password_reset_email.html', {
-                'user': user,
-                'protocol': protocol,
-                'domain': current_site,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': password_reset_token.make_token(user),
-            })
-            to_email = email
-            send_mail(
-                mail_subject,
-                message,
-                settings.EMAIL_HOST_USER,
-                [to_email],
-                fail_silently=False,
-            )
-            messages.success(request, 'A password reset link has been sent to your email.')
+            # Send verification email (with error handling)
+            try:
+                protocol = 'https' if request.is_secure() else 'http'
+                current_site = request.get_host()
+                mail_subject = 'Reset your password.'
+                message = render_to_string('password_reset_email.html', {
+                    'user': user,
+                    'protocol': protocol,
+                    'domain': current_site,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': password_reset_token.make_token(user),
+                })
+                to_email = email
+                send_mail(
+                    mail_subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [to_email],
+                    fail_silently=False,
+                )
+                messages.success(request, 'A password reset link has been sent to your email.')
+            except Exception as e:
+                messages.error(request, 'Email service temporarily unavailable. Please contact admin or try again later.')
         else:
             messages.error(request, 'No user found with that email address.')
 
@@ -82,6 +86,25 @@ def auth_view(request):
             password = request.POST.get('password')
             password2 = request.POST.get('password2')
 
+            # Verify reCAPTCHA
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+            if not recaptcha_response:
+                messages.error(request, 'Please complete the CAPTCHA verification.')
+                return redirect('auth')
+            
+            recaptcha_verify = http_requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': recaptcha_response,
+                },
+                timeout=5
+            )
+            recaptcha_result = recaptcha_verify.json()
+            if not recaptcha_result.get('success'):
+                messages.error(request, 'CAPTCHA verification failed. Please try again.')
+                return redirect('auth')
+
             if not all([first_name, last_name, email, phone_number, password, password2]):
                 messages.error(request, 'Please fill in all fields.')
                 return redirect('auth')
@@ -110,30 +133,36 @@ def auth_view(request):
             )
             Wallet.objects.create(user=user)
 
-            # Send verification email
-            protocol = 'https' if request.is_secure() else 'http'
-            current_site = request.get_host()
-            mail_subject = 'Activate your CRM account.'
-            message = render_to_string('acc_active_email.html', {
-                'user': user,
-                'protocol': protocol,
-                'domain': current_site,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            to_email = email
-            send_mail(
-                mail_subject,
-                message,
-                settings.EMAIL_HOST_USER,
-                [to_email],
-                fail_silently=False,
-            )
-
-            messages.success(request, 'Registration successful! Please confirm your email address to complete the registration.')
+            # Send verification email (with error handling)
+            try:
+                protocol = 'https' if request.is_secure() else 'http'
+                current_site = request.get_host()
+                mail_subject = 'Activate your CRM account.'
+                message = render_to_string('acc_active_email.html', {
+                    'user': user,
+                    'protocol': protocol,
+                    'domain': current_site,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': account_activation_token.make_token(user),
+                })
+                to_email = email
+                send_mail(
+                    mail_subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [to_email],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Registration successful! Please confirm your email address to complete the registration.')
+            except Exception as e:
+                # If email fails, still show success but mention admin activation
+                messages.warning(request, f'Registration successful! Your account will be activated by an admin. Email: {email}')
+            
             return redirect('auth')
 
-    return render(request, 'auth.html')
+    return render(request, 'auth.html', {
+        'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY,
+    })
 
 def verify_email(request, uidb64, token):
     try:

@@ -66,6 +66,13 @@
             Overview
         </a>
 
+        <a href="{% url 'admin_dashboard:activity_log' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Activity Log
+        </a>
+
         <a href="{% url 'admin_dashboard:review_deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
             <path d="M18.364 5.636a9 9 0 11-12.728 0" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -85,6 +92,35 @@
         <a href="{% url 'admin_dashboard:manage_user' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 640 640"><path d="M240 192C240 147.8 275.8 112 320 112C364.2 112 400 147.8 400 192C400 236.2 364.2 272 320 272C275.8 272 240 236.2 240 192zM448 192C448 121.3 390.7 64 320 64C249.3 64 192 121.3 192 192C192 262.7 249.3 320 320 320C390.7 320 448 262.7 448 192zM144 544C144 473.3 201.3 416 272 416L368 416C438.7 416 496 473.3 496 544L496 552C496 565.3 506.7 576 520 576C533.3 576 544 565.3 544 552L544 544C544 446.8 465.2 368 368 368L272 368C174.8 368 96 446.8 96 544L96 552C96 565.3 106.7 576 120 576C133.3 576 144 565.3 144 552L144 544z"/></svg>            
             Manage Users
+        </a>
+
+        <a href="{% url 'admin_dashboard:payment_methods' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2" y="5" width="20" height="14" rx="2" stroke-linecap="round" stroke-linejoin="round"></rect>
+            <path d="M2 10h20" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Payment Methods
+        </a>
+
+        <a href="{% url 'admin_dashboard:appearance' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM14 13a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1h-4a1 1 0 01-1-1v-5z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Appearance
+        </a>
+
+        <a href="{% url 'admin_dashboard:withdrawal_requests' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Withdrawals
+        </a>
+
+        <a href="{% url 'admin_dashboard:wallet_balance_report' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Balance Report
         </a>
         {% endif %}
 
