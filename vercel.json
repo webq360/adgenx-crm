@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput --clear",
+  "outputDirectory": "staticfiles",
+  "framework": "django",
+  "env": {
+    "PYTHON_VERSION": "3.12"
+  },
+  "functions": {
+    "crm/wsgi.py": {
+      "runtime": "python3.12"
+    }
+  }
+}
