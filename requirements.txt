@@ -7,8 +7,10 @@ certifi==2025.8.3
 charset-normalizer==3.4.3
 curlify==3.0.0
 Django==5.2.5
+dj-database-url==2.1.0
 djangorestframework==3.14.0
 django-cors-headers==4.3.1
+psycopg2-binary==2.9.9
 facebook_business==23.0.1
 frozenlist==1.7.0
 idna==3.10
