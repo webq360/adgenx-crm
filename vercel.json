@@ -6,9 +6,14 @@
   "env": {
     "PYTHON_VERSION": "3.12"
   },
-  "functions": {
-    "crm/wsgi.py": {
-      "runtime": "python@3.12"
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/crm/wsgi.py"
     }
-  }
+  ]
 }
