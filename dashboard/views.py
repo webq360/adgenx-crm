@@ -70,6 +70,23 @@ def index(request):
     total_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
     total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
 
+    # Deposit summary by rate
+    deposit_summary = deposit_qs.values('created_at__date').annotate(
+        total_bdt=Sum('bdt_amount'),
+        total_usd=Sum('usd_amount')
+    ).order_by('-created_at__date')
+    
+    # Calculate rate for each day
+    deposit_by_rate = []
+    for item in deposit_summary:
+        rate = round(item['total_bdt'] / item['total_usd'], 2) if item['total_usd'] > 0 else 0
+        deposit_by_rate.append({
+            'date': item['created_at__date'],
+            'bdt_amount': item['total_bdt'],
+            'usd_amount': item['total_usd'],
+            'rate': rate
+        })
+
     ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
 
@@ -80,6 +97,7 @@ def index(request):
         'utils': utils,
         'total_deposit': total_deposit,
         'total_topup_increase': total_topup_increase,
+        'deposit_by_rate': deposit_by_rate,
         'start_date': start_date_str,
         'end_date': end_date_str,
     })
