@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .edit-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .edit-header h2 { font-size: 28px; font-weight: 700; margin: 0; }
+    .form-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(15,23,42,0.08); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 700; color: #0f172a; }
+    .form-control { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; }
+    .form-control:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .permission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .permission-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+    .btn-primary { background: #2563eb; border: 1px solid #2563eb; color: white; }
+    .btn-secondary { background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; }
+</style>
+
+<div class="edit-header">
+    <div>
+        <h2>Edit Role</h2>
+        <p style="color: #64748b; margin: 8px 0 0;">Update role name and permission assignments.</p>
+    </div>
+    <a href="{% url 'admin_dashboard:manage_roles' %}" class="btn btn-secondary">Back to Roles</a>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">Role Name</label>
+            <input type="text" name="group_name" class="form-control" value="{{ group.name }}" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Permissions</label>
+            <div class="permission-grid">
+                {% for perm_codename, perm_label in available_permissions.items %}
+                <label class="permission-item">
+                    <input type="checkbox" name="permissions" value="{{ perm_codename }}" {% if perm_codename in current_permissions %}checked{% endif %}>
+                    <span>{{ perm_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 12px 22px;">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

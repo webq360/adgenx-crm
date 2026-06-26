@@ -1,0 +1,239 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="mb-5">
+            <h1 class="fs-2 fw-bold mb-2" style="color: #1a1d29;">Withdrawal History</h1>
+            <p class="text-secondary">View and manage all your withdrawal requests</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <a href="{% url 'deposit_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                Deposit
+            </a>
+            <a href="{% url 'topup_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                Top Up
+            </a>
+            <a href="{% url 'withdrawal_transactions' %}" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                </svg>
+                Withdrawals
+            </a>
+        </div>
+
+        <!-- Withdrawal Table Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div class="card-body p-0" style="background: white;">
+                {% if withdrawals %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                <tr>
+                                    <th class="text-secondary small fw-semibold text-uppercase px-4 py-3" style="color: #6b7280;">Requested Date</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">ID</th>
+                                    {% if request.user.is_staff %}
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">User</th>
+                                    {% endif %}
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Amount (USD)</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Amount (BDT)</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Payment Method</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Status</th>
+                                    {% if request.user.is_staff %}
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Reviewed By</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Reviewed At</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for withdrawal in withdrawals %}
+                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                    <td class="px-4 py-3">
+                                        <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ withdrawal.requested_at|date:"M d, Y" }}</div>
+                                        <div style="font-size: 0.75rem; color: #6b7280;">{{ withdrawal.requested_at|date:"H:i" }}</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span style="font-family: monospace; color: #1a1d29; font-weight: 500;">{{ withdrawal.id }}</span>
+                                            <button class="btn btn-sm" onclick="copyToClipboard('{{ withdrawal.id }}', this)" style="background: #f3f4f6; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer;" title="Copy">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">
+                                                    <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    {% if request.user.is_staff %}
+                                    <td class="py-3">
+                                        <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ withdrawal.user.first_name }} {{ withdrawal.user.last_name }}</div>
+                                        <div style="font-size: 0.75rem; color: #6b7280;">{{ withdrawal.user.username }}</div>
+                                    </td>
+                                    {% endif %}
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span style="color: #667eea; font-weight: 600;">${{ withdrawal.amount_usd }}</span>
+                                            <button class="btn btn-sm" onclick="copyToClipboard('{{ withdrawal.amount_usd }}', this)" style="background: #f3f4f6; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer;" title="Copy">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">
+                                                    <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span style="color: #f5576c; font-weight: 600;">৳{{ withdrawal.amount_bdt }}</span>
+                                            <button class="btn btn-sm" onclick="copyToClipboard('{{ withdrawal.amount_bdt }}', this)" style="background: #f3f4f6; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer;" title="Copy">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">
+                                                    <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge" style="background: #dbeafe; color: #0369a1; font-weight: 600; padding: 6px 12px; border-radius: 6px;">{{ withdrawal.payment_method }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge" style="background: {% if withdrawal.status == 'approved' %}#d1fae5; color: #059669{% elif withdrawal.status == 'pending' %}#fef3c7; color: #b45309{% elif withdrawal.status == 'rejected' %}#fee2e2; color: #dc2626{% else %}#dbeafe; color: #0369a1{% endif %}; font-weight: 600; padding: 6px 12px; border-radius: 6px;">{{ withdrawal.status|capfirst }}</span>
+                                    </td>
+                                    {% if request.user.is_staff %}
+                                    <td class="py-3">
+                                        {% if withdrawal.reviewed_by %}
+                                            <span style="color: #1a1d29; font-weight: 500;">{{ withdrawal.reviewed_by.username }}</span>
+                                        {% else %}
+                                            <span style="color: #9ca3af;">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if withdrawal.reviewed_at %}
+                                            <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ withdrawal.reviewed_at|date:"M d, Y" }}</div>
+                                            <div style="font-size: 0.75rem; color: #6b7280;">{{ withdrawal.reviewed_at|date:"H:i" }}</div>
+                                        {% else %}
+                                            <span style="color: #9ca3af;">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if withdrawals.has_other_pages %}
+                    <div class="p-3 border-top" style="background: #f9fafb;">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if withdrawals.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ withdrawals.previous_page_number }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</span>
+                                </li>
+                                {% endif %}
+                                
+                                {% with withdrawals.number as current_page %}
+                                {% with withdrawals.paginator.num_pages as total_pages %}
+                                    {% if total_pages > 5 %}
+                                        {% if current_page > 3 %}
+                                            <li class="page-item"><a class="page-link" href="?page=1" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">1</a></li>
+                                            {% if current_page > 4 %}
+                                                <li class="page-item disabled"><span class="page-link" style="border: 1px solid #e5e7eb; margin: 0 2px;">...</span></li>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% for i in withdrawals.paginator.page_range %}
+                                            {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
+                                                {% if current_page == i %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">{{ i }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item"><a class="page-link" href="?page={{ i }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ i }}</a></li>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if current_page < total_pages|add:'-2' %}
+                                            {% if current_page < total_pages|add:'-3' %}
+                                                <li class="page-item disabled"><span class="page-link" style="border: 1px solid #e5e7eb; margin: 0 2px;">...</span></li>
+                                            {% endif %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ total_pages }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ total_pages }}</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        {% for i in withdrawals.paginator.page_range %}
+                                            {% if withdrawals.number == i %}
+                                                <li class="page-item active">
+                                                    <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">{{ i }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item"><a class="page-link" href="?page={{ i }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ i }}</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endwith %}
+                                {% endwith %}
+
+                                {% if withdrawals.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ withdrawals.next_page_number }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48" height="48" style="color: #d1d5db; margin: 0 auto 20px;">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="text-secondary mb-0">No withdrawal requests found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+function copyToClipboard(text, button) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        const svg = button.querySelector('svg');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14" style="color: #10b981;"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+        button.style.background = '#d1fae5';
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = '#f3f4f6';
+        }, 1500);
+    } catch (err) {
+        console.error('Copy failed:', err);
+    }
+    
+    document.body.removeChild(textarea);
+}
+</script>
+
+{% endblock %}

@@ -1,167 +1,166 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block styles %}
-{{ block.super }}
-<style>
-.activity-log-card {
-    border-left: 4px solid #6366f1;
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-}
-
-.activity-log-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateX(4px);
-}
-
-.activity-type-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-}
-
-.activity-wallet_edit { border-left-color: #f59e0b; }
-.activity-rate_change { border-left-color: #8b5cf6; }
-.activity-topup_increase { border-left-color: #10b981; }
-.activity-topup_decrease { border-left-color: #ef4444; }
-.activity-deposit_approved { border-left-color: #3b82f6; }
-.activity-deposit_rejected { border-left-color: #dc2626; }
-.activity-user_activated { border-left-color: #22c55e; }
-.activity-user_deactivated { border-left-color: #f97316; }
-
-.filter-section {
-    background: #f8fafc;
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    margin-bottom: 1.5rem;
-}
-
-.json-value {
-    background: #1e293b;
-    color: #10b981;
-    padding: 0.5rem;
-    border-radius: 0.375rem;
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    overflow-x: auto;
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container-fluid py-4 px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">
-            <i class="fas fa-history text-primary"></i> Activity Log
-        </h2>
-        <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-start mb-5">
+            <div>
+                <h1 class="fs-2 fw-bold mb-2" style="color: #1a1d29;">Activity Log</h1>
+                <p class="text-secondary">Monitor and track all system activities</p>
+            </div>
+            <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
 
-    <!-- Filters -->
-    <div class="filter-section">
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Activity Type</label>
-                <select name="activity_type" class="form-select">
-                    <option value="">All Types</option>
-                    {% for type_code, type_name in activity_types %}
-                        <option value="{{ type_code }}" {% if activity_type == type_code %}selected{% endif %}>
-                            {{ type_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <label class="form-label fw-semibold">User</label>
-                <input type="text" name="user" class="form-control" placeholder="Username..." value="{{ user_filter }}">
-            </div>
-            
-            <div class="col-md-2">
-                <label class="form-label fw-semibold">From Date</label>
-                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
-            </div>
-            
-            <div class="col-md-2">
-                <label class="form-label fw-semibold">To Date</label>
-                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
-            </div>
-            
-            <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-                <a href="{% url 'admin_dashboard:activity_log' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-times"></i> Clear
-                </a>
-            </div>
-        </form>
-    </div>
+        <!-- Filter Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 24px;">
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-bold mb-4" style="color: #1a1d29;">Filter Activities</h5>
+                <form method="get" class="row g-3">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-semibold mb-2" style="color: #1a1d29; font-size: 0.875rem;">Activity Type</label>
+                        <select name="activity_type" class="form-select" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px; background: white;">
+                            <option value="">All Types</option>
+                            {% for type_code, type_name in activity_types %}
+                                <option value="{{ type_code }}" {% if activity_type == type_code %}selected{% endif %}>
+                                    {{ type_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-semibold mb-2" style="color: #1a1d29; font-size: 0.875rem;">Username</label>
+                        <input type="text" name="user" class="form-control" placeholder="Search username..." value="{{ user_filter }}" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px;">
+                    </div>
+                    
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-semibold mb-2" style="color: #1a1d29; font-size: 0.875rem;">From Date</label>
+                        <input type="date" name="date_from" class="form-control" value="{{ date_from }}" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px;">
+                    </div>
+                    
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-semibold mb-2" style="color: #1a1d29; font-size: 0.875rem;">To Date</label>
+                        <input type="date" name="date_to" class="form-control" value="{{ date_to }}" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px;">
+                    </div>
 
-    <!-- Activity Log Cards -->
-    <div class="row">
-        <div class="col-12">
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                                <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4-4v-2.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            Apply Filter
+                        </button>
+                        <a href="{% url 'admin_dashboard:activity_log' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                            Clear Filters
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Activity Logs Timeline -->
+        <div style="position: relative;">
             {% if logs %}
                 {% for log in logs %}
-                <div class="card activity-log-card activity-{{ log.activity_type }}">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="d-flex align-items-start gap-3">
-                                    <div class="flex-shrink-0">
-                                        <i class="fas fa-circle-notch fa-sm text-primary mt-1"></i>
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 16px; border-left: 4px solid {% if log.activity_type == 'topup_increase' %}#10b981{% elif log.activity_type == 'topup_decrease' %}#ef4444{% elif log.activity_type == 'deposit_approved' %}#3b82f6{% elif log.activity_type == 'deposit_rejected' %}#dc2626{% elif log.activity_type == 'user_activated' %}#22c55e{% elif log.activity_type == 'user_deactivated' %}#f97316{% elif log.activity_type == 'wallet_edit' %}#f59e0b{% else %}#667eea{% endif %}; transition: all 0.3s ease;">
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- Left Column - Main Info -->
+                            <div class="col-lg-8">
+                                <div class="d-flex gap-3 align-items-start">
+                                    <!-- Activity Icon -->
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                                        </svg>
                                     </div>
+
+                                    <!-- Activity Details -->
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1">
-                                            <span class="badge activity-type-badge bg-{{ log.activity_type|slice:':6' }}">
+                                        <div class="mb-2">
+                                            <span class="badge" style="background: {% if log.activity_type == 'topup_increase' %}#d1fae5; color: #059669{% elif log.activity_type == 'topup_decrease' %}#fee2e2; color: #dc2626{% elif log.activity_type == 'deposit_approved' %}#dbeafe; color: #0369a1{% elif log.activity_type == 'deposit_rejected' %}#fecaca; color: #991b1b{% elif log.activity_type == 'user_activated' %}#dcfce7; color: #166534{% elif log.activity_type == 'user_deactivated' %}#fed7aa; color: #92400e{% elif log.activity_type == 'wallet_edit' %}#fef3c7; color: #b45309{% else %}#dbeafe; color: #0369a1{% endif %}; font-weight: 600; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px;">
                                                 {{ log.get_activity_type_display }}
                                             </span>
-                                        </h6>
-                                        <p class="mb-2 text-dark">{{ log.description }}</p>
+                                        </div>
+                                        <h6 class="fw-bold mb-3" style="color: #1a1d29;">{{ log.description }}</h6>
                                         
-                                        <div class="small text-muted">
-                                            <span class="me-3">
-                                                <i class="fas fa-user"></i> 
-                                                <strong>By:</strong> {{ log.performed_by.username|default:"System" }}
-                                            </span>
+                                        <!-- Activity Meta -->
+                                        <div class="d-flex flex-wrap gap-3" style="font-size: 0.875rem;">
+                                            <div>
+                                                <span class="text-secondary" style="font-weight: 500;">By:</span>
+                                                <span style="color: #1a1d29; font-weight: 600;">{{ log.performed_by.username|default:"System" }}</span>
+                                            </div>
                                             {% if log.target_user %}
-                                            <span class="me-3">
-                                                <i class="fas fa-user-tag"></i> 
-                                                <strong>Target:</strong> {{ log.target_user.username }}
-                                            </span>
+                                            <div>
+                                                <span class="text-secondary" style="font-weight: 500;">Target:</span>
+                                                <span style="color: #1a1d29; font-weight: 600;">{{ log.target_user.username }}</span>
+                                            </div>
                                             {% endif %}
-                                            <span class="me-3">
-                                                <i class="fas fa-clock"></i> {{ log.timestamp|date:"H:i, d M Y" }}
-                                            </span>
+                                            <div>
+                                                <span class="text-secondary" style="font-weight: 500;">Time:</span>
+                                                <span style="color: #1a1d29; font-weight: 600;">{{ log.timestamp|date:"H:i, d M Y" }}</span>
+                                            </div>
                                             {% if log.ip_address %}
-                                            <span>
-                                                <i class="fas fa-map-marker-alt"></i> {{ log.ip_address }}
-                                            </span>
+                                            <div>
+                                                <span class="text-secondary" style="font-weight: 500;">IP:</span>
+                                                <span style="color: #1a1d29; font-weight: 600;">{{ log.ip_address }}</span>
+                                            </div>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-4">
+
+                            <!-- Right Column - Values -->
+                            <div class="col-lg-4">
                                 {% if log.old_value or log.new_value %}
-                                <div class="small">
-                                    {% if log.old_value %}
-                                    <div class="mb-2">
-                                        <strong class="text-danger">Old:</strong>
-                                        <div class="json-value">{{ log.old_value|safe }}</div>
+                                    {% if log.activity_type == 'topup_increase' and log.new_value %}
+                                    <!-- Special Display for Topup -->
+                                    <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%); border-radius: 12px; padding: 16px; border: 1px solid #d1fae5;">
+                                        <div class="mb-3">
+                                            <p class="text-secondary small mb-1" style="font-weight: 500;">Topup Amount</p>
+                                            <h5 class="fw-bold mb-0" style="color: #10b981;">${{ log.new_value.topup_amount|default:"N/A" }}</h5>
+                                        </div>
+                                        <div class="d-flex gap-2 mb-3">
+                                            <div style="flex: 1;">
+                                                <p class="text-secondary small mb-1" style="font-weight: 500;">Before</p>
+                                                <p class="fw-bold mb-0" style="color: #1a1d29;">${{ log.old_value.wallet_balance_before_topup|default:"N/A" }}</p>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <p class="text-secondary small mb-1" style="font-weight: 500;">After</p>
+                                                <p class="fw-bold mb-0" style="color: #10b981;">${{ log.new_value.wallet_balance_after_topup|default:"N/A" }}</p>
+                                            </div>
+                                        </div>
+                                        <div style="border-top: 1px solid #d1fae5; padding-top: 12px;">
+                                            <p class="text-secondary small mb-1" style="font-weight: 500;">Remaining Balance</p>
+                                            <h6 class="fw-bold mb-0" style="color: #10b981;">${{ log.new_value.remaining_balance|default:"N/A" }}</h6>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <!-- Regular Display for Other Activities -->
+                                    <div style="background: #f9fafb; border-radius: 12px; padding: 16px; border: 1px solid #e5e7eb; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                                        {% if log.old_value %}
+                                        <div class="mb-2">
+                                            <p class="text-secondary small mb-1" style="font-weight: 600; text-transform: uppercase;">Before:</p>
+                                            <div style="background: white; padding: 8px 12px; border-radius: 6px; color: #ef4444; word-break: break-word;">{{ log.old_value|safe }}</div>
+                                        </div>
+                                        {% endif %}
+                                        {% if log.new_value %}
+                                        <div>
+                                            <p class="text-secondary small mb-1" style="font-weight: 600; text-transform: uppercase;">After:</p>
+                                            <div style="background: white; padding: 8px 12px; border-radius: 6px; color: #10b981; word-break: break-word;">{{ log.new_value|safe }}</div>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                     {% endif %}
-                                    {% if log.new_value %}
-                                    <div>
-                                        <strong class="text-success">New:</strong>
-                                        <div class="json-value">{{ log.new_value|safe }}</div>
-                                    </div>
-                                    {% endif %}
-                                </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -171,29 +170,29 @@
                 
                 <!-- Pagination -->
                 {% if logs.has_other_pages %}
-                <nav aria-label="Activity log pagination">
+                <nav aria-label="Activity log pagination" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if logs.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ logs.previous_page_number }}&activity_type={{ activity_type }}&user={{ user_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">Previous</a>
+                            <a class="page-link" href="?page={{ logs.previous_page_number }}&activity_type={{ activity_type }}&user={{ user_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled">
-                            <span class="page-link">Previous</span>
+                            <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</span>
                         </li>
                         {% endif %}
                         
                         <li class="page-item active">
-                            <span class="page-link">Page {{ logs.number }} of {{ logs.paginator.num_pages }}</span>
+                            <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">Page {{ logs.number }} of {{ logs.paginator.num_pages }}</span>
                         </li>
                         
                         {% if logs.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ logs.next_page_number }}&activity_type={{ activity_type }}&user={{ user_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">Next</a>
+                            <a class="page-link" href="?page={{ logs.next_page_number }}&activity_type={{ activity_type }}&user={{ user_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled">
-                            <span class="page-link">Next</span>
+                            <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</span>
                         </li>
                         {% endif %}
                     </ul>
@@ -201,12 +200,25 @@
                 {% endif %}
                 
             {% else %}
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle fa-2x mb-2"></i>
-                    <p class="mb-0">No activity logs found matching your filters.</p>
+                <!-- Empty State -->
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; text-align: center;">
+                    <div class="card-body p-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48" height="48" style="color: #d1d5db; margin: 0 auto 20px;">
+                            <path d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="text-secondary mb-0" style="font-size: 1rem;">
+                            {% if user_filter or activity_type or date_from or date_to %}
+                                No activity logs found matching your filters.
+                            {% else %}
+                                No activity logs available.
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
             {% endif %}
         </div>
+
     </div>
-</div>
+</main>
+
 {% endblock %}

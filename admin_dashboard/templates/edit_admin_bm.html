@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<main class="flex-grow-1 overflow-auto p-4">
+<div class="container-fluid">
+<div class="row">
+<div class="col-lg-6 mx-auto">
+<div class="bg-white rounded-3 shadow-sm p-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+<h1 class="h3 fw-semibold">Edit Admin BM Account</h1>
+<a href="{% url 'admin_dashboard:manage_admin_bm' %}" class="btn btn-outline-secondary">
+<i class="fas fa-arrow-left"></i> Back
+</a>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+{{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+<form method="POST">
+{% csrf_token %}
+
+<div class="mb-3">
+<label for="acc_name" class="form-label fw-semibold">BM Account Name <span class="text-danger">*</span></label>
+<input type="text" class="form-control" id="acc_name" name="acc_name" value="{{ admin_bm.acc_name }}" required>
+</div>
+
+<div class="mb-3">
+<label for="acc_id" class="form-label fw-semibold">BM Account ID <span class="text-danger">*</span></label>
+<input type="number" class="form-control" id="acc_id" name="acc_id" value="{{ admin_bm.acc_id }}" required>
+</div>
+
+<div class="d-flex gap-2">
+<button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+<i class="fas fa-save"></i> Save Changes
+</button>
+<a href="{% url 'admin_dashboard:manage_admin_bm' %}" class="btn btn-secondary btn-lg">
+<i class="fas fa-times"></i> Cancel
+</a>
+</div>
+
+</form>
+
+</div>
+</div>
+</div>
+</main>
+{% endblock %}

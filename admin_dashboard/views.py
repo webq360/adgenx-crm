@@ -2,21 +2,39 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta, datetime
+from django.contrib.sessions.models import Session
+from django.contrib.auth import logout
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 import os
 
 from dashboard.models import DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, User, TopupHistory, ActivityLog
 from dashboard.fb_api_reqs import get_ad_account_info, change_spend_cap
 from dashboard.utils import paginate_data, get_user_utils, log_activity
+from dashboard.group_permissions import require_group_permission as require_permission, GroupPermissionManager
+
+
+def clear_user_sessions(user):
+    """Clear all sessions for a user - no longer needed with Groups but kept for compatibility"""
+    from django.contrib.sessions.models import Session
+    from django.utils import timezone
+    sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    for session in sessions:
+        try:
+            session_data = session.get_decoded()
+            if str(user.pk) == str(session_data.get('_auth_user_id')):
+                session.delete()
+        except:
+            continue
 
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def admin_overview(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     from decimal import Decimal
     from django.db.models import Count, Avg
@@ -48,6 +66,10 @@ def admin_overview(request):
     
     # Count pending BM requests (add and remove)
     pending_bm_requests = BMAccount.objects.filter(status='pending').count()
+    
+    # Count pending withdrawal requests
+    from dashboard.models import WithdrawalRequest
+    pending_withdrawals = WithdrawalRequest.objects.filter(status='pending').count()
 
     # Build user queryset based on filter
     user_qs = User.objects.filter(is_staff=False)
@@ -69,6 +91,30 @@ def admin_overview(request):
     total_bdt_deposit = deposit_qs.aggregate(total=Sum('bdt_amount'))['total'] or 0
     total_usd_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or Decimal('0')
     total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+    # Deposit summary by rate (group by exchange rate)
+    from collections import defaultdict
+    
+    deposits = deposit_qs.values('bdt_amount', 'usd_amount')
+    rate_summary = defaultdict(lambda: {'bdt': Decimal('0'), 'usd': Decimal('0')})
+    
+    for deposit in deposits:
+        bdt = Decimal(str(deposit['bdt_amount']))
+        usd = Decimal(str(deposit['usd_amount']))
+        if usd > 0:
+            rate = round(bdt / usd, 2)
+            rate_summary[rate]['bdt'] += bdt
+            rate_summary[rate]['usd'] += usd
+    
+    # Convert to list and sort by rate
+    deposit_by_rate = [
+        {
+            'rate': rate,
+            'bdt_amount': float(data['bdt']),
+            'usd_amount': float(data['usd'])
+        }
+        for rate, data in sorted(rate_summary.items(), reverse=True)
+    ]
 
     # Calculate profit metrics
     total_revenue = total_usd_deposit + total_topup_increase
@@ -194,11 +240,26 @@ def admin_overview(request):
         created_at__lt=one_month_ago
     ).exclude(receipt='').count()
 
+    # Calculate total user wallet balances
+    total_user_wallet_balance = Wallet.objects.filter(
+        user__is_staff=False
+    ).aggregate(total=Sum('balance'))['total'] or Decimal('0')
+    
+    # Remaining balance is the same as current balance
+    total_user_wallet_remaining_balance = total_user_wallet_balance
+
+    # Get recent withdrawal requests
+    from dashboard.models import WithdrawalRequest
+    recent_withdrawal_requests_list = WithdrawalRequest.objects.filter(
+        status='pending'
+    ).select_related('user').order_by('-requested_at')[:10]
+    
     utils = {
         'pending_deposits': pending_deposits,
         'pending_accounts': pending_accounts,
         'active_accounts': active_accounts,
         'pending_bm_requests': pending_bm_requests,
+        'pending_withdrawals': pending_withdrawals,
     }
 
     context = {
@@ -221,14 +282,17 @@ def admin_overview(request):
         'expenses': all_expenses,
         'include_manual': include_manual,
         'today': timezone.now().strftime('%Y-%m-%d'),
+        'total_user_wallet_balance': total_user_wallet_balance,
+        'total_user_wallet_remaining_balance': total_user_wallet_remaining_balance,
+        'recent_withdrawal_requests': recent_withdrawal_requests_list,
+        'deposit_by_rate': deposit_by_rate,
     }
 
     return render(request, 'admin_overview.html', context)
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def review_deposit(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     search_query = request.GET.get('search', '')
     if search_query:
@@ -256,9 +320,8 @@ def review_deposit(request):
     })
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def review_deposit_details(request, transaction_id):
-    if not request.user.is_staff:
-        return redirect('index') # Or some other appropriate redirect/error
     transaction = get_object_or_404(DepositTransaction, id=transaction_id)
     
     # Get user's wallet balance
@@ -291,12 +354,15 @@ def review_deposit_details(request, transaction_id):
             )
             # Notify user
             from dashboard.models import Notification
+            from dashboard.notification_handler import notify_deposit_approved
             Notification.objects.create(
                 user=transaction.user,
                 notification_type='deposit_approved',
                 title='Deposit Approved ✓',
                 message=f'Your deposit of ${transaction.usd_amount} (৳{transaction.bdt_amount}) via {transaction.method} has been approved. Wallet balance updated to ${wallet.balance}.',
             )
+            # Send email
+            notify_deposit_approved(transaction)
 
         elif action == 'reject':
             transaction.status = 'rejected'
@@ -314,12 +380,15 @@ def review_deposit_details(request, transaction_id):
             )
             # Notify user
             from dashboard.models import Notification
+            from dashboard.notification_handler import notify_deposit_rejected
             Notification.objects.create(
                 user=transaction.user,
                 notification_type='deposit_rejected',
                 title='Deposit Rejected ✗',
                 message=f'Your deposit of ${transaction.usd_amount} (৳{transaction.bdt_amount}) via {transaction.method} has been rejected. Please contact support for details.',
             )
+            # Send email
+            notify_deposit_rejected(transaction)
             
         transaction.save()
         return redirect('admin_dashboard:review_deposit')
@@ -331,18 +400,23 @@ def review_deposit_details(request, transaction_id):
     })
 
 @login_required(login_url='auth')
+@require_permission('can_manage_accounts')
 def ad_account_details(request, ad_account_id):
-    if not request.user.is_staff:
-        return redirect('index')
 
     ad_account = get_object_or_404(AdAccount, id=ad_account_id)
     admin_bms = AdminBM.objects.all()
 
-    if ad_account.status == 'active':
-        ad_info = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.acc_id if ad_account.admin_bm else None)
-        ad_account.balance = ad_info.get('balance', 0)
-        ad_account.total_spent = ad_info.get('amount_spent', 0)
-        ad_account.limit = ad_info.get('spend_cap', 0)
+    if ad_account.status == 'active' and ad_account.admin_bm:
+        ad_info = get_ad_account_info(ad_account.acc_id, ad_account.admin_bm.acc_id)
+        if isinstance(ad_info, dict):
+            ad_account.balance = ad_info.get('balance', 0)
+            ad_account.total_spent = ad_info.get('amount_spent', 0)
+            ad_account.limit = ad_info.get('spend_cap', 0)
+        else:
+            ad_account.balance = 'N/A'
+            ad_account.limit = 'N/A'
+            ad_account.total_spent = 'N/A'
+            messages.warning(request, 'Unable to fetch ad account stats right now. Please try again later.')
     else:
         ad_account.balance = 'N/A'
         ad_account.limit = 'N/A'
@@ -426,9 +500,8 @@ def ad_account_details(request, ad_account_id):
     return render(request, 'ad_account_details.html', {'ad_account': ad_account, 'admin_bms': admin_bms})
 
 @login_required(login_url='auth')
+@require_permission('can_manage_accounts')
 def review_ad_account(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     search_query = request.GET.get('search', '')
     if search_query:
@@ -449,9 +522,8 @@ def review_ad_account(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_accounts')
 def review_bm_request(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     search_query = request.GET.get('search', '')
     pending_bm_accounts = BMAccount.objects.filter(status='pending')
@@ -469,14 +541,13 @@ def review_bm_request(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_users')
 def manage_user(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     if request.method == 'POST':
         action = request.POST.get('action')
         user_id = request.POST.get('user_id')
-        user_to_manage = get_object_or_404(User, id=user_id, is_staff=False)
+        user_to_manage = get_object_or_404(User.objects.prefetch_related('groups'), id=user_id, is_staff=False)
         
         if action == 'edit_user':
             # Update user details
@@ -493,7 +564,57 @@ def manage_user(request):
             is_verified = request.POST.get('is_verified') == 'on'
             user_to_manage.is_verified = is_verified
             
+            # Handle group (role) assignment - USING DJANGO GROUPS
+            group_id = request.POST.get('group')
+            group_changed = False
+            if group_id:
+                old_groups = list(user_to_manage.groups.all())
+                try:
+                    new_group = Group.objects.get(id=group_id)
+                    # Clear existing groups and add new one
+                    user_to_manage.groups.clear()
+                    user_to_manage.groups.add(new_group)
+                    group_changed = True
+                    
+                    old_group_names = ', '.join([g.name for g in old_groups]) if old_groups else "No group"
+                    admin_info = f"{request.user.first_name} {request.user.last_name} ({request.user.username})"
+                    log_activity(
+                        performed_by=request.user,
+                        activity_type='role_change',
+                        description=f"[ADMIN: {admin_info}] Changed group for {user_to_manage.username}: {old_group_names} → {new_group.name}",
+                        target_user=user_to_manage,
+                        old_value={'group': old_group_names},
+                        new_value={'group': new_group.name},
+                        request=request
+                    )
+                except Group.DoesNotExist:
+                    pass
+            else:
+                # Remove all groups
+                old_groups = list(user_to_manage.groups.all())
+                if old_groups:
+                    user_to_manage.groups.clear()
+                    group_changed = True
+                    old_group_names = ', '.join([g.name for g in old_groups])
+                    admin_info = f"{request.user.first_name} {request.user.last_name} ({request.user.username})"
+                    log_activity(
+                        performed_by=request.user,
+                        activity_type='role_change',
+                        description=f"[ADMIN: {admin_info}] Removed groups from {user_to_manage.username}: {old_group_names}",
+                        target_user=user_to_manage,
+                        old_value={'group': old_group_names},
+                        new_value={'group': 'No group'},
+                        request=request
+                    )
+            
             user_to_manage.save()
+            
+            # Clear user's sessions if group changed (force re-login to apply new permissions)
+            if group_changed:
+                clear_user_sessions(user_to_manage)
+                messages.success(request, f'User updated successfully! {user_to_manage.username} needs to log in again for permissions to take effect.')
+            else:
+                messages.success(request, 'User updated successfully!')
             
             # Update dollar rate
             dollar_rate = request.POST.get('dollar_rate')
@@ -532,7 +653,6 @@ def manage_user(request):
                     request=request
                 )
             
-            messages.success(request, 'User updated successfully!')
             return redirect('admin_dashboard:manage_user')
         
         elif action == 'toggle_ban':
@@ -558,7 +678,7 @@ def manage_user(request):
     
     # Search functionality
     search_query = request.GET.get('search', '')
-    all_users_list = User.objects.filter(is_staff=False).prefetch_related('wallet').order_by('-id')
+    all_users_list = User.objects.filter(is_staff=False).prefetch_related('groups', 'wallet').order_by('-id')
     
     if search_query:
         all_users_list = all_users_list.filter(
@@ -587,15 +707,104 @@ def manage_user(request):
         
         user.total_spent = total_spent
         user.total_received = total_received
+        user.group_name = user.groups.first().name if user.groups.exists() else 'No Role'
     
     all_users = paginate_data(request, all_users_list, 15)
     return render(request, 'manage_user.html', {'all_users': all_users})
 
 @login_required(login_url='auth')
+@require_permission('can_manage_users')
+def manage_roles(request):
+    from django.contrib.contenttypes.models import ContentType
+
+    content_type = ContentType.objects.get_for_model(User)
+    available_permissions = GroupPermissionManager.PERMISSIONS
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create_role':
+            role_name = request.POST.get('group_name', '').strip()
+            selected_permissions = request.POST.getlist('permissions')
+
+            if not role_name:
+                messages.error(request, 'Role name is required.')
+            else:
+                group, created = Group.objects.get_or_create(name=role_name)
+                group.permissions.clear()
+
+                for permission_codename in selected_permissions:
+                    permission, _ = Permission.objects.get_or_create(
+                        codename=permission_codename,
+                        content_type=content_type,
+                        defaults={'name': GroupPermissionManager.PERMISSIONS.get(permission_codename, permission_codename)}
+                    )
+                    group.permissions.add(permission)
+
+                messages.success(request, f"Role '{role_name}' saved successfully.")
+                return redirect('admin_dashboard:manage_roles')
+
+        elif action == 'delete_role':
+            group_id = request.POST.get('group_id')
+            group = Group.objects.filter(id=group_id).first()
+            if group:
+                group.delete()
+                messages.success(request, f"Role '{group.name}' deleted successfully.")
+            else:
+                messages.error(request, 'Role not found.')
+            return redirect('admin_dashboard:manage_roles')
+
+    roles = Group.objects.prefetch_related('permissions').all()
+    return render(request, 'manage_roles.html', {
+        'roles': roles,
+        'available_permissions': available_permissions,
+    })
+
+@login_required(login_url='auth')
+@require_permission('can_manage_users')
+def edit_role(request, group_id):
+    from django.contrib.contenttypes.models import ContentType
+
+    content_type = ContentType.objects.get_for_model(User)
+    group = get_object_or_404(Group, id=group_id)
+    available_permissions = GroupPermissionManager.PERMISSIONS
+    current_permissions = [perm.codename for perm in group.permissions.all()]
+
+    if request.method == 'POST':
+        new_name = request.POST.get('group_name', '').strip()
+        selected_permissions = request.POST.getlist('permissions')
+
+        if not new_name:
+            messages.error(request, 'Role name is required.')
+        elif Group.objects.filter(name=new_name).exclude(id=group.id).exists():
+            messages.error(request, 'Another role with that name already exists.')
+        else:
+            group.name = new_name
+            group.save()
+            group.permissions.clear()
+
+            for permission_codename in selected_permissions:
+                permission, _ = Permission.objects.get_or_create(
+                    codename=permission_codename,
+                    content_type=content_type,
+                    defaults={'name': GroupPermissionManager.PERMISSIONS.get(permission_codename, permission_codename)}
+                )
+                group.permissions.add(permission)
+
+            messages.success(request, f"Role '{new_name}' updated successfully.")
+            return redirect('admin_dashboard:manage_roles')
+
+        current_permissions = selected_permissions
+
+    return render(request, 'edit_role.html', {
+        'group': group,
+        'available_permissions': available_permissions,
+        'current_permissions': current_permissions,
+    })
+
+@login_required(login_url='auth')
+@require_permission('can_manage_users')
 def user_api(request, user_id):
     """API endpoint for user details (for modals)"""
-    if not request.user.is_staff:
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
     
     try:
         user = User.objects.get(id=user_id, is_staff=False)
@@ -633,6 +842,14 @@ def user_api(request, user_id):
         # Remaining = Current balance (what's left in wallet)
         remaining_balance = current_balance
         
+        # Get available groups and current user's group
+        from django.contrib.auth.models import Group
+        available_groups = Group.objects.all().values('id', 'name')
+        user_group_id = user.groups.first().id if user.groups.exists() else None
+
+        # Get user's ad accounts
+        ad_accounts = AdAccount.objects.filter(user=user).values('id', 'name', 'status')
+        
         data = {
             'id': user.id,
             'username': user.username,
@@ -648,6 +865,9 @@ def user_api(request, user_id):
             'total_received': str(total_received),
             'total_spent': str(total_spent),
             'remaining_balance': str(remaining_balance),
+            'available_groups': list(available_groups),
+            'group_id': user_group_id,
+            'ad_accounts': list(ad_accounts),
             'stats': {
                 'pending_deposits': pending_deposits,
                 'pending_accounts': pending_accounts,
@@ -665,9 +885,8 @@ def user_api(request, user_id):
 
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def review_topup(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     if request.method == 'POST':
         topup_id = request.POST.get('topup_id')
@@ -675,6 +894,14 @@ def review_topup(request):
         topup = get_object_or_404(TopupHistory, id=topup_id)
 
         if action == 'approve':
+            if not topup.ad_account:
+                messages.error(request, "Ad account associated with this top-up has been deleted.")
+                return redirect('admin_dashboard:review_topup')
+            
+            if not topup.ad_account.admin_bm:
+                messages.error(request, "Admin BM account associated with this top-up has been removed.")
+                return redirect('admin_dashboard:review_topup')
+            
             ad_account_info = get_ad_account_info(topup.ad_account.acc_id, topup.ad_account.admin_bm.acc_id)
             
             balance = float(ad_account_info.get('balance', 0))
@@ -694,6 +921,13 @@ def review_topup(request):
                         wallet.balance += topup.amount
                         new_wallet_balance = wallet.balance
                         wallet.save()
+                        
+                        # Update ad account balances
+                        ad_account = topup.ad_account
+                        ad_account.total_spent = F('total_spent') - topup.amount
+                        ad_account.remaining_balance = F('remaining_balance') + topup.amount
+                        ad_account.save()
+                        ad_account.refresh_from_db()
                         
                         topup.status = 'approved'
                         topup.save()
@@ -717,6 +951,10 @@ def review_topup(request):
                             },
                             request=request
                         )
+                        
+                        # Send notifications
+                        from dashboard.notification_handler import notify_topup_approved
+                        notify_topup_approved(topup)
                         
                         messages.success(request, "Top-up approved and spend cap updated.")
                     else:
@@ -748,6 +986,7 @@ def review_topup(request):
 
 @login_required(login_url='auth')
 def delete_old_receipts(request):
+    # Staff only - keep this check
     if not request.user.is_staff:
         return redirect('index')
 
@@ -779,26 +1018,38 @@ def delete_old_receipts(request):
 
 @login_required(login_url='auth')
 def activity_log(request):
-    """View all activity logs"""
-    if not request.user.is_staff:
-        return redirect('index')
+    """View all activity logs - Staff only"""
+    if request.user.is_staff:
+        # Admin can see all logs
+        logs = ActivityLog.objects.select_related('performed_by', 'target_user').all()
+        
+        # Filters for admin
+        activity_type = request.GET.get('activity_type', '')
+        user_filter = request.GET.get('user', '')
+        
+        if activity_type:
+            logs = logs.filter(activity_type=activity_type)
+        
+        if user_filter:
+            logs = logs.filter(
+                models.Q(performed_by__username__icontains=user_filter) |
+                models.Q(target_user__username__icontains=user_filter)
+            )
+    else:
+        # Normal user can only see their own activities
+        logs = ActivityLog.objects.select_related('performed_by', 'target_user').filter(
+            models.Q(performed_by=request.user) | models.Q(target_user=request.user)
+        )
+        
+        activity_type = request.GET.get('activity_type', '')
+        user_filter = ''
+        
+        if activity_type:
+            logs = logs.filter(activity_type=activity_type)
     
-    # Filters
-    activity_type = request.GET.get('activity_type', '')
-    user_filter = request.GET.get('user', '')
+    # Date filters (both admin and user)
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
-    
-    logs = ActivityLog.objects.select_related('performed_by', 'target_user').all()
-    
-    if activity_type:
-        logs = logs.filter(activity_type=activity_type)
-    
-    if user_filter:
-        logs = logs.filter(
-            models.Q(performed_by__username__icontains=user_filter) |
-            models.Q(target_user__username__icontains=user_filter)
-        )
     
     if date_from:
         try:
@@ -833,10 +1084,9 @@ def activity_log(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_users')
 def create_manual_client(request):
     """Create a manual client with custom settings"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     if request.method == 'POST':
         try:
@@ -930,10 +1180,9 @@ def create_manual_client(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def edit_wallet_balance(request):
     """Manually edit user's wallet balance"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     if request.method == 'POST':
         try:
@@ -992,218 +1241,9 @@ def edit_wallet_balance(request):
 
 
 @login_required(login_url='auth')
-def profit_dashboard(request):
-    """Profit dashboard with revenue, expenses, and net profit calculations"""
-    if not request.user.is_staff:
-        return redirect('index')
-    
-    from decimal import Decimal
-    from django.db.models import Count
-    from dashboard.models import BusinessExpense
-    
-    # Get filter parameters
-    date_from = request.GET.get('date_from', '')
-    date_to = request.GET.get('date_to', '')
-    include_manual = request.GET.get('include_manual', 'all')
-    
-    # Build user queryset based on filter
-    user_qs = User.objects.filter(is_staff=False)
-    if include_manual == 'yes':
-        user_qs = user_qs.filter(is_manual_client=True, include_in_profit_reports=True)
-    elif include_manual == 'no':
-        user_qs = user_qs.filter(is_manual_client=False, include_in_profit_reports=True)
-    else:
-        user_qs = user_qs.filter(include_in_profit_reports=True)
-    
-    # Calculate revenue from deposits
-    deposit_qs = DepositTransaction.objects.filter(status='approved', user__in=user_qs)
-    if date_from:
-        try:
-            date_from_obj = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
-            deposit_qs = deposit_qs.filter(created_at__gte=date_from_obj)
-        except ValueError:
-            pass
-    
-    if date_to:
-        try:
-            date_to_obj = timezone.make_aware(datetime.strptime(date_to, '%Y-%m-%d')) + timedelta(days=1)
-            deposit_qs = deposit_qs.filter(created_at__lt=date_to_obj)
-        except ValueError:
-            pass
-    
-    total_deposits = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or Decimal('0')
-    
-    # Calculate revenue from top-ups
-    topup_qs = TopupHistory.objects.filter(status='approved', type='increase', ad_account__user__in=user_qs)
-    if date_from:
-        try:
-            date_from_obj = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
-            topup_qs = topup_qs.filter(date__gte=date_from_obj)
-        except ValueError:
-            pass
-    
-    if date_to:
-        try:
-            date_to_obj = timezone.make_aware(datetime.strptime(date_to, '%Y-%m-%d')) + timedelta(days=1)
-            topup_qs = topup_qs.filter(date__lt=date_to_obj)
-        except ValueError:
-            pass
-    
-    total_topups = topup_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0')
-    
-    # Total revenue
-    total_revenue = total_deposits + total_topups
-    
-    # Calculate expenses
-    expense_qs = BusinessExpense.objects.all()
-    if date_from:
-        try:
-            date_from_obj = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
-            expense_qs = expense_qs.filter(date__gte=date_from_obj)
-        except ValueError:
-            pass
-    
-    if date_to:
-        try:
-            date_to_obj = timezone.make_aware(datetime.strptime(date_to, '%Y-%m-%d')) + timedelta(days=1)
-            expense_qs = expense_qs.filter(date__lt=date_to_obj)
-        except ValueError:
-            pass
-    
-    total_expenses = expense_qs.aggregate(total=Sum('amount_usd'))['total'] or Decimal('0')
-    
-    # Calculate net profit
-    net_profit = total_revenue - total_expenses
-    profit_margin = (net_profit / total_revenue * 100) if total_revenue > 0 else 0
-    
-    # Get expenses by category
-    expenses_by_category = expense_qs.values('category').annotate(
-        total=Sum('amount_usd'),
-        count=Count('id')
-    ).order_by('-total')
-    
-    # Add display names for categories
-    category_dict = dict(BusinessExpense.CATEGORY_CHOICES)
-    for item in expenses_by_category:
-        item['category_display'] = category_dict.get(item['category'], item['category'])
-    
-    # Handle expense CRUD operations
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        
-        if action == 'add':
-            try:
-                category = request.POST.get('category')
-                description = request.POST.get('description', '').strip()
-                amount_usd = Decimal(request.POST.get('amount_usd', 0))
-                date = request.POST.get('date')
-                notes = request.POST.get('notes', '').strip()
-                receipt = request.FILES.get('receipt')
-                
-                expense = BusinessExpense.objects.create(
-                    category=category,
-                    description=description,
-                    amount_usd=amount_usd,
-                    date=date,
-                    notes=notes,
-                    receipt=receipt,
-                    added_by=request.user
-                )
-                
-                # Log activity
-                log_activity(
-                    performed_by=request.user,
-                    activity_type='payment_method_added',
-                    description=f"Added business expense: {category} - ${amount_usd}",
-                    target_user=None,
-                    old_value=None,
-                    new_value={
-                        'category': category,
-                        'amount': str(amount_usd),
-                        'description': description
-                    },
-                    request=request
-                )
-                
-                messages.success(request, f'Expense added successfully: ${amount_usd}')
-            except Exception as e:
-                messages.error(request, f'Error adding expense: {str(e)}')
-        
-        elif action == 'edit':
-            try:
-                expense_id = request.POST.get('expense_id')
-                expense = get_object_or_404(BusinessExpense, id=expense_id)
-                
-                old_amount = expense.amount_usd
-                
-                expense.category = request.POST.get('category')
-                expense.description = request.POST.get('description', '').strip()
-                expense.amount_usd = Decimal(request.POST.get('amount_usd', 0))
-                expense.date = request.POST.get('date')
-                expense.notes = request.POST.get('notes', '').strip()
-                expense.save()
-                
-                messages.success(request, 'Expense updated successfully')
-            except Exception as e:
-                messages.error(request, f'Error updating expense: {str(e)}')
-        
-        elif action == 'delete':
-            try:
-                expense_id = request.POST.get('expense_id')
-                expense = get_object_or_404(BusinessExpense, id=expense_id)
-                
-                amount = expense.amount_usd
-                category = expense.get_category_display()
-                
-                expense.delete()
-                
-                # Log activity
-                log_activity(
-                    performed_by=request.user,
-                    activity_type='payment_method_removed',
-                    description=f"Deleted business expense: {category} - ${amount}",
-                    target_user=None,
-                    old_value={'amount': str(amount), 'category': category},
-                    new_value=None,
-                    request=request
-                )
-                
-                messages.success(request, f'Expense deleted: {category} - ${amount}')
-            except Exception as e:
-                messages.error(request, f'Error deleting expense: {str(e)}')
-        
-        return redirect('admin_dashboard:profit_dashboard')
-    
-    # Paginate expenses
-    all_expenses = expense_qs.order_by('-date')
-    expenses = paginate_data(request, all_expenses, 20)
-    
-    context = {
-        'total_revenue': total_revenue,
-        'total_expenses': total_expenses,
-        'net_profit': net_profit,
-        'profit_margin': profit_margin,
-        'total_deposits': total_deposits,
-        'total_topups': total_topups,
-        'user_count': user_qs.count(),
-        'expense_count': expense_qs.count(),
-        'expenses_by_category': expenses_by_category,
-        'expenses': expenses,
-        'date_from': date_from,
-        'date_to': date_to,
-        'include_manual': include_manual,
-        'today': timezone.now().strftime('%Y-%m-%d'),
-    }
-    
-    return render(request, 'profit_dashboard.html', context)
-
-
-
-@login_required(login_url='auth')
+@require_permission('can_manage_payments')
 def payment_methods(request):
     """Manage payment methods"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     from dashboard.models import PaymentMethod
     
@@ -1318,10 +1358,9 @@ def payment_methods(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_users')
 def delete_user(request):
     """Delete a user and all associated data"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     if request.method == 'POST':
         try:
@@ -1369,10 +1408,9 @@ def delete_user(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def withdrawal_requests(request):
     """Manage withdrawal requests"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     from dashboard.models import WithdrawalRequest
     
@@ -1445,10 +1483,9 @@ def withdrawal_requests(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_review_deposits')
 def wallet_balance_report(request):
     """Total wallet balance report for all users"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     from decimal import Decimal
     from django.db.models import Count, Avg
@@ -1522,10 +1559,9 @@ def wallet_balance_report(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_users')
 def transfer_ad_account(request):
     """Transfer ad account to another user"""
-    if not request.user.is_staff:
-        return redirect('index')
     
     if request.method == 'POST':
         try:
@@ -1565,9 +1601,8 @@ def transfer_ad_account(request):
 # ── Appearance Views ──
 
 @login_required(login_url='auth')
+@require_permission('can_edit_settings')
 def appearance(request):
-    if not request.user.is_staff:
-        return redirect('index')
 
     from .models import SiteSettings, FAQ, Testimonial
 
@@ -1599,6 +1634,11 @@ def appearance(request):
             settings.tiktok_url = request.POST.get('tiktok_url', '').strip()
             settings.instagram_url = request.POST.get('instagram_url', '').strip()
             settings.footer_tagline = request.POST.get('footer_tagline', '').strip()
+            
+            # Handle logo upload
+            if 'logo' in request.FILES:
+                settings.logo = request.FILES['logo']
+            
             settings.save()
             messages.success(request, 'Site settings updated successfully.')
 
@@ -1661,3 +1701,195 @@ def appearance(request):
         'faqs': faqs,
         'testimonials': testimonials,
     })
+
+
+
+@login_required(login_url='auth')
+@require_permission('can_manage_accounts')
+def manage_admin_bm(request):
+    """List and manage Admin BM accounts and BM Accounts"""
+    
+    tab = request.GET.get('tab', 'admin_bm')  # Default to admin_bm tab
+    search_query = request.GET.get('search', '')
+    
+    admin_bms = None
+    bm_accounts = None
+    
+    if tab == 'admin_bm':
+        if search_query:
+            admin_bms = AdminBM.objects.filter(Q(acc_name__icontains=search_query) | Q(acc_id__icontains=search_query))
+        else:
+            admin_bms = AdminBM.objects.all()
+        admin_bms = paginate_data(request, admin_bms, 20)
+    
+    elif tab == 'bm_accounts':
+        if search_query:
+            bm_accounts = BMAccount.objects.filter(Q(acc_name__icontains=search_query) | Q(acc_id__icontains=search_query))
+        else:
+            bm_accounts = BMAccount.objects.all()
+        bm_accounts = paginate_data(request, bm_accounts, 20)
+    
+    return render(request, 'manage_admin_bm.html', {
+        'admin_bms': admin_bms,
+        'bm_accounts': bm_accounts,
+        'search_query': search_query,
+        'tab': tab
+    })
+
+
+@login_required(login_url='auth')
+@require_permission('can_manage_accounts')
+def add_admin_bm(request):
+    """Add new Admin BM account"""
+    
+    if request.method == 'POST':
+        acc_name = request.POST.get('acc_name', '').strip()
+        acc_id = request.POST.get('acc_id', '').strip()
+        
+        if not acc_name or not acc_id:
+            messages.error(request, 'All fields are required.')
+            return redirect('admin_dashboard:add_admin_bm')
+        
+        try:
+            acc_id = int(acc_id)
+            
+            if AdminBM.objects.filter(acc_id=acc_id).exists():
+                messages.error(request, 'BM Account with this ID already exists.')
+                return redirect('admin_dashboard:add_admin_bm')
+            
+            AdminBM.objects.create(acc_name=acc_name, acc_id=acc_id)
+            
+            log_activity(
+                performed_by=request.user,
+                activity_type='admin_bm_created',
+                description=f"Created Admin BM Account: {acc_name} ({acc_id})",
+                target_user=None,
+                old_value=None,
+                new_value={'acc_id': acc_id, 'acc_name': acc_name},
+                request=request
+            )
+            
+            messages.success(request, 'Admin BM Account created successfully!')
+            return redirect('admin_dashboard:manage_admin_bm')
+        
+        except ValueError:
+            messages.error(request, 'Account ID must be a number.')
+            return redirect('admin_dashboard:add_admin_bm')
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+            return redirect('admin_dashboard:add_admin_bm')
+    
+    return render(request, 'add_admin_bm.html')
+
+
+@login_required(login_url='auth')
+@require_permission('can_manage_accounts')
+def edit_admin_bm(request, admin_bm_id):
+    """Edit Admin BM account"""
+    
+    admin_bm = get_object_or_404(AdminBM, id=admin_bm_id)
+    
+    if request.method == 'POST':
+        acc_name = request.POST.get('acc_name', '').strip()
+        acc_id = request.POST.get('acc_id', '').strip()
+        
+        if not acc_name or not acc_id:
+            messages.error(request, 'All fields are required.')
+            return redirect('admin_dashboard:edit_admin_bm', admin_bm_id=admin_bm_id)
+        
+        try:
+            acc_id = int(acc_id)
+            
+            if AdminBM.objects.filter(acc_id=acc_id).exclude(id=admin_bm_id).exists():
+                messages.error(request, 'BM Account with this ID already exists.')
+                return redirect('admin_dashboard:edit_admin_bm', admin_bm_id=admin_bm_id)
+            
+            old_values = {'acc_name': admin_bm.acc_name, 'acc_id': admin_bm.acc_id}
+            admin_bm.acc_name = acc_name
+            admin_bm.acc_id = acc_id
+            admin_bm.save()
+            
+            log_activity(
+                performed_by=request.user,
+                activity_type='admin_bm_updated',
+                description=f"Updated Admin BM Account: {acc_name} ({acc_id})",
+                target_user=None,
+                old_value=old_values,
+                new_value={'acc_id': acc_id, 'acc_name': acc_name},
+                request=request
+            )
+            
+            messages.success(request, 'Admin BM Account updated successfully!')
+            return redirect('admin_dashboard:manage_admin_bm')
+        
+        except ValueError:
+            messages.error(request, 'Account ID must be a number.')
+            return redirect('admin_dashboard:edit_admin_bm', admin_bm_id=admin_bm_id)
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+            return redirect('admin_dashboard:edit_admin_bm', admin_bm_id=admin_bm_id)
+    
+    return render(request, 'edit_admin_bm.html', {'admin_bm': admin_bm})
+
+
+@login_required(login_url='auth')
+@require_permission('can_manage_accounts')
+def delete_admin_bm(request, admin_bm_id):
+    """Delete Admin BM account"""
+    
+    admin_bm = get_object_or_404(AdminBM, id=admin_bm_id)
+    
+    if request.method == 'POST':
+        acc_name = admin_bm.acc_name
+        acc_id = admin_bm.acc_id
+        admin_bm.delete()
+        
+        log_activity(
+            performed_by=request.user,
+            activity_type='admin_bm_deleted',
+            description=f"Deleted Admin BM Account: {acc_name} ({acc_id})",
+            target_user=None,
+            old_value={'acc_id': acc_id, 'acc_name': acc_name},
+            new_value=None,
+            request=request
+        )
+        
+        messages.success(request, 'Admin BM Account deleted successfully!')
+        return redirect('admin_dashboard:manage_admin_bm')
+    
+    return render(request, 'delete_admin_bm.html', {'admin_bm': admin_bm})
+
+
+@login_required(login_url='auth')
+@require_permission('can_manage_accounts')
+def admin_ad_accounts(request):
+    """Admin view for all ad accounts"""
+    from dashboard.models import AdAccount
+    
+    # Get search query
+    search_query = request.GET.get('search', '').strip()
+    
+    # Get all ad accounts
+    ad_accounts = AdAccount.objects.select_related('user', 'admin_bm').all().order_by('-start_date')
+    
+    # Apply search filter
+    if search_query:
+        from django.db.models import Q
+        ad_accounts = ad_accounts.filter(
+            Q(name__icontains=search_query) |
+            Q(acc_id__icontains=search_query) |
+            Q(user__username__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(admin_bm__acc_name__icontains=search_query) |
+            Q(admin_bm__acc_id__icontains=search_query)
+        )
+    
+    # Paginate
+    ad_accounts = paginate_data(request, ad_accounts, 20)
+    
+    context = {
+        'ad_accounts': ad_accounts,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'admin_ad_accounts.html', context)

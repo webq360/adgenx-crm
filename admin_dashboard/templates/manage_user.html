@@ -1,259 +1,458 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block styles %}
-{{ block.super }}
-<style>
-.user-table-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.status-badge {
-    padding: 0.35rem 0.75rem;
-    border-radius: 2rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-active {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-inactive {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-banned {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.action-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 0.375rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    transition: all 0.2s;
-    font-size: 0.875rem;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-}
-
-.btn-view { background: #dbeafe; color: #1e40af; }
-.btn-view:hover { background: #bfdbfe; }
-
-.btn-edit { background: #fef3c7; color: #92400e; }
-.btn-edit:hover { background: #fde68a; }
-
-.btn-ban { background: #ffe4e6; color: #9f1239; }
-.btn-ban:hover { background: #fecdd3; }
-
-.btn-delete { background: #fee2e2; color: #991b1b; }
-.btn-delete:hover { background: #fecaca; }
-
-.search-box {
-    border-radius: 2rem;
-    padding: 0.75rem 1.5rem;
-    border: 2px solid #e5e7eb;
-}
-
-.search-box:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-}
-
-.modal-header-custom {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.info-row {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.info-row:last-child {
-    border-bottom: none;
-}
-
-.info-label {
-    font-weight: 600;
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-.info-value {
-    color: #111827;
-    font-size: 0.95rem;
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container-fluid py-4 px-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">
-                <i class="fas fa-users-cog text-primary"></i> Manage Users
-            </h2>
-            <p class="text-muted mb-0">View, edit, and manage all system users</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'admin_dashboard:create_manual_client' %}" class="btn btn-success">
-                <i class="fas fa-user-plus"></i> Create Manual Client
-            </a>
-            <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-        </div>
-    </div>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, main { background: #f8f9fa; }
 
-    <!-- Search and Filter -->
-    <div class="user-table-card mb-4 p-4">
-        <form method="get" class="row g-3">
-            <div class="col-md-10">
-                <input type="text" class="form-control search-box" name="search" 
-                       placeholder="🔍 Search by name, email, or phone..." 
-                       value="{{ request.GET.search }}">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
+    .header-section {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        padding: 30px 40px;
+        color: white;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-left p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 8px 0 0 0;
+    }
+
+    .header-right {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+    }
+
+    .btn-add {
+        background: white;
+        color: #667eea;
+    }
+
+    .btn-add:hover {
+        background: #f0f0f0;
+    }
+
+    .btn-back {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .btn-back:hover {
+        background: rgba(255,255,255,0.3);
+    }
+
+    .container-main {
+        padding: 0 40px 40px 40px;
+    }
+
+    .search-section {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .users-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: #f9fafb;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    th {
+        padding: 16px;
+        text-align: left;
+        font-weight: 700;
+        color: #374151;
+        font-size: 13px;
+    }
+
+    td {
+        padding: 16px;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 14px;
+    }
+
+    tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .user-username {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-manual {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-regular {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .wallet-info {
+        font-size: 12px;
+    }
+
+    .wallet-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+
+    .wallet-label {
+        color: #6b7280;
+    }
+
+    .wallet-value {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 13px;
+    }
+
+    .btn-view { background: #dbeafe; color: #1e40af; }
+    .btn-view:hover { background: #bfdbfe; }
+
+    .btn-edit { background: #fef3c7; color: #92400e; }
+    .btn-edit:hover { background: #fde68a; }
+
+    .btn-ban { background: #ffe4e6; color: #9f1239; }
+    .btn-ban:hover { background: #fecdd3; }
+
+    .btn-delete { background: #fee2e2; color: #991b1b; }
+    .btn-delete:hover { background: #fecaca; }
+
+    .actions-cell {
+        display: flex;
+        gap: 8px;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 20px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .page-link {
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #667eea;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        background: #f9fafb;
+    }
+
+    .page-link.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        color: #d1d5db;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .empty-state p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+</style>
+
+<!-- Header -->
+<div class="header-section">
+    <div class="header-left">
+        <h2><i class="fas fa-users"></i> Manage Users</h2>
+        <p>View, edit, and manage all system users</p>
+    </div>
+    <div class="header-right" style="gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+        <a href="{% url 'admin_dashboard:manage_roles' %}" class="btn btn-add" style="background: #10b981; color: white;">
+            <i class="fas fa-user-shield"></i> Manage Roles
+        </a>
+        <a href="{% url 'admin_dashboard:create_manual_client' %}" class="btn btn-add">
+            <i class="fas fa-user-plus"></i> Create Client
+        </a>
+        <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container-main">
+    <!-- Search -->
+    <div class="search-section">
+        <form method="get" style="display: flex; gap: 10px;">
+            <input type="text" name="search" class="search-input" placeholder="🔍 Search by name, email, or phone..." value="{{ request.GET.search }}">
+            <button type="submit" class="btn btn-add" style="flex: 0 0 auto; padding: 10px 24px;">
+                <i class="fas fa-search"></i>
+            </button>
         </form>
     </div>
 
     <!-- Users Table -->
-    <div class="user-table-card">
+    <div class="users-table">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+            <table>
+                <thead>
                     <tr>
-                        <th class="px-4 py-3">User</th>
-                        <th class="py-3">Contact</th>
-                        <th class="py-3">Wallet Info</th>
-                        <th class="py-3">Status</th>
-                        <th class="py-3">Type</th>
-                        <th class="py-3 text-center">Actions</th>
+                        <th style="width: 25%;">User</th>
+                        <th style="width: 20%;">Contact</th>
+                        <th style="width: 20%;">Wallet Info</th>
+                        <th style="width: 10%;">Role</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 10%;">Type</th>
+                        <th style="width: 15%; text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in all_users %}
                     <tr>
-                        <td class="px-4 py-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="user-avatar">
-                                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-                                </div>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
                                 <div>
-                                    <div class="fw-semibold">{{ user.first_name }} {{ user.last_name }}</div>
-                                    <div class="text-muted small">{{ user.username }}</div>
+                                    <div class="user-name">{{ user.first_name }} {{ user.last_name }}</div>
+                                    <div class="user-username">@{{ user.username }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3">
-                            <div class="small">
-                                <div><i class="fas fa-envelope text-muted"></i> {{ user.email }}</div>
+                        <td>
+                            <div style="font-size: 12px; line-height: 1.6;">
+                                <div><strong>Email:</strong> {{ user.email }}</div>
                                 {% if user.phone_number %}
-                                <div><i class="fab fa-whatsapp text-success"></i> {{ user.phone_number }}</div>
+                                <div><strong>Phone:</strong> {{ user.phone_number }}</div>
                                 {% endif %}
                             </div>
                         </td>
-                        <td class="py-3">
+                        <td>
                             {% if user.wallet %}
-                                <div class="small">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="text-muted" style="font-size: 0.7rem;">Received:</span>
-                                        <span class="text-primary fw-semibold" style="font-size: 0.8rem;">${{ user.total_received|floatformat:2 }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="text-muted" style="font-size: 0.7rem;">Spent:</span>
-                                        <span class="text-danger fw-semibold" style="font-size: 0.8rem;">${{ user.total_spent|floatformat:2 }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center pt-1 border-top">
-                                        <span class="text-muted fw-semibold" style="font-size: 0.75rem;">Balance:</span>
-                                        <span class="text-success fw-bold" style="font-size: 0.85rem;">${{ user.wallet.balance|floatformat:2 }}</span>
-                                    </div>
+                            <div class="wallet-info">
+                                <div class="wallet-row">
+                                    <span class="wallet-label">Received:</span>
+                                    <span class="wallet-value" style="color: #3b82f6;">${{ user.total_received|floatformat:2 }}</span>
                                 </div>
+                                <div class="wallet-row">
+                                    <span class="wallet-label">Spent:</span>
+                                    <span class="wallet-value" style="color: #ef4444;">${{ user.total_spent|floatformat:2 }}</span>
+                                </div>
+                                <div class="wallet-row" style="border-top: 1px solid #f3f4f6; padding-top: 4px; margin-top: 4px;">
+                                    <span class="wallet-label">Balance:</span>
+                                    <span class="wallet-value" style="color: #10b981;">${{ user.wallet.balance|floatformat:2 }}</span>
+                                </div>
+                            </div>
                             {% else %}
-                                <span class="text-muted small">No wallet</span>
+                            <span style="color: #6b7280;">No wallet</span>
                             {% endif %}
                         </td>
-                        <td class="py-3">
-                            {% if user.is_active %}
-                                <span class="status-badge status-active">
-                                    <i class="fas fa-check-circle"></i> Active
-                                </span>
-                            {% else %}
-                                <span class="status-badge status-inactive">
-                                    <i class="fas fa-times-circle"></i> Inactive
-                                </span>
-                            {% endif %}
+                        <td>
+                            <span class="badge" style="background: #e0e7ff; color: #667eea;">
+                                <i class="fas fa-user-tag"></i> {{ user.group_name }}
+                            </span>
                         </td>
-                        <td class="py-3">
+                        <td>
+                            <span class="badge {% if user.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                                {% if user.is_active %}<i class="fas fa-check-circle"></i> Active{% else %}<i class="fas fa-times-circle"></i> Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>
                             {% if user.is_manual_client %}
-                                <span class="badge bg-info"><i class="fas fa-user-tie"></i> Manual</span>
+                            <span class="badge badge-manual">Manual</span>
                             {% else %}
-                                <span class="badge bg-secondary"><i class="fas fa-user"></i> Regular</span>
+                            <span class="badge badge-regular">Regular</span>
                             {% endif %}
                         </td>
-                        <td class="py-3">
-                            <div class="d-flex justify-content-center gap-2">
-                                <button class="action-btn btn-view" 
-                                        onclick="viewUser({{ user.id }})" 
-                                        title="View Details">
+                        <td>
+                            <div class="actions-cell" style="justify-content: center;">
+                                <button class="action-btn btn-view" onclick="viewUser({{ user.id }})" title="View">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="action-btn btn-edit" 
-                                        onclick="editUser({{ user.id }})" 
-                                        title="Edit User">
+                                <button class="action-btn btn-edit" onclick="editUser({{ user.id }})" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="action-btn btn-ban" 
-                                        onclick="toggleBanUser({{ user.id }}, {{ user.is_active|yesno:'true,false' }})" 
-                                        title="{% if user.is_active %}Ban{% else %}Unban{% endif %} User">
+                                <button class="action-btn btn-ban" onclick="toggleBanUser({{ user.id }}, {{ user.is_active|yesno:'true,false' }})" title="{% if user.is_active %}Ban{% else %}Unban{% endif %}">
                                     <i class="fas {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
                                 </button>
-                                <button class="action-btn btn-delete" 
-                                        onclick="deleteUser({{ user.id }}, '{{ user.email }}')" 
-                                        title="Delete User">
+                                <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.email }}')" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -261,9 +460,11 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="fas fa-users fa-3x mb-3 opacity-25"></i>
-                            <p class="mb-0">No users found</p>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>No users found</p>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -273,49 +474,36 @@
 
         <!-- Pagination -->
         {% if all_users.has_other_pages %}
-        <div class="p-4 border-top">
-            <nav>
-                <ul class="pagination justify-content-center mb-0">
-                    {% if all_users.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ all_users.previous_page_number }}&search={{ request.GET.search }}">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                    
-                    <li class="page-item active">
-                        <span class="page-link">{{ all_users.number }} of {{ all_users.paginator.num_pages }}</span>
-                    </li>
-                    
-                    {% if all_users.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ all_users.next_page_number }}&search={{ request.GET.search }}">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
+        <div class="pagination">
+            {% if all_users.has_previous %}
+            <a href="?page={{ all_users.previous_page_number }}&search={{ request.GET.search }}" class="page-link">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            <span class="page-link active">Page {{ all_users.number }} of {{ all_users.paginator.num_pages }}</span>
+            
+            {% if all_users.has_next %}
+            <a href="?page={{ all_users.next_page_number }}&search={{ request.GET.search }}" class="page-link">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>
 </div>
 
+
 <!-- View User Modal -->
 <div class="modal fade" id="viewUserModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header modal-header-custom">
+            <div class="modal-header">
                 <h5 class="modal-title"><i class="fas fa-user-circle"></i> User Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="viewUserContent">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
+            <div class="modal-body" id="viewUserContent" style="text-align: center; padding: 40px;">
+                <div class="spinner-border text-primary"></div>
             </div>
         </div>
     </div>
@@ -325,38 +513,34 @@
 <div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header modal-header-custom">
+            <div class="modal-header">
                 <h5 class="modal-title"><i class="fas fa-edit"></i> Edit User</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" id="editUserForm">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="edit_user">
                 <input type="hidden" name="user_id" id="edit_user_id">
                 <div class="modal-body" id="editUserContent">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                    <div style="text-align: center; padding: 40px;">
+                        <div class="spinner-border text-primary"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
+                    <button type="submit" class="btn btn-add" style="background: #667eea;">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Ban/Unban Confirmation Modal -->
+<!-- Ban/Unban Modal -->
 <div class="modal fade" id="banUserModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header" id="banModalHeader" style="background: #fef3c7;">
-                <h5 class="modal-title" id="banModalTitle">
+            <div class="modal-header" style="background: #fef3c7; border: none;">
+                <h5 class="modal-title" id="banModalTitle" style="color: #92400e;">
                     <i class="fas fa-ban"></i> Ban User
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -367,11 +551,11 @@
                 <input type="hidden" name="user_id" id="ban_user_id">
                 <input type="hidden" name="is_active" id="ban_is_active">
                 <div class="modal-body">
-                    <p id="banMessage"></p>
+                    <p id="banMessage" style="font-size: 14px;"></p>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn" id="banConfirmBtn">Confirm</button>
+                    <button type="submit" class="btn btn-add" id="banConfirmBtn" style="background: #fef3c7; color: #92400e;">Confirm</button>
                 </div>
             </form>
         </div>
@@ -382,83 +566,28 @@
 <div class="modal fade" id="deleteUserModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle"></i> Confirm User Deletion
+            <div class="modal-header" style="background: #fee2e2; border: none;">
+                <h5 class="modal-title" style="color: #991b1b;">
+                    <i class="fas fa-exclamation-triangle"></i> Delete User
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" action="{% url 'admin_dashboard:delete_user' %}">
                 {% csrf_token %}
                 <input type="hidden" name="user_id" id="delete_user_id">
                 <div class="modal-body">
                     <div class="alert alert-danger">
-                        <strong>⚠️ DANGER:</strong> This action is PERMANENT and cannot be undone!
+                        <strong>⚠️ WARNING:</strong> This action is PERMANENT and cannot be undone!
                     </div>
-                    <p class="mb-3">You are about to permanently delete this user and all associated data.</p>
-                    <div class="mb-3">
-                        <label for="confirm_email" class="form-label fw-semibold">
-                            Type <code id="delete_user_email"></code> to confirm:
-                        </label>
-                        <input type="text" class="form-control" id="confirm_email" name="confirm_email" required>
+                    <p>You are about to permanently delete this user and all associated data.</p>
+                    <div style="margin-top: 16px;">
+                        <label class="form-label">Type the email to confirm:</label>
+                        <input type="text" class="form-control" id="confirm_email" name="confirm_email" required placeholder="user@email.com">
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Yes, Delete User
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Wallet Balance Modal -->
-<div class="modal fade" id="editWalletModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title">
-                    <i class="fas fa-wallet"></i> Edit Wallet Balance
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'admin_dashboard:edit_wallet_balance' %}">
-                {% csrf_token %}
-                <input type="hidden" name="user_id" id="wallet_user_id">
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong> 
-                        You are about to manually edit the wallet balance. This action will be logged.
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">User</label>
-                        <input type="text" class="form-control" id="wallet_username" readonly>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Current Balance</label>
-                            <div class="form-control bg-light" id="wallet_current_balance">$0.00</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">New Balance (USD) *</label>
-                            <input type="number" step="0.01" class="form-control" name="new_balance" id="wallet_new_balance" required>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3 mt-3">
-                        <label class="form-label fw-semibold">Reason for Edit *</label>
-                        <textarea class="form-control" name="admin_reason" rows="3" required placeholder="Explain why you're editing the balance..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-save"></i> Update Balance
-                    </button>
+                    <button type="submit" class="btn btn-add" style="background: #ef4444;">Delete User</button>
                 </div>
             </form>
         </div>
@@ -466,266 +595,179 @@
 </div>
 
 <script>
-// Get CSRF token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
 
-const csrftoken = getCookie('csrftoken');
+    const csrftoken = getCookie('csrftoken');
 
-// View user details
-function viewUser(userId) {
-    const apiUrl = `/admin_dashboard/api/user/${userId}/`;
-    console.log('Fetching from:', apiUrl);
-    
-    fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-            'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin'
-    })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+    function viewUser(userId) {
+        fetch(`/admin_dashboard/api/user/${userId}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
         })
-        .then(data => {
-            console.log('User data:', data);
-            console.log('Total Received:', data.total_received);
-            console.log('Total Spent:', data.total_spent);
-            console.log('Remaining:', data.remaining_balance);
-            
-            const content = `
-                <div class="row g-0">
-                    <div class="col-md-4 text-center p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <div class="user-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 32px;">
-                            ${data.first_name.charAt(0)}${data.last_name.charAt(0)}
-                        </div>
-                        <h5 class="text-white">${data.first_name} ${data.last_name}</h5>
-                        <p class="text-white-50 small mb-3">${data.username}</p>
-                        ${data.is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>'}
-                        ${data.is_manual_client ? '<span class="badge bg-info ms-2">Manual Client</span>' : ''}
-                    </div>
-                    <div class="col-md-8 p-4">
-                        <h6 class="fw-bold mb-3 text-primary">Contact Information</h6>
-                        <div class="info-row">
-                            <div class="info-label">Email</div>
-                            <div class="info-value">${data.email}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Phone Number</div>
-                            <div class="info-value">${data.phone_number || 'Not provided'}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Verified</div>
-                            <div class="info-value">${data.is_verified ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-warning">No</span>'}</div>
-                        </div>
-                        
-                        <h6 class="fw-bold mb-3 mt-4 text-primary">Wallet Information</h6>
-                        <div class="info-row">
-                            <div class="info-label">Total Received (Deposits)</div>
-                            <div class="info-value text-primary fw-bold">$${parseFloat(data.total_received).toFixed(2)}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Total Spent (Top-ups)</div>
-                            <div class="info-value text-danger fw-bold">$${parseFloat(data.total_spent).toFixed(2)}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Current Balance (Remaining)</div>
-                            <div class="info-value text-success fw-bold">$${parseFloat(data.remaining_balance).toFixed(2)}</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Dollar Rate</div>
-                            <div class="info-value">৳${data.dollar_rate}</div>
-                        </div>
-                        
-                        <h6 class="fw-bold mb-3 mt-4 text-primary">Statistics</h6>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-primary mb-1">${data.stats.pending_deposits}</h4>
-                                    <small class="text-muted">Pending Deposits</small>
-                                </div>
+            .then(response => response.json())
+            .then(data => {
+                const content = `
+                    <div style="text-align: left;">
+                        <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.3); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700;">
+                                ${data.first_name.charAt(0)}${data.last_name.charAt(0)}
                             </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-success mb-1">${data.stats.active_accounts}</h4>
-                                    <small class="text-muted">Active Accounts</small>
-                                </div>
+                            <h5 style="margin: 0; font-weight: 700;">${data.first_name} ${data.last_name}</h5>
+                            <p style="margin: 4px 0; opacity: 0.9;">@${data.username}</p>
+                        </div>
+
+                        <h6 style="font-weight: 700; margin-bottom: 12px; color: #1f2937;">Contact Information</h6>
+                        <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+                            <div style="margin-bottom: 8px;"><strong>Email:</strong> ${data.email}</div>
+                            <div><strong>Phone:</strong> ${data.phone_number || 'Not provided'}</div>
+                        </div>
+
+                        <h6 style="font-weight: 700; margin-bottom: 12px; margin-top: 16px; color: #1f2937;">Wallet Information</h6>
+                        <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+                            <div style="margin-bottom: 8px;"><strong>Received:</strong> <span style="color: #3b82f6; font-weight: 600;">$${parseFloat(data.total_received).toFixed(2)}</span></div>
+                            <div style="margin-bottom: 8px;"><strong>Spent:</strong> <span style="color: #ef4444; font-weight: 600;">$${parseFloat(data.total_spent).toFixed(2)}</span></div>
+                            <div><strong>Balance:</strong> <span style="color: #10b981; font-weight: 600;">$${parseFloat(data.remaining_balance).toFixed(2)}</span></div>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <h6 style="font-weight: 700; margin-bottom: 12px; color: #1f2937;">Ad Accounts</h6>
+                            <div style="display: grid; gap: 10px;">
+                                ${data.ad_accounts && data.ad_accounts.length ? data.ad_accounts.map(account => `
+                                    <a href="/admin_dashboard/ad_accounts/${account.id}/" style="display: block; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; text-decoration: none; color: #1f2937;">
+                                        <div style="font-weight: 700;">${account.name}</div>
+                                        <div style="font-size: 13px; color: #64748b;">Status: ${account.status.charAt(0).toUpperCase() + account.status.slice(1)}</div>
+                                    </a>
+                                `).join('') : `<div style="padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; color: #64748b;">No ad accounts available.</div>`}
                             </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-warning mb-1">${data.stats.pending_accounts}</h4>
-                                    <small class="text-muted">Pending Accounts</small>
-                                </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <div style="flex: 1; background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center; font-size: 13px;">
+                                <div style="font-weight: 700; font-size: 16px; color: #667eea;">${data.stats.pending_deposits}</div>
+                                <div style="color: #6b7280;">Pending Deposits</div>
                             </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-info mb-1">$${parseFloat(data.stats.total_approved_deposit).toFixed(2)}</h4>
-                                    <small class="text-muted">Total Deposits</small>
-                                </div>
+                            <div style="flex: 1; background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center; font-size: 13px;">
+                                <div style="font-weight: 700; font-size: 16px; color: #10b981;">${data.stats.active_accounts}</div>
+                                <div style="color: #6b7280;">Active Accounts</div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            document.getElementById('viewUserContent').innerHTML = content;
-            new bootstrap.Modal(document.getElementById('viewUserModal')).show();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('viewUserContent').innerHTML = `
-                <div class="alert alert-danger">
-                    <h5>Error Loading User Details</h5>
-                    <p>${error.message}</p>
-                    <p class="small mb-0">Check browser console for more details.</p>
-                </div>
-            `;
-            new bootstrap.Modal(document.getElementById('viewUserModal')).show();
-        });
-}
-
-// Edit user
-function editUser(userId) {
-    const apiUrl = `/admin_dashboard/api/user/${userId}/`;
-    console.log('Fetching from:', apiUrl);
-    
-    fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-            'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin'
-    })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('User data:', data);
-            document.getElementById('edit_user_id').value = userId;
-            const content = `
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">First Name</label>
-                    <input type="text" class="form-control" name="first_name" value="${data.first_name}" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Last Name</label>
-                    <input type="text" class="form-control" name="last_name" value="${data.last_name}" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Email</label>
-                    <input type="email" class="form-control" name="email" value="${data.email}" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Phone Number</label>
-                    <input type="text" class="form-control" name="phone_number" value="${data.phone_number || ''}">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Dollar Rate</label>
-                    <input type="number" step="0.01" class="form-control" name="dollar_rate" value="${data.dollar_rate}">
-                </div>
-                
-                <div class="alert alert-info">
-                    <strong><i class="fas fa-wallet"></i> Current Wallet Balance:</strong> $${parseFloat(data.wallet_balance).toFixed(2)}
-                    <button type="button" class="btn btn-sm btn-warning float-end" onclick="openWalletEditModal(${data.id}, '${data.username}', '${data.wallet_balance}')">
-                        <i class="fas fa-edit"></i> Edit Balance
-                    </button>
-                </div>
-                
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" name="is_active" id="edit_is_active" ${data.is_active ? 'checked' : ''}>
-                    <label class="form-check-label" for="edit_is_active">Active</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" name="is_verified" id="edit_is_verified" ${data.is_verified ? 'checked' : ''}>
-                    <label class="form-check-label" for="edit_is_verified">Verified</label>
-                </div>
-            `;
-            document.getElementById('editUserContent').innerHTML = content;
-            new bootstrap.Modal(document.getElementById('editUserModal')).show();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('editUserContent').innerHTML = `
-                <div class="alert alert-danger">
-                    <h5>Error Loading User Details</h5>
-                    <p>${error.message}</p>
-                    <p class="small mb-0">Check browser console for more details.</p>
-                </div>
-            `;
-            new bootstrap.Modal(document.getElementById('editUserModal')).show();
-        });
-}
-
-// Toggle ban user
-function toggleBanUser(userId, isActive) {
-    document.getElementById('ban_user_id').value = userId;
-    document.getElementById('ban_is_active').value = isActive ? 'false' : 'true';
-    
-    const modal = document.getElementById('banUserModal');
-    const header = document.getElementById('banModalHeader');
-    const title = document.getElementById('banModalTitle');
-    const message = document.getElementById('banMessage');
-    const btn = document.getElementById('banConfirmBtn');
-    
-    if (isActive) {
-        header.style.background = '#fef3c7';
-        title.innerHTML = '<i class="fas fa-ban"></i> Ban User';
-        message.textContent = 'Are you sure you want to ban this user? They will not be able to log in.';
-        btn.className = 'btn btn-warning';
-        btn.innerHTML = '<i class="fas fa-ban"></i> Ban User';
-    } else {
-        header.style.background = '#d1fae5';
-        title.innerHTML = '<i class="fas fa-check"></i> Unban User';
-        message.textContent = 'Are you sure you want to unban this user? They will be able to log in again.';
-        btn.className = 'btn btn-success';
-        btn.innerHTML = '<i class="fas fa-check"></i> Unban User';
+                `;
+                document.getElementById('viewUserContent').innerHTML = content;
+                new bootstrap.Modal(document.getElementById('viewUserModal')).show();
+            })
+            .catch(error => {
+                document.getElementById('viewUserContent').innerHTML = `<div class="alert alert-danger">Error loading user details</div>`;
+                new bootstrap.Modal(document.getElementById('viewUserModal')).show();
+            });
     }
-    
-    new bootstrap.Modal(modal).show();
-}
 
-// Delete user
-function deleteUser(userId, email) {
-    document.getElementById('delete_user_id').value = userId;
-    document.getElementById('delete_user_email').textContent = email;
-    document.getElementById('confirm_email').value = '';
-    new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
-}
+    function editUser(userId) {
+        fetch(`/admin_dashboard/api/user/${userId}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('edit_user_id').value = userId;
+                const content = `
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" name="first_name" value="${data.first_name}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" name="last_name" value="${data.last_name}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" value="${data.email}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" name="phone_number" value="${data.phone_number || ''}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dollar Rate</label>
+                        <input type="number" step="0.01" class="form-control" name="dollar_rate" value="${data.dollar_rate}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">User Group</label>
+                        <select name="group" class="form-control">
+                            <option value="">-- No Group --</option>
+                            ${data.available_groups.map(group => `
+                                <option value="${group.id}" ${data.group_id === group.id ? 'selected' : ''}>
+                                    ${group.name}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="alert alert-info" style="margin: 16px 0;">
+                        <strong><i class="fas fa-wallet"></i> Wallet Balance:</strong> $${parseFloat(data.wallet_balance).toFixed(2)}
+                    </div>
+                    <div class="mb-3" style="display: flex; gap: 16px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                            <input type="checkbox" name="is_active" ${data.is_active ? 'checked' : ''}>
+                            <span>Active</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                            <input type="checkbox" name="is_verified" ${data.is_verified ? 'checked' : ''}>
+                            <span>Verified</span>
+                        </label>
+                    </div>
+                `;
+                document.getElementById('editUserContent').innerHTML = content;
+                new bootstrap.Modal(document.getElementById('editUserModal')).show();
+            })
+            .catch(error => {
+                document.getElementById('editUserContent').innerHTML = `<div class="alert alert-danger">Error loading user details</div>`;
+                new bootstrap.Modal(document.getElementById('editUserModal')).show();
+            });
+    }
 
-// Open wallet edit modal
-function openWalletEditModal(userId, username, currentBalance) {
-    // Close edit user modal first
-    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-    
-    // Set values
-    document.getElementById('wallet_user_id').value = userId;
-    document.getElementById('wallet_username').value = username;
-    document.getElementById('wallet_current_balance').textContent = '$' + parseFloat(currentBalance).toFixed(2);
-    document.getElementById('wallet_new_balance').value = currentBalance;
-    
-    // Show modal
-    new bootstrap.Modal(document.getElementById('editWalletModal')).show();
-}
+    function toggleBanUser(userId, isActive) {
+        document.getElementById('ban_user_id').value = userId;
+        document.getElementById('ban_is_active').value = isActive;
+        
+        if (isActive) {
+            document.getElementById('banModalTitle').innerHTML = '<i class="fas fa-ban"></i> Ban User';
+            document.getElementById('banMessage').innerHTML = 'Are you sure you want to <strong>ban</strong> this user? They will no longer be able to access the system.';
+            document.getElementById('banConfirmBtn').innerHTML = 'Ban User';
+        } else {
+            document.getElementById('banModalTitle').innerHTML = '<i class="fas fa-check"></i> Unban User';
+            document.getElementById('banMessage').innerHTML = 'Are you sure you want to <strong>unban</strong> this user? They will be able to access the system again.';
+            document.getElementById('banConfirmBtn').innerHTML = 'Unban User';
+        }
+        
+        new bootstrap.Modal(document.getElementById('banUserModal')).show();
+    }
+
+    function deleteUser(userId, email) {
+        document.getElementById('delete_user_id').value = userId;
+        document.getElementById('confirm_email').placeholder = email;
+        new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+    }
 </script>
+
 {% endblock %}

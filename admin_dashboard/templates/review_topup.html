@@ -23,7 +23,7 @@
           BM Requests
         </a>
         <a href="{% url 'admin_dashboard:review_topup' %}" type="button" role="button" class="btn-filter text-decoration-none active">
-          Top-ups
+          Withdrawals
         </a>
         <div class="ms-auto">
           <form method="get" action="{% url 'admin_dashboard:review_topup' %}" class="d-flex align-items-center">
@@ -45,8 +45,8 @@
             <tr>
               <th>ID</th>
               <th>Ad Account</th>
+              <th>Ad Account ID</th>
               <th>Amount</th>
-              <th>Type</th>
               <th>Status</th>
               <th>Date</th>
               <th class="pe-2">Action</th>
@@ -54,15 +54,29 @@
           </thead>
           <tbody>
             {% for topup in topups %}
+            {% if topup.ad_account and topup.ad_account.admin_bm %}
             <tr>
               <td style="font-size: 0.75rem;">{{ topup.id }}</td>
               <td style="font-size: 0.75rem;">
                 <a href="{% url 'ad_accounts' %}?search={{ topup.ad_account.name }}" class="text-decoration-none">
                     {{ topup.ad_account.name }}
                 </a>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ topup.ad_account.name }}', this)" title="Copy Ad Account Name">
+                  <i class="fas fa-copy"></i>
+                </button>
               </td>
-              <td style="font-size: 0.75rem;">৳{{ topup.amount }}</td>
-              <td style="font-size: 0.75rem;">{{ topup.type|capfirst }}</td>
+              <td style="font-size: 0.75rem;">
+                {{ topup.ad_account.acc_id }}
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ topup.ad_account.acc_id }}', this)" title="Copy Ad Account ID">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </td>
+              <td style="font-size: 0.75rem;">
+                ৳{{ topup.amount }}
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ topup.amount }}', this)" title="Copy Amount">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </td>
               <td><span class="status-{{ topup.status }}">{{ topup.status|capfirst }}</span></td>
               <td class="ps-2" style="font-size: 0.75rem; color: #637381;">{{ topup.date|date:"H:i, d M Y" }}</td>
               <td class="pe-2">
@@ -75,6 +89,33 @@
                 </form>
               </td>
             </tr>
+            {% elif topup.ad_account and not topup.ad_account.admin_bm %}
+            <tr style="background-color: #f8d7da; opacity: 0.7;">
+              <td style="font-size: 0.75rem;">{{ topup.id }}</td>
+              <td colspan="5" style="font-size: 0.75rem; color: #721c24;">
+                ⚠️ {{ topup.ad_account.name }} - Admin BM account has been removed (cannot process)
+              </td>
+              <td class="pe-2">
+                <form action="{% url 'admin_dashboard:review_topup' %}" method="post">
+                  <input type="hidden" name="topup_id" value="{{ topup.id }}">
+                  {% csrf_token %}
+                  <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr style="background-color: #fff3cd;">
+              <td style="font-size: 0.75rem;">{{ topup.id }}</td>
+              <td colspan="5" style="font-size: 0.75rem; color: #856404;">⚠️ Ad account has been deleted</td>
+              <td class="pe-2">
+                <form action="{% url 'admin_dashboard:review_topup' %}" method="post">
+                  <input type="hidden" name="topup_id" value="{{ topup.id }}">
+                  {% csrf_token %}
+                  <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endif %}
             {% empty %}
             <tr>
               <td colspan="7" class="text-center">No pending top-up requests found.</td>
@@ -152,5 +193,37 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function copyToClipboard(text, button) {
+      // Create temporary textarea
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        document.execCommand('copy');
+        // Visual feedback
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-check';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+          icon.className = originalClass;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-secondary');
+        }, 1500);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+      
+      document.body.removeChild(textarea);
+    }
+  </script>
 
 {% endblock %}

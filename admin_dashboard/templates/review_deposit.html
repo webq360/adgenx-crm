@@ -22,7 +22,7 @@
           BM Requests
         </a>
         <a href="{% url 'admin_dashboard:review_topup' %}" type="button" role="button" class="btn-filter text-decoration-none">
-          Top-ups
+          Withdrawals
         </a>
         <div class="ms-auto">
           <form method="get" action="{% url 'admin_dashboard:review_deposit' %}" class="d-flex align-items-center">
@@ -62,15 +62,33 @@
               <td style="font-size: 0.75rem;">{{ transaction.id }}</td>
               <td style="font-size: 0.75rem;">
                 {{ transaction.user.first_name }} {{ transaction.user.last_name }} ({{ transaction.user.username }})
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ transaction.user.username }}', this)" title="Copy Username">
+                  <i class="fas fa-copy"></i>
+                </button>
               </td>
               <td style="font-size: 0.75rem;">
                 <span class="text-success fw-semibold">${{ transaction.user.wallet.balance|floatformat:2 }}</span>
               </td>
               <td style="font-size: 0.75rem;">{{ transaction.method }}</td>
-              <td style="font-size: 0.75rem;">{{ transaction.trx_id }}</td>
+              <td style="font-size: 0.75rem;">
+                {{ transaction.trx_id }}
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ transaction.trx_id }}', this)" title="Copy TRX ID">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </td>
               <td style="font-size: 0.75rem;">${{ transaction.user_dollar_rate }}</td>
-              <td style="font-size: 0.75rem;">৳{{ transaction.bdt_amount }}</td>
-              <td style="font-size: 0.75rem;">${{ transaction.usd_amount }}</td>
+              <td style="font-size: 0.75rem;">
+                ৳{{ transaction.bdt_amount }}
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ transaction.bdt_amount }}', this)" title="Copy BDT Amount">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </td>
+              <td style="font-size: 0.75rem;">
+                ${{ transaction.usd_amount }}
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ transaction.usd_amount }}', this)" title="Copy USD Amount">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </td>
               <td><span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></td>
               <td class="pe-2">
                 <a href="{% url 'admin_dashboard:review_deposit_details' transaction.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
@@ -153,5 +171,37 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function copyToClipboard(text, button) {
+      // Create temporary textarea
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        document.execCommand('copy');
+        // Visual feedback
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-check';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+          icon.className = originalClass;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-secondary');
+        }, 1500);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+      
+      document.body.removeChild(textarea);
+    }
+  </script>
 
 {% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .roles-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .roles-header h2 { font-size: 28px; font-weight: 700; margin: 0; }
+    .roles-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(15,23,42,0.08); margin-bottom: 24px; }
+    .roles-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .roles-table th, .roles-table td { padding: 14px 16px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+    .roles-table th { background: #f8fafc; color: #334155; font-weight: 700; }
+    .roles-table td { color: #475569; }
+    .roles-table tbody tr:hover { background: #f8fafc; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+    .badge-perm { background: #eef2ff; color: #4338ca; }
+    .btn-primary { background: #2563eb; border: 1px solid #2563eb; color: white; }
+    .btn-secondary { background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; }
+    .form-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(15,23,42,0.08); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 700; color: #0f172a; }
+    .form-control { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; }
+    .form-control:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .permission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .permission-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+</style>
+
+<div class="roles-header">
+    <div>
+        <h2>Role Management</h2>
+        <p style="color: #64748b; margin: 8px 0 0;">Create roles, assign permissions, and manage group-based access.</p>
+    </div>
+    <a href="{% url 'admin_dashboard:admin_overview' %}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<div class="roles-card">
+    <h3 style="margin-bottom: 16px;">Existing Roles</h3>
+    <table class="roles-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Role Name</th>
+                <th style="width: 55%;">Permissions</th>
+                <th style="width: 20%;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for role in roles %}
+            <tr>
+                <td>{{ role.name }}</td>
+                <td>
+                    {% if role.permissions.all %}
+                    {% for perm in role.permissions.all %}
+                        <span class="badge badge-perm">{{ perm.name }}</span>
+                    {% endfor %}
+                    {% else %}
+                        <span style="color: #94a3b8;">No permissions assigned</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="{% url 'admin_dashboard:edit_role' role.id %}" class="btn btn-primary" style="padding: 8px 12px;">Edit</a>
+                        <form method="post" style="margin:0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_role">
+                            <input type="hidden" name="group_id" value="{{ role.id }}">
+                            <button type="submit" class="btn btn-secondary" style="padding: 8px 12px;">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: #64748b;">No roles found. Create one below.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="form-card">
+    <h3 style="margin-bottom: 16px;">Create New Role</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_role">
+        <div class="form-group">
+            <label class="form-label">Role Name</label>
+            <input type="text" name="group_name" class="form-control" placeholder="e.g. Manager" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Permissions</label>
+            <div class="permission-grid">
+                {% for perm_codename, perm_label in available_permissions.items %}
+                <label class="permission-item">
+                    <input type="checkbox" name="permissions" value="{{ perm_codename }}">
+                    <span>{{ perm_label }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 12px 22px;">Create Role</button>
+    </form>
+</div>
+{% endblock %}

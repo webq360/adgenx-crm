@@ -34,6 +34,9 @@ class SiteSettings(models.Model):
     # Footer
     footer_tagline = models.CharField(max_length=200, default='Premium ad account management platform for Facebook, TikTok & Google Ads. Scale without limits.')
 
+    # Logo
+    logo = models.ImageField(upload_to='logos/', blank=True, null=True, help_text='Upload logo image (max 2MB, PNG/JPG recommended)')
+
     class Meta:
         verbose_name = 'Site Settings'
 

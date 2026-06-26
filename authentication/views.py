@@ -131,6 +131,8 @@ def auth_view(request):
                 is_active=False,
                 is_verified=False
             )
+            
+            # User will use Django Groups for permissions instead of custom roles
             Wallet.objects.create(user=user)
 
             # Send verification email (with error handling)
@@ -181,7 +183,10 @@ def verify_email(request, uidb64, token):
         return redirect('auth')
 
 def logout_view(request):
+    # Clear session data to remove cached permissions
+    request.session.flush()
     logout(request)
+    messages.success(request, 'Successfully logged out.')
     return redirect('auth')
 
 def password_reset(request, uidb64, token):

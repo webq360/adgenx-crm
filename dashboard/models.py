@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
+from django.contrib.auth.models import AbstractUser
+
+
 class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True)
     is_verified = models.BooleanField(default=False)
@@ -10,6 +13,8 @@ class User(AbstractUser):
     notes = models.TextField(blank=True)
     include_in_profit_reports = models.BooleanField(default=True)
     created_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    # REMOVED: role field - using Django Groups instead
+    dollar_rate = models.DecimalField(max_digits=10, decimal_places=2, default=110)
 
 class DepositTransaction(models.Model):
     STATUS_CHOICES = (
@@ -77,6 +82,9 @@ class AdAccount(models.Model):
     
     start_date = models.DateField(db_index=True)
     monthly_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    remaining_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    limit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='inactive', db_index=True)
     bm_accounts = models.ManyToManyField(BMAccount, blank=True)
     admin_bm = models.ForeignKey('AdminBM', on_delete=models.SET_NULL, null=True, blank=True)
@@ -258,10 +266,16 @@ class Notification(models.Model):
         ('deposit_pending', 'Deposit Pending'),
         ('topup_approved', 'Topup Approved'),
         ('topup_decrease_approved', 'Topup Decrease Approved'),
+        ('topup_pending', 'Topup Pending'),
         ('ad_account_activated', 'Ad Account Activated'),
         ('ad_account_deactivated', 'Ad Account Deactivated'),
+        ('ad_account_pending', 'Ad Account Pending'),
         ('bm_approved', 'BM Account Approved'),
         ('bm_removed', 'BM Account Removed'),
+        ('bm_pending', 'BM Pending'),
+        ('withdrawal_pending', 'Withdrawal Pending'),
+        ('withdrawal_approved', 'Withdrawal Approved'),
+        ('withdrawal_rejected', 'Withdrawal Rejected'),
         ('wallet_updated', 'Wallet Updated'),
         ('general', 'General'),
     ]

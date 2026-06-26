@@ -17,18 +17,21 @@
     <!-- Sidebar -->
     <aside class="sidebar d-flex flex-column justify-content-between">
     <div>
-        <div class="d-flex justify-content-center align-items-center border-bottom border-2 border-gray-200" style="height: 4rem;">
-            <a href="{% url 'index' %}" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
-                <!--<img loading="lazy" src="" alt="Logo" width="32" height="32" style="object-fit: contain;" />
-                -->
-                <h2 class="m-0">Adgenx</h2>
+        <div class="d-flex justify-content-center align-items-center">
+            <a href="{% url 'index' %}" class="logo d-flex align-items-center gap-2 text-decoration-none">
+                {% if settings.logo %}
+                    <img loading="lazy" src="{{ settings.logo.url }}" alt="Logo" />
+                {% else %}
+                    <span>Adgenx</span>
+                {% endif %}
             </a>
         </div>
-        <nav class="nav flex-column mt-3 px-3 gap-2" aria-label="Main Menu">
+        <nav class="nav flex-column mt-0 px-0 gap-0" aria-label="Main Menu">
 
         {% if not request.user.is_staff %}
+        <!-- Overview - Always visible for non-staff users -->
         <a href="{% url 'index' %}" class="nav-link d-flex align-items-center gap-2" aria-current="page">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="stroke: currentColor;">
             <rect x="3" y="3" width="7" height="7" rx="1" ry="1"></rect>
             <rect x="14" y="3" width="7" height="7" rx="1" ry="1"></rect>
             <rect x="14" y="14" width="7" height="7" rx="1" ry="1"></rect>
@@ -37,24 +40,48 @@
             Overview
         </a>
 
+        <!-- Ad Accounts - Base permission (always visible) OR role has permission -->
+        {% if user_permissions.can_manage_accounts %}
         <a href="{% url 'ad_accounts' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C11.6353 5.5179 13.0696 4.1665 14.3039 4.1665C16.1558 4.1665 17.3253 6.31803 18.0078 9.23859C18.6596 12.0279 18.4707 15.8332 16.1558 15.8332C15.1242 15.8332 13.7038 14.3117 12.3149 12.2826C11.4311 11.004 10.6565 9.64609 10 8.22456Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C8.20127 5.5179 6.62352 4.1665 5.26578 4.1665C3.22865 4.1665 1.94221 6.31803 1.19153 9.23859C0.474461 12.0279 0.682248 15.8332 3.22865 15.8332C4.36333 15.8332 5.9258 14.3117 7.45364 12.2826C8.47221 10.9303 9.32063 9.57692 10 8.22456Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="menu-icon">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C11.6353 5.5179 13.0696 4.1665 14.3039 4.1665C16.1558 4.1665 17.3253 6.31803 18.0078 9.23859C18.6596 12.0279 18.4707 15.8332 16.1558 15.8332C15.1242 15.8332 13.7038 14.3117 12.3149 12.2826C11.4311 11.004 10.6565 9.64609 10 8.22456Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C8.20127 5.5179 6.62352 4.1665 5.26578 4.1665C3.22865 4.1665 1.94221 6.31803 1.19153 9.23859C0.474461 12.0279 0.682248 15.8332 3.22865 15.8332C4.36333 15.8332 5.9258 14.3117 7.45364 12.2826C8.47221 10.9303 9.32063 9.57692 10 8.22456Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
             Ad Accounts
         </a>
+        {% endif %}
 
-
+        <!-- Deposit - Base permission (always visible) OR role has permission -->
+        {% if user_permissions.can_manage_payments %}
         <a href="{% url 'deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13.335 11.25C13.335 11.9403 13.8945 12.5 14.585 12.5C15.2753 12.5 15.835 11.9403 15.835 11.25C15.835 10.5597 15.2753 10 14.585 10C13.8945 10 13.335 10.5597 13.335 11.25Z" stroke="#424B57" stroke-width="1.25">
-            </path><path d="M1.66833 9.16667C1.66833 6.02397 1.66834 4.45262 2.64465 3.47631C3.62096 2.5 5.19231 2.5 8.33504 2.5H11.6684C12.4433 2.5 12.8308 2.5 13.1487 2.58518C14.0115 2.81635 14.6853 3.49022 14.9165 4.35295C15.0017 4.67087 15.0017 5.05836 15.0017 5.83333M8.33504 5.83333H13.335C15.692 5.83333 16.8705 5.83333 17.6028 6.56557C18.335 7.2978 18.335 8.47633 18.335 10.8333V12.5C18.335 14.857 18.335 16.0355 17.6028 16.7677C16.8705 17.5 15.692 17.5 13.335 17.5H10.4171" stroke="#424B57" stroke-width="1.25" stroke-linecap="round"></path>
-            <path d="M8.33329 14.1668H4.99996M4.99996 14.1668H1.66663M4.99996 14.1668V17.5002M4.99996 14.1668V10.8335" stroke="#424B57" stroke-width="1.25" stroke-linecap="round"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="menu-icon"><path d="M13.335 11.25C13.335 11.9403 13.8945 12.5 14.585 12.5C15.2753 12.5 15.835 11.9403 15.835 11.25C15.835 10.5597 15.2753 10 14.585 10C13.8945 10 13.335 10.5597 13.335 11.25Z" stroke="currentColor" stroke-width="1.25">
+            </path><path d="M1.66833 9.16667C1.66833 6.02397 1.66834 4.45262 2.64465 3.47631C3.62096 2.5 5.19231 2.5 8.33504 2.5H11.6684C12.4433 2.5 12.8308 2.5 13.1487 2.58518C14.0115 2.81635 14.6853 3.49022 14.9165 4.35295C15.0017 4.67087 15.0017 5.05836 15.0017 5.83333M8.33504 5.83333H13.335C15.692 5.83333 16.8705 5.83333 17.6028 6.56557C18.335 7.2978 18.335 8.47633 18.335 10.8333V12.5C18.335 14.857 18.335 16.0355 17.6028 16.7677C16.8705 17.5 15.692 17.5 13.335 17.5H10.4171" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"></path>
+            <path d="M8.33329 14.1668H4.99996M4.99996 14.1668H1.66663M4.99996 14.1668V17.5002M4.99996 14.1668V10.8335" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"></path></svg>
             Deposit
+        </a>
+        {% endif %}
+
+        <!-- Activity Log - Always visible for logged in users -->
+        <a href="{% url 'admin_dashboard:activity_log' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Activity Log
         </a>
 
         {% endif %}
         
+        <!-- Admin Panel Section - Only show if user is staff OR has special admin permissions (NOT base permissions) -->
+        {% if request.user.is_staff or user_permissions.can_review_deposits or user_permissions.can_manage_users or user_permissions.can_edit_settings %}
+        
+        <!-- Section Title -->
+        <div style="padding: 1rem 1.5rem 0.5rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="color: #000000; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">
+                Admin Panel
+            </p>
+        </div>
+        
+        <!-- Admin/Staff Overview -->
         {% if request.user.is_staff %}
         <a href="{% url 'admin_dashboard:admin_overview' %}" class="nav-link d-flex align-items-center gap-2" aria-current="page">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -65,14 +92,10 @@
             </svg>
             Overview
         </a>
+        {% endif %}
 
-        <a href="{% url 'admin_dashboard:activity_log' %}" class="nav-link d-flex align-items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            Activity Log
-        </a>
-
+        <!-- Review - Only if can_review_deposits -->
+        {% if request.user.is_staff or user_permissions.can_review_deposits %}
         <a href="{% url 'admin_dashboard:review_deposit' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25rem; height: 1.25rem;">
             <path d="M18.364 5.636a9 9 0 11-12.728 0" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -80,40 +103,87 @@
             </svg>
             Review
         </a>
+        {% endif %}
 
-        <a href="{% url 'ad_accounts' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C11.6353 5.5179 13.0696 4.1665 14.3039 4.1665C16.1558 4.1665 17.3253 6.31803 18.0078 9.23859C18.6596 12.0279 18.4707 15.8332 16.1558 15.8332C15.1242 15.8332 13.7038 14.3117 12.3149 12.2826C11.4311 11.004 10.6565 9.64609 10 8.22456Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C8.20127 5.5179 6.62352 4.1665 5.26578 4.1665C3.22865 4.1665 1.94221 6.31803 1.19153 9.23859C0.474461 12.0279 0.682248 15.8332 3.22865 15.8332C4.36333 15.8332 5.9258 14.3117 7.45364 12.2826C8.47221 10.9303 9.32063 9.57692 10 8.22456Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            Ad Accounts
-        </a>
-
+        <!-- Manage Users - Only if can_manage_users -->
+        {% if request.user.is_staff or user_permissions.can_manage_users %}
         <a href="{% url 'admin_dashboard:manage_user' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 640 640"><path d="M240 192C240 147.8 275.8 112 320 112C364.2 112 400 147.8 400 192C400 236.2 364.2 272 320 272C275.8 272 240 236.2 240 192zM448 192C448 121.3 390.7 64 320 64C249.3 64 192 121.3 192 192C192 262.7 249.3 320 320 320C390.7 320 448 262.7 448 192zM144 544C144 473.3 201.3 416 272 416L368 416C438.7 416 496 473.3 496 544L496 552C496 565.3 506.7 576 520 576C533.3 576 544 565.3 544 552L544 544C544 446.8 465.2 368 368 368L272 368C174.8 368 96 446.8 96 544L96 552C96 565.3 106.7 576 120 576C133.3 576 144 565.3 144 552L144 544z"/></svg>            
             Manage Users
         </a>
+        {% endif %}
 
+        <!-- Ad Accounts - Only for staff or can_manage_accounts -->
+        {% if request.user.is_staff or user_permissions.can_manage_accounts %}
+        <a href="{% url 'admin_dashboard:admin_ad_accounts' %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="menu-icon">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C11.6353 5.5179 13.0696 4.1665 14.3039 4.1665C16.1558 4.1665 17.3253 6.31803 18.0078 9.23859C18.6596 12.0279 18.4707 15.8332 16.1558 15.8332C15.1242 15.8332 13.7038 14.3117 12.3149 12.2826C11.4311 11.004 10.6565 9.64609 10 8.22456Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 8.22456C8.20127 5.5179 6.62352 4.1665 5.26578 4.1665C3.22865 4.1665 1.94221 6.31803 1.19153 9.23859C0.474461 12.0279 0.682248 15.8332 3.22865 15.8332C4.36333 15.8332 5.9258 14.3117 7.45364 12.2826C8.47221 10.9303 9.32063 9.57692 10 8.22456Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Ad Accounts
+        </a>
+        {% endif %}
+
+        <!-- Payment Methods - Only if can_manage_payments -->
+        {% if request.user.is_staff or user_permissions.can_manage_payments %}
         <a href="{% url 'admin_dashboard:payment_methods' %}" class="nav-link d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="2" y="5" width="20" height="14" rx="2" stroke-linecap="round" stroke-linejoin="round"></rect>
+            <rect x="2" y="5" width="20" height="14" rx="2" stroke-linecap="round" stroke-linejoin="round"></path>
             <path d="M2 10h20" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
             Payment Methods
         </a>
+        {% endif %}
 
+        <!-- Wallet Report - Only for staff -->
+        {% if request.user.is_staff %}
+        <a href="{% url 'admin_dashboard:wallet_balance_report' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 10h18M7 15h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Wallet Report
+        </a>
+        {% endif %}
+
+        <!-- Withdrawal Requests - Only if can_review_deposits OR staff -->
+        {% if request.user.is_staff or user_permissions.can_review_deposits %}
+        <a href="{% url 'admin_dashboard:withdrawal_requests' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Withdrawals
+        </a>
+        {% endif %}
+
+        <!-- Activity Log - Only for staff -->
+        {% if request.user.is_staff %}
+        <a href="{% url 'admin_dashboard:activity_log' %}" class="nav-link d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            Activity Log
+        </a>
+        {% endif %}
+        <!-- End Admin Panel Section -->
+
+        <!-- Appearance - Only if can_edit_settings -->
+        {% if request.user.is_staff or user_permissions.can_edit_settings %}
         <a href="{% url 'admin_dashboard:appearance' %}" class="nav-link d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM14 13a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1h-4a1 1 0 01-1-1v-5z" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
             Appearance
         </a>
+        {% endif %}
 
-        <a href="{% url 'admin_dashboard:withdrawal_requests' %}" class="nav-link d-flex align-items-center gap-2">
+        <!-- Admin BM Accounts - Only staff -->
+        {% if request.user.is_staff %}
+        <a href="{% url 'admin_dashboard:manage_admin_bm' %}" class="nav-link d-flex align-items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12 12a4 4 0 100-8 4 4 0 000 8z"></path>
+            <path d="M6 20.5C6 17 8.7 15 12 15s6 2 6 5.5" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
-            Withdrawals
+            Admin BM Accounts
         </a>
 
         <a href="{% url 'admin_dashboard:wallet_balance_report' %}" class="nav-link d-flex align-items-center gap-2">
@@ -123,11 +193,16 @@
             Balance Report
         </a>
         {% endif %}
+        
+        {% endif %}
 
+        <!-- Transactions - Show if has payment OR deposit review permissions (merged) -->
+        {% if user_permissions.can_manage_payments or user_permissions.can_review_deposits %}
         <a href="{% url 'deposit_transactions'  %}" class="nav-link d-flex align-items-center gap-2 fw-semibold fw-semibold ad-accounts-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.33337 15.538V6.71172C3.33337 4.33338 3.33337 3.14421 4.06561 2.40536C4.79784 1.6665 5.97635 1.6665 8.33337 1.6665H11.6667C14.0237 1.6665 15.2022 1.6665 15.9345 2.40536C16.6667 3.14421 16.6667 4.33338 16.6667 6.71172V15.538C16.6667 16.7978 16.6667 17.4276 16.2817 17.6755C15.6526 18.0808 14.6801 17.231 14.191 16.9226C13.7868 16.6677 13.5848 16.5403 13.3605 16.5329C13.1181 16.5249 12.9125 16.6472 12.4758 16.9226L10.8834 17.9268C10.4538 18.1977 10.239 18.3332 10 18.3332C9.76104 18.3332 9.54629 18.1977 9.11671 17.9268L7.52432 16.9226C7.12017 16.6677 6.91809 16.5403 6.69382 16.5329C6.45147 16.5249 6.24582 16.6472 5.80910 16.9226C5.32 17.231 4.34743 18.0808 3.71833 17.6755C3.33337 17.4276 3.33337 16.7978 3.33337 15.538Z" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.3333 5H6.66663" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8.33329 8.3335H6.66663" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12.0834 8.22917C11.393 8.22917 10.8334 8.71883 10.8334 9.32292C10.8334 9.927 11.393 10.4167 12.0834 10.4167C12.7737 10.4167 13.3334 10.9063 13.3334 11.5104C13.3334 12.1145 12.7737 12.6042 12.0834 12.6042M12.0834 8.22917C12.6276 8.22917 13.0906 8.5335 13.2622 8.95833M12.0834 8.22917V7.5M12.0834 12.6042C11.5391 12.6042 11.0761 12.2998 10.9045 11.875M12.0834 12.6042V13.3333" stroke="#424B57" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.33337 15.538V6.71172C3.33337 4.33338 3.33337 3.14421 4.06561 2.40536C4.79784 1.6665 5.97635 1.6665 8.33337 1.6665H11.6667C14.0237 1.6665 15.2022 1.6665 15.9345 2.40536C16.6667 3.14421 16.6667 4.33338 16.6667 6.71172V15.538C16.6667 16.7978 16.6667 17.4276 16.2817 17.6755C15.6526 18.0808 14.6801 17.231 14.191 16.9226C13.7868 16.6677 13.5848 16.5403 13.3605 16.5329C13.1181 16.5249 12.9125 16.6472 12.4758 16.9226L10.8834 17.9268C10.4538 18.1977 10.239 18.3332 10 18.3332C9.76104 18.3332 9.54629 18.1977 9.11671 17.9268L7.52432 16.9226C7.12017 16.6677 6.91809 16.5403 6.69382 16.5329C6.45147 16.5249 6.24582 16.6472 5.80910 16.9226C5.32 17.231 4.34743 18.0808 3.71833 17.6755C3.33337 17.4276 3.33337 16.7978 3.33337 15.538Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.3333 5H6.66663" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8.33329 8.3335H6.66663" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12.0834 8.22917C11.393 8.22917 10.8334 8.71883 10.8334 9.32292C10.8334 9.927 11.393 10.4167 12.0834 10.4167C12.7737 10.4167 13.3334 10.9063 13.3334 11.5104C13.3334 12.1145 12.7737 12.6042 12.0834 12.6042M12.0834 8.22917C12.6276 8.22917 13.0906 8.5335 13.2622 8.95833M12.0834 8.22917V7.5M12.0834 12.6042C11.5391 12.6042 11.0761 12.2998 10.9045 11.875M12.0834 12.6042V13.3333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             Transactions
         </a>
+        {% endif %}
 
         </nav>
     </div>
@@ -137,30 +212,26 @@
     <!-- Main content -->
     <div class="flex-grow-1 d-flex flex-column">
     <!-- Topbar -->
-    <header class="topbar d-flex justify-content-between align-items-center px-3">
-        <div class="topbar-left d-flex align-items-center gap-2">
-            <button type="button" aria-label="Toggle sidebar" class="btn btn-outline-secondary btn-toggle-sidebar">
-                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="25" viewBox="0 0 50 50" class="btn-toggle-sidebar-svg">
-                <path d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 L 0 7.5 z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 L 0 22.5 z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 L 0 37.5 z"></path>
+    <header class="topbar">
+        <div class="topbar-left">
+            <button type="button" aria-label="Toggle sidebar" class="btn-toggle-sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" class="btn-toggle-sidebar-svg">
+                    <path d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 L 0 7.5 z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 L 0 22.5 z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 L 0 37.5 z"></path>
                 </svg>
             </button>
             
-            {% if  request.user.is_staff %}
+            {% if request.user.is_staff %}
             <div class="d-flex align-items-center gap-2 w-100">
-                <div style="width: 70%;">
-                    <div class="input-group">
+                <div class="input-group">
                     <input type="number" class="form-control form-control-sm" id="rateInput" placeholder="Rate" aria-label="Rate">
                     <input type="number" class="form-control form-control-sm" id="amountInput" placeholder="Amount" aria-label="Amount">
-                </div>
-                </div>
-                <div id="resultDisplay" class="fw-bold text-primary">0.00</div>
-                {% else %}
-                    <div class="position-relative d-none d-sm-block">
-                    <div class="position-absolute top-50 end-0 translate-middle-y pe-2 text-secondary small" style="user-select:none;"></div>
-                {% endif %}
+                    <div id="resultDisplay">0.00</div>
                 </div>
             </div>
-        <div class="topbar-right d-flex align-items-center gap-2 position-relative">
+            {% endif %}
+        </div>
+
+        <div class="topbar-right">
             {% if not request.user.is_staff %}
             <button type="button" class="btn-support">
                 <i class="fas fa-headphones-alt"></i> <span class="d-none d-sm-inline">Support</span>
@@ -173,14 +244,14 @@
             <!-- Profile Dropdown -->
             <div class="dropdown">
                 <button type="button" aria-label="User menu" class="avatar" onclick="toggleDropdown()">
-                    <img loading="lazy" src="https://img.icons8.com/?size=100&id=60655&format=png&color=000000" alt="User profile picture, circular avatar with gray background and text 'User'" />
+                    <img loading="lazy" src="https://img.icons8.com/?size=100&id=60655&format=png&color=000000" alt="User profile picture, circular avatar with gray background" />
                 </button>
                 <div id="profileDropdown" class="dropdown-content">
-                    <a href="{% url 'account_settings' %}" class="gap-2">
-                        <i class="fas fa-cog m-2"></i>Settings
+                    <a href="{% url 'account_settings' %}">
+                        <i class="fas fa-cog"></i> Settings
                     </a>
-                    <a href="{% url 'logout' %}" class="gap-2">
-                        <i class="fas fa-sign-out-alt m-2"></i>Logout
+                    <a href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
             </div>

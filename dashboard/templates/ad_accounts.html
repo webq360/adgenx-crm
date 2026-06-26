@@ -1,278 +1,295 @@
 {% extends 'layout.html' %}
+{% load static %}
 
 {% block content %}
-    <!-- Content -->
-    <main class="flex-grow-1 overflow-auto p-4 table-container-container">
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
         
-    <section class="bg-white rounded-3 shadow-sm p-3 tab table-container">
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3 gap-3">
-            <h2 class="fw-semibold fs-5 mb-0">Ad Accounts</h2>
-            <form method="get" action="{% url 'ad_accounts' %}">
-                <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
-                    <input type="search" class="input-search" placeholder="Search ad accounts" name="search" 
-                    value="{{ search_query }}" aria-label="Search ad accounts" autocomplete="off" />
-
-                    <button type="submit" class="btn-create">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                        </svg>
-                        Search
-                    </button>
-                </div>
-            </form>
+        <!-- Header Section -->
+        <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <h1 class="fs-3 fw-bold mb-2" style="color: #1a1d29;">Ad Accounts</h1>
+                <p class="text-secondary mb-0">Manage and monitor your ad accounts</p>
+            </div>
+            {% if request.user.is_staff %}
+            <a href="{% url 'add_ad_account_page' %}" class="btn px-4 py-2 text-white text-decoration-none" role="button" type="button" style="border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18" class="me-2" style="display: inline;">
+                    <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                Add Account
+            </a>
+            {% endif %}
         </div>
-        <div class="table-responsive">
-            <table class="table table-borderless align-middle mb-0 fs-6">
-                <thead class="bg-light border border-secondary-subtle">
-                    <tr>
-                        <th class="border border-secondary-subtle">#</th>
-                        <th class="border border-secondary-subtle">Ad Account</th>
-                        <th class="border border-secondary-subtle">Connected BM</th>
-                        <th class="border border-secondary-subtle">Remaining Balance</th>
-                        <th class="border border-secondary-subtle">Total Spent</th>
-                        <th class="border border-secondary-subtle">Limit</th>
-                        <th class="border border-secondary-subtle">Status</th>
-                        <th class="border border-secondary-subtle">Action</th>
-                        {% if not request.user.is_staff %}
-                        <th class="border border-secondary-subtle">Top Up</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ad_account in ad_accounts_data %}
-                    <tr class="border border-secondary-subtle align-top" data-account-id="{{ ad_account.id }}" data-has-bm="{{ ad_account.has_admin_bm }}">
-                        <td class="border border-secondary-subtle text-secondary">
-                            {{ ad_accounts.start_index|add:forloop.counter0 }}
-                        </td>
-                        <td class="border border-secondary-subtle">
-                            <!--ad_account name-->
-                            <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
-                            <!--ad_account_id-->
-                            <p class="text-secondary mb-0 lh-sm">
-                                id - {{ ad_account.acc_id }}<br />
-                                <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer"
-                                    class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
-                            </p>
-                        </td>
-                        <td class="border border-secondary-subtle">
-                            {% for bm_account in ad_account.bm_accounts %}
-                                {% if bm_account.status == 'approved' %}
-                                <p class="text-success fw-semibold mb-0">Approved</p>
-                                    <p class="mb-0">{{ bm_account.acc_name }}</p>
-                                    <p class="mb-1">{{ bm_account.acc_id }}</p>
-                                {% elif bm_account.status == 'pending' %}
-                                <p class="text-warning fw-semibold mb-0">Pending</p>
-                                    <p class="mb-0 text-secondary">{{ bm_account.acc_name }}</p>
-                                    <p class="mb-1 text-secondary">{{ bm_account.acc_id }}</p>
+
+        <!-- Search and Table Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: visible;">
+            <!-- Search Bar -->
+            <div class="card-header p-3" style="background: white; border-bottom: 1px solid #e5e7eb;">
+                <form method="GET" action="{% url 'ad_accounts' %}" class="d-flex gap-2">
+                    <input type="text" name="search" class="form-control" placeholder="Search by account name..." value="{{ search_query }}" style="border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <button type="submit" class="btn px-4" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; font-weight: 600;">Search</button>
+                    {% if search_query %}
+                    <a href="{% url 'ad_accounts' %}" class="btn btn-outline-secondary px-3" style="border-radius: 8px;">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Table with Overflow Fix -->
+            <div class="card-body p-0" style="background: white; min-height: auto;">
+                {% if ad_accounts_data %}
+                    <style>
+                        .table-responsive-fixed {
+                            overflow-x: auto;
+                            overflow-y: visible !important;
+                            max-height: none !important;
+                        }
+                        .table-responsive-fixed table {
+                            margin-bottom: 0;
+                        }
+                        .table-responsive-fixed .dropdown {
+                            position: static;
+                        }
+                        .table-responsive-fixed .dropdown-menu {
+                            position: fixed;
+                            z-index: 1050;
+                        }
+                    </style>
+                    <div class="table-responsive-fixed" style="overflow-y: visible !important;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                <tr>
+                                    <th class="text-secondary small fw-semibold text-uppercase px-4 py-3" style="color: #6b7280;">Account Name</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Connected BM</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Monthly Budget</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Remaining Balance</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Total Spent</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Limit</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Status</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in ad_accounts_data %}
+                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                    <td class="px-4 py-3">
+                                        <div class="fw-semibold" style="color: #1a1d29;">{{ account.name }}</div>
+                                        <div class="text-secondary small">ID: {{ account.acc_id }}</div>
+                                        {% if account.acc_link %}
+                                        <a href="{{ account.acc_link }}" target="_blank" class="text-decoration-none small" style="color: #667eea;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="12" height="12" style="display: inline;">
+                                                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                            View
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if account.bm_accounts %}
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for bm in account.bm_accounts %}
+                                                    {% if bm.status == 'approved' %}
+                                                    <span class="badge px-2 py-1" style="background: #d1fae5; color: #059669; font-size: 0.75rem; font-weight: 600;">{{ bm.acc_name|default:bm.acc_id|truncatewords:2 }}</span>
+                                                    {% elif bm.status == 'pending' %}
+                                                    <span class="badge px-2 py-1" style="background: #fef3c7; color: #b45309; font-size: 0.75rem; font-weight: 600;">Pending</span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                        <span class="text-secondary small">Not connected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #1a1d29; font-weight: 600;">${{ account.monthly_budget }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-semibold" style="color: #10b981;">${{ account.remaining_balance }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #ef4444;">${{ account.total_spent }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #667eea; font-weight: 600;">${{ account.limit }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if account.status == 'active' %}
+                                        <span class="badge px-2 py-1" style="background: #d1fae5; color: #059669; font-weight: 600;">Active</span>
+                                        {% else %}
+                                        <span class="badge px-2 py-1" style="background: #fee2e2; color: #dc2626; font-weight: 600;">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex gap-1">
+                                            {% if account.status == 'active' %}
+                                            <button type="button" class="btn btn-sm text-white" data-bs-toggle="modal" data-bs-target="#topupModal" data-ad-account-id="{{ account.id }}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; font-weight: 600; padding: 4px 12px; font-size: 0.8rem;">
+                                                Top Up
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <div class="dropdown" style="position: static;">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" data-bs-offset="0,10" style="border-radius: 6px; border: 1px solid #d1d5db; font-weight: 600; padding: 4px 12px; font-size: 0.8rem;">
+                                                    More
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end" style="border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 150px;">
+                                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addBmModal" data-ad-account-id="{{ account.id }}">Add BM</button></li>
+                                                    {% if account.bm_accounts %}
+                                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#removeBmModal" data-ad-account-id="{{ account.id }}">Remove BM</button></li>
+                                                    {% endif %}
+                                                    {% if account.status == 'active' %}
+                                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#decreaseLimitModal" data-ad-account-id="{{ account.id }}">Decrease Limit</button></li>
+                                                    {% endif %}
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editAccountModal" data-ad-account-id="{{ account.id }}" data-account-name="{{ account.name }}" data-account-link="{{ account.acc_link }}" data-monthly-budget="{{ account.monthly_budget }}" data-limit="{{ account.limit }}">Edit</button></li>
+                                                    <li><button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" data-ad-account-id="{{ account.id }}" data-account-name="{{ account.name }}">Delete</button></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if ad_accounts.has_other_pages %}
+                    <div class="p-3 border-top" style="background: #f9fafb;">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if ad_accounts.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ ad_accounts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</a>
+                                </li>
                                 {% endif %}
-                            {% empty %}
-                                <p class="text-secondary mb-0">No BM accounts</p>
-                            {% endfor %}
-                        </td>
-                        <td class="border border-secondary-subtle fb-balance" data-id="{{ ad_account.id }}">
-                            {% if ad_account.has_admin_bm %}<span class="text-secondary fst-italic">Loading...</span>{% else %}N/A{% endif %}
-                        </td>
-                        <td class="border border-secondary-subtle fb-spent" data-id="{{ ad_account.id }}">
-                            {% if ad_account.has_admin_bm %}<span class="text-secondary fst-italic">Loading...</span>{% else %}N/A{% endif %}
-                        </td>
-                        <td class="border border-secondary-subtle fb-limit" data-id="{{ ad_account.id }}">
-                            {% if ad_account.has_admin_bm %}<span class="text-secondary fst-italic">Loading...</span>{% else %}N/A{% endif %}
-                        </td>
-                        <td class="border border-secondary-subtle">
-                            <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
-                        </td>
+                                
+                                {% for num in ad_accounts.paginator.page_range %}
+                                {% if ad_accounts.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; margin: 0 2px;">{{ num }}</span>
+                                </li>
+                                {% elif num > ad_accounts.number|add:-3 and num < ad_accounts.number|add:3 %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                                {% endfor %}
 
-                        {% if not request.user.is_staff %}
-                        <td class="border border-secondary-subtle text-center">
-                            <div class="dropup">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"strategy":"fixed"}'>
-                                    
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ ad_account.id }}">
-                                    <li><button class="dropdown-item" data-bs-toggle="modal"
-                                        data-bs-target="#adMbAccountModal"
-                                        data-ad-account-id="{{ ad_account.id }}">Ad BM Account
-                                    </button></li>
-                                    <li><button class="dropdown-item" href="#" data-bs-toggle="modal"
-                                        data-bs-target="#removeBmAccountModal"
-                                        data-ad-account-id="{{ ad_account.id }}">Remove BM Account
-                                    </button></li>
-                                    <li><a href="{% url 'topup_transactions' %}?ad_acc_name={{ ad_account.name }}" 
-                                        class="dropdown-item text-white text-decoration-none">Topup History
-                                    </a></li>
-                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#decreaseLimitModal" data-ad-account-id="{{ ad_account.id }}">Decrease Limit</button></li>
-                                </ul>
-                            </div>
-                        </td>
-                        
-                        <td class="border border-secondary-subtle">
-                            <button type="button" class="btn-topup" data-bs-toggle="modal" data-bs-target="#topupModal"
-                                data-ad-account-id="{{ ad_account.id }}">
-                                Top Up
-                            </button>
-                        </td>
-                        {% else %}
-                            <td class="border border-secondary-subtle text-center">
-                                <a href="{% url 'admin_dashboard:ad_account_details' ad_account.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
-                            </td>
-                        {% endif %}
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9" class="text-center">No ad accounts found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
-            <nav aria-label="Page navigation">
-              <ul class="pagination mb-0">
-                {% if ad_accounts.has_previous %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ ad_accounts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
-                      <i class="fas fa-chevron-left"></i>
-                    </a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
-                  </li>
-                {% endif %}
-    
-                {% with ad_accounts.number as current_page %}
-                {% with ad_accounts.paginator.num_pages as total_pages %}
-                  {% if total_pages > 5 %}
-                    {% if current_page > 3 %}
-                      <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">1</a></li>
-                      {% if current_page > 4 %}
-                        <li class="page-item disabled"><span class="page-link">...</span></li>
-                      {% endif %}
+                                {% if ad_accounts.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ ad_accounts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
                     {% endif %}
-    
-                    {% for i in ad_accounts.paginator.page_range %}
-                      {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
-                        {% if current_page == i %}
-                          <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                        {% else %}
-                          <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-    
-                    {% if current_page < total_pages|add:'-2' %}
-                      {% if current_page < total_pages|add:'-3' %}
-                        <li class="page-item disabled"><span class="page-link">...</span></li>
-                      {% endif %}
-                      <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ total_pages }}</a></li>
-                    {% endif %}
-                  {% else %}
-                    {% for i in ad_accounts.paginator.page_range %}
-                      {% if ad_accounts.number == i %}
-                        <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                      {% else %}
-                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
-                      {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
-                {% endwith %}
-    
-                {% if ad_accounts.has_next %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ ad_accounts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
-                      <i class="fas fa-chevron-right"></i>
-                    </a>
-                  </li>
+
                 {% else %}
-                  <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
-                  </li>
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48" height="48" style="color: #d1d5db;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v6l4 2"></path>
+                            </svg>
+                        </div>
+                        <p class="text-secondary mb-3">{% if search_query %}No accounts found matching "{{ search_query }}"{% else %}No ad accounts yet{% endif %}</p>
+                        {% if request.user.is_staff %}
+                        <a href="{% url 'add_ad_account_page' %}" class="btn px-4 py-2 text-white" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" class="me-2" style="display: inline;">
+                                <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            Add Your First Account
+                        </a>
+                        {% endif %}
+                    </div>
                 {% endif %}
-              </ul>
-            </nav>
+            </div>
         </div>
-    </section>
+
+    </div>
 </main>
 
 <!-- Top Up Modal -->
-<div class="modal fade" id="topupModal" tabindex="-1" aria-labelledby="topupModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="topupModalLabel">Top Up Ad Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal fade" id="topupModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold">Top Up Ad Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="topup-form">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <input type="hidden" name="ad_account_id" id="ad-account-id">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ad_account_id" id="topup-ad-account-id">
                     <div id="topup-message" class="mb-3"></div>
                     <div class="mb-3">
-                        <label for="amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
+                        <label for="topup-amount" class="form-label fw-semibold">Amount (USD)</label>
+                        <input type="number" class="form-control" id="topup-amount" name="amount" step="0.01" min="0.01" required style="border-radius: 8px;">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Top Up</button>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn text-white" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">Top Up</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Ad MB Account Modal -->
-<div class="modal fade" id="adMbAccountModal" tabindex="-1" aria-labelledby="adMbAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="adMbAccountModalLabel">Ad BM Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Add BM Modal -->
+<div class="modal fade" id="addBmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold">Add BM Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="ad-mb-account-form">
+            <form id="add-bm-form">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <input type="hidden" name="ad_account_id" id="ad-mb-account-id">
-                    <div id="ad-mb-account-message" class="mb-3"></div>
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ad_account_id" id="add-bm-ad-account-id">
+                    <div id="add-bm-message" class="mb-3"></div>
                     <div class="mb-3">
-                        <label for="mb-name" class="form-label">BM Name</label>
-                        <input type="text" class="form-control" id="mb-name" name="mb_name" required>
+                        <label for="mb_name" class="form-label fw-semibold">BM Name</label>
+                        <input type="text" class="form-control" id="mb_name" name="mb_name" required style="border-radius: 8px;">
                     </div>
                     <div class="mb-3">
-                        <label for="mb-id" class="form-label">BM ID</label>
-                        <input type="text" class="form-control" id="mb-id" name="mb_id" required>
+                        <label for="mb_id" class="form-label fw-semibold">BM ID</label>
+                        <input type="text" class="form-control" id="mb_id" name="mb_id" required style="border-radius: 8px;">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn text-white" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">Add BM</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Remove BM Account Modal -->
-<div class="modal fade" id="removeBmAccountModal" tabindex="-1" aria-labelledby="removeBmAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="removeBmAccountModalLabel">Remove BM Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Remove BM Modal -->
+<div class="modal fade" id="removeBmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold">Remove BM Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="remove-bm-account-form">
+            <form id="remove-bm-form">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <input type="hidden" name="ad_account_id" id="remove-bm-account-ad-id">
-                    <div id="remove-bm-account-message" class="mb-3"></div>
-                    <div id="bm-accounts-checkboxes">
-                        <!-- Checkboxes will be populated by JavaScript -->
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ad_account_id" id="remove-bm-ad-account-id">
+                    <div id="remove-bm-message" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="bm_account_id" class="form-label fw-semibold">Select BM to Remove</label>
+                        <select class="form-select" id="bm_account_id" name="bm_account_id" required style="border-radius: 8px;">
+                            <option value="">Select BM Account</option>
+                        </select>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn btn-danger" style="border-radius: 8px; font-weight: 600;">Remove BM</button>
                 </div>
             </form>
         </div>
@@ -280,240 +297,348 @@
 </div>
 
 <!-- Decrease Limit Modal -->
-<div class="modal fade" id="decreaseLimitModal" tabindex="-1" aria-labelledby="decreaseLimitModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="decreaseLimitModalLabel">Request Decrease Limit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal fade" id="decreaseLimitModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold">Request Limit Decrease</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="decrease-limit-form">
                 {% csrf_token %}
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <input type="hidden" name="ad_account_id" id="decrease-ad-account-id">
                     <div id="decrease-limit-message" class="mb-3"></div>
                     <div class="mb-3">
-                        <label for="decrease-amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="decrease-amount" name="amount" step="0.01" min="0.01" required>
+                        <label for="decrease-amount" class="form-label fw-semibold">Amount (USD)</label>
+                        <input type="number" class="form-control" id="decrease-amount" name="amount" step="0.01" min="0.01" required style="border-radius: 8px;">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Send Request</button>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn text-white" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">Send Request</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{ ad_accounts_data|json_script:"ad_accounts_data_json" }}
+<!-- Edit Account Modal -->
+<div class="modal fade" id="editAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold">Edit Ad Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="edit-account-form">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ad_account_id" id="edit-ad-account-id">
+                    <div id="edit-account-message" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="account_name" class="form-label fw-semibold">Account Name</label>
+                        <input type="text" class="form-control" id="account_name" name="account_name" required style="border-radius: 8px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="account_link" class="form-label fw-semibold">Account Link</label>
+                        <input type="url" class="form-control" id="account_link" name="account_link" style="border-radius: 8px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="monthly_budget" class="form-label fw-semibold">Monthly Budget (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="monthly_budget" name="monthly_budget" step="0.01" min="0" style="border-radius: 0 8px 8px 0;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="limit" class="form-label fw-semibold">Spending Limit (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="limit" name="limit" step="0.01" min="0" style="border-radius: 0 8px 8px 0;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn text-white" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold text-danger">Delete Ad Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="delete-account-form">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ad_account_id" id="delete-ad-account-id">
+                    <div id="delete-account-message" class="mb-3"></div>
+                    <p class="text-secondary">Are you sure you want to delete <strong id="delete-account-name"></strong>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-danger" style="border-radius: 8px; font-weight: 600;">Delete Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    const ad_accounts_data_element = document.getElementById('ad_accounts_data_json');
-    const ad_accounts_data = JSON.parse(ad_accounts_data_element.textContent);
+const ad_accounts_data = {{ ad_accounts_data|safe }};
 
-    // Load FB balance/spent/limit async for each row
-    document.querySelectorAll('tr[data-account-id][data-has-bm="True"]').forEach(row => {
-        const accId = row.dataset.accountId;
-        fetch(`/ad_accounts/fb_info/${accId}/`)
-            .then(res => res.json())
-            .then(data => {
-                const fmt = v => (v === 'N/A' ? 'N/A' : `$${v}`);
-                const balanceCell = document.querySelector(`.fb-balance[data-id="${accId}"]`);
-                const spentCell   = document.querySelector(`.fb-spent[data-id="${accId}"]`);
-                const limitCell   = document.querySelector(`.fb-limit[data-id="${accId}"]`);
-                if (balanceCell) balanceCell.textContent = fmt(data.balance);
-                if (spentCell)   spentCell.textContent   = fmt(data.total_spent);
-                if (limitCell)   limitCell.textContent   = fmt(data.limit);
-            })
-            .catch(() => {
-                const balanceCell = document.querySelector(`.fb-balance[data-id="${accId}"]`);
-                const spentCell   = document.querySelector(`.fb-spent[data-id="${accId}"]`);
-                const limitCell   = document.querySelector(`.fb-limit[data-id="${accId}"]`);
-                if (balanceCell) balanceCell.textContent = 'N/A';
-                if (spentCell)   spentCell.textContent   = 'N/A';
-                if (limitCell)   limitCell.textContent   = 'N/A';
-            });
-    });
-
-    const topupModal = document.getElementById('topupModal');
-    const topupMessage = document.getElementById('topup-message');
-
+// Top Up Modal
+const topupModal = document.getElementById('topupModal');
+if (topupModal) {
     topupModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = topupModal.querySelector('#ad-account-id');
-        adAccountIdInput.value = adAccountId;
-        topupMessage.innerHTML = ''; // Clear previous messages
-        topupModal.querySelector('#amount').value = ''; // Clear previous amount
+        document.getElementById('topup-ad-account-id').value = button.getAttribute('data-ad-account-id');
+        document.getElementById('topup-message').innerHTML = '';
+        document.getElementById('topup-amount').value = '';
     });
 
-    const topupForm = document.getElementById('topup-form');
-    topupForm.addEventListener('submit', async (e) => {
+    document.getElementById('topup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = topupForm.querySelector('button[type="submit"]');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        const formData = new FormData(topupForm);
-        const response = await fetch('/topup/', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            topupMessage.innerHTML = 'Top up successful!';
-            topupMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            topupMessage.innerHTML = `Error: ${result.error}`;
-            topupMessage.style.color = 'red';
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('/topup/', {method: 'POST', body: formData});
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('topup-message').innerHTML = '<div class="alert alert-success mb-0">✓ Top up successful!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                document.getElementById('topup-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            document.getElementById('topup-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + err.message + '</div>';
             submitButton.disabled = false;
         }
     });
+}
 
-    const adMbAccountModal = document.getElementById('adMbAccountModal');
-    const adMbAccountMessage = document.getElementById('ad-mb-account-message');
-
-    adMbAccountModal.addEventListener('show.bs.modal', function (event) {
-        console.log('Add MB Account modal shown');
+// Add BM Modal
+const addBmModal = document.getElementById('addBmModal');
+if (addBmModal) {
+    addBmModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = adMbAccountModal.querySelector('#ad-mb-account-id');
-        adAccountIdInput.value = adAccountId;
-        adMbAccountMessage.innerHTML = ''; // Clear previous messages
-        adMbAccountModal.querySelector('#mb-name').value = '';
-        adMbAccountModal.querySelector('#mb-name').defaultValue = ''; // Clear previous mb name
-        adMbAccountModal.querySelector('#mb-id').value = '';
-        adMbAccountModal.querySelector('#mb-id').defaultValue = ''; // Clear previous mb id
-        console.log('Cleared mb-name and mb-id');
+        document.getElementById('add-bm-ad-account-id').value = button.getAttribute('data-ad-account-id');
+        document.getElementById('add-bm-message').innerHTML = '';
+        document.getElementById('mb_name').value = '';
+        document.getElementById('mb_id').value = '';
     });
 
-    const adMbAccountForm = document.getElementById('ad-mb-account-form');
-    adMbAccountForm.addEventListener('submit', async (e) => {
+    document.getElementById('add-bm-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = adMbAccountForm.querySelector('button[type="submit"]');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        const formData = new FormData(adMbAccountForm);
-        const response = await fetch('/request_bm_account/', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            adMbAccountMessage.innerHTML = 'Ad BM Account added successfully!';
-            adMbAccountMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            adMbAccountMessage.innerHTML = `Error: ${result.error}`;
-            adMbAccountMessage.style.color = 'red';
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('{% url "request_bm_account" %}', {method: 'POST', body: formData});
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('add-bm-message').innerHTML = '<div class="alert alert-success mb-0">✓ BM request submitted!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                document.getElementById('add-bm-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            document.getElementById('add-bm-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + err.message + '</div>';
             submitButton.disabled = false;
         }
     });
+}
 
-    const removeBmAccountModal = document.getElementById('removeBmAccountModal');
-    const removeBmAccountMessage = document.getElementById('remove-bm-account-message');
-    const bmAccountsCheckboxesDiv = document.getElementById('bm-accounts-checkboxes');
-
-    removeBmAccountModal.addEventListener('show.bs.modal', function (event) {
-        console.log('Remove BM Account modal shown');
+// Remove BM Modal
+const removeBmModal = document.getElementById('removeBmModal');
+if (removeBmModal) {
+    removeBmModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = removeBmAccountModal.querySelector('#remove-bm-account-ad-id');
-        adAccountIdInput.value = adAccountId;
-        removeBmAccountMessage.innerHTML = ''; // Clear previous messages
-        bmAccountsCheckboxesDiv.innerHTML = ''; // Clear previous checkboxes
-        console.log('Cleared previous messages and checkboxes');
-
-        const adAccount = ad_accounts_data.find(acc => acc.id == adAccountId);
-        console.log('Ad Account data:', adAccount);
-
-        if (adAccount && adAccount.bm_accounts.length > 0) {
-            console.log('Populating checkboxes for BM accounts:', adAccount.bm_accounts);
-            adAccount.bm_accounts.forEach(bm => {
-                const div = document.createElement('div');
-                div.className = 'form-check';
-                div.innerHTML = `
-                    <input class="form-check-input" type="radio" name="bm_account_id" value="${bm.id}" id="bm-${bm.id}">
-                    <label class="form-check-label" for="bm-${bm.id}">
-                        ${bm.acc_name} (ID: ${bm.acc_id})
-                    </label>
-                `;
-                bmAccountsCheckboxesDiv.appendChild(div);
+        document.getElementById('remove-bm-ad-account-id').value = button.getAttribute('data-ad-account-id');
+        document.getElementById('remove-bm-message').innerHTML = '';
+        
+        const account = ad_accounts_data.find(acc => acc.id == button.getAttribute('data-ad-account-id'));
+        const selectElement = document.getElementById('bm_account_id');
+        selectElement.innerHTML = '<option value="">Select BM Account</option>';
+        
+        if (account && account.bm_accounts) {
+            account.bm_accounts.forEach(bm => {
+                const option = document.createElement('option');
+                option.value = bm.id;
+                option.textContent = bm.acc_name || bm.acc_id;
+                selectElement.appendChild(option);
             });
-        } else {
-            console.log('No BM accounts found for this Ad Account.');
-            bmAccountsCheckboxesDiv.innerHTML = '<p>No BM accounts connected to this Ad Account.</p>';
         }
     });
 
-    const removeBmAccountForm = document.getElementById('remove-bm-account-form');
-    removeBmAccountForm.addEventListener('submit', async (e) => {
+    document.getElementById('remove-bm-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = removeBmAccountForm.querySelector('button[type="submit"]');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        const formData = new FormData(removeBmAccountForm);
-        const response = await fetch('/remove_bm_account_request/', { // New URL for backend
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            removeBmAccountMessage.innerHTML = 'Remove BM Account request submitted successfully!';
-            removeBmAccountMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            removeBmAccountMessage.innerHTML = `Error: ${result.error}`;
-            removeBmAccountMessage.style.color = 'red';
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('{% url "remove_bm_account_request" %}', {method: 'POST', body: formData});
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('remove-bm-message').innerHTML = '<div class="alert alert-success mb-0">✓ Remove request submitted!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                document.getElementById('remove-bm-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            document.getElementById('remove-bm-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + err.message + '</div>';
             submitButton.disabled = false;
         }
     });
+}
 
-    const decreaseLimitModal = document.getElementById('decreaseLimitModal');
-    const decreaseLimitMessage = document.getElementById('decrease-limit-message');
-
+// Decrease Limit Modal
+const decreaseLimitModal = document.getElementById('decreaseLimitModal');
+if (decreaseLimitModal) {
     decreaseLimitModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = decreaseLimitModal.querySelector('#decrease-ad-account-id');
-        adAccountIdInput.value = adAccountId;
-        decreaseLimitMessage.innerHTML = ''; // Clear previous messages
-        decreaseLimitModal.querySelector('#decrease-amount').value = ''; // Clear previous amount
+        document.getElementById('decrease-ad-account-id').value = button.getAttribute('data-ad-account-id');
+        document.getElementById('decrease-limit-message').innerHTML = '';
+        document.getElementById('decrease-amount').value = '';
     });
 
-    const decreaseLimitForm = document.getElementById('decrease-limit-form');
-    decreaseLimitForm.addEventListener('submit', async (e) => {
+    document.getElementById('decrease-limit-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = decreaseLimitForm.querySelector('button[type="submit"]');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        const formData = new FormData(decreaseLimitForm);
-        const response = await fetch('{% url "request_decrease_limit" %}', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            decreaseLimitMessage.innerHTML = 'Decrease limit request sent successfully!';
-            decreaseLimitMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            decreaseLimitMessage.innerHTML = `Error: ${result.error}`;
-            decreaseLimitMessage.style.color = 'red';
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('{% url "request_decrease_limit" %}', {method: 'POST', body: formData});
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('decrease-limit-message').innerHTML = '<div class="alert alert-success mb-0">✓ Request sent!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                document.getElementById('decrease-limit-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            document.getElementById('decrease-limit-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + err.message + '</div>';
             submitButton.disabled = false;
         }
     });
+}
+
+// Edit Account Modal
+const editAccountModal = document.getElementById('editAccountModal');
+if (editAccountModal) {
+    editAccountModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        document.getElementById('edit-ad-account-id').value = button.getAttribute('data-ad-account-id');
+        document.getElementById('account_name').value = button.getAttribute('data-account-name');
+        document.getElementById('account_link').value = button.getAttribute('data-account-link');
+        document.getElementById('monthly_budget').value = button.getAttribute('data-monthly-budget') || '';
+        document.getElementById('limit').value = button.getAttribute('data-limit') || '';
+        document.getElementById('edit-account-message').innerHTML = '';
+    });
+
+    document.getElementById('edit-account-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('{% url "edit_ad_account" %}', {method: 'POST', body: formData});
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('edit-account-message').innerHTML = '<div class="alert alert-success mb-0">✓ Updated!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                document.getElementById('edit-account-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            document.getElementById('edit-account-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + err.message + '</div>';
+            submitButton.disabled = false;
+        }
+    });
+}
+
+// Delete Account Modal
+const deleteAccountModal = document.getElementById('deleteAccountModal');
+if (deleteAccountModal) {
+    deleteAccountModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        document.getElementById('delete-ad-account-id').value = button.getAttribute('data-ad-account-id');
+        document.getElementById('delete-account-name').textContent = button.getAttribute('data-account-name');
+        document.getElementById('delete-account-message').innerHTML = '';
+    });
+
+    document.getElementById('delete-account-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('{% url "delete_ad_account" %}', {method: 'POST', body: formData});
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('delete-account-message').innerHTML = '<div class="alert alert-success mb-0">✓ Deleted!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                document.getElementById('delete-account-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            document.getElementById('delete-account-message').innerHTML = '<div class="alert alert-danger mb-0">✗ ' + err.message + '</div>';
+            submitButton.disabled = false;
+        }
+    });
+}
+
+// Fix dropdown positioning to appear above table overflow
+document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('shown.bs.dropdown', function() {
+        const dropdown = this.nextElementSibling;
+        const button = this;
+        const rect = button.getBoundingClientRect();
+        const dropdownRect = dropdown.getBoundingClientRect();
+        
+        // Position the dropdown menu using fixed positioning
+        dropdown.style.position = 'fixed';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = (rect.top - dropdownRect.height - 10) + 'px';
+        dropdown.style.zIndex = '1050';
+        
+        // Adjust if going off-screen
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        
+        if (spaceAbove < dropdownRect.height && spaceBelow > dropdownRect.height) {
+            dropdown.style.top = (rect.bottom + 10) + 'px';
+        }
+    });
+    
+    toggle.addEventListener('hidden.bs.dropdown', function() {
+        const dropdown = this.nextElementSibling;
+        dropdown.style.position = '';
+        dropdown.style.left = '';
+        dropdown.style.top = '';
+    });
+});
 </script>
+
 {% endblock %}

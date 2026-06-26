@@ -22,7 +22,7 @@
           BM Accounts
         </a>
         <a href="{% url 'admin_dashboard:review_topup' %}" type="button" role="button" class="btn-filter text-decoration-none">
-          Top-ups
+          Withdrawals
         </a>
         <div class="ms-auto">
           <form method="get" action="{% url 'admin_dashboard:review_bm_request' %}" class="d-flex align-items-center">
@@ -54,20 +54,41 @@
             {% for ad_account in ad_accounts %}
             <tr>
                 <td style="font-size: 0.75rem;">
-                    {{ ad_account.name }}<br>
-                    <span class="text-secondary">id - {{ ad_account.acc_id }}</span><br>
+                    {{ ad_account.name }}
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ ad_account.name }}', this)" title="Copy Ad Account Name">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                    <br>
+                    <span class="text-secondary">id - {{ ad_account.acc_id }}</span>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ ad_account.acc_id }}', this)" title="Copy Ad Account ID">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                    <br>
                     <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
                 </td>
                 <td style="font-size: 0.75rem;">
                     {{ ad_account.user.first_name }} {{ ad_account.user.last_name }}<br>
                     <span class="text-secondary">({{ ad_account.user.username }})</span>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ ad_account.user.username }}', this)" title="Copy Username">
+                      <i class="fas fa-copy"></i>
+                    </button>
                 </td>
                 <td style="font-size: 0.75rem;">
                     {% for bm_account in ad_account.bm_accounts.all %}
                         {% if bm_account.status == 'pending' %}
                         <div class="mb-2">
-                            <p class="fw-semibold mb-1">{{ bm_account.acc_name }}</p>
-                            <p class="text-secondary mb-0" style="line-height: 1.2;">ID: {{ bm_account.acc_id }}</p>
+                            <p class="fw-semibold mb-1">
+                              {{ bm_account.acc_name }}
+                              <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ bm_account.acc_name }}', this)" title="Copy BM Name">
+                                <i class="fas fa-copy"></i>
+                              </button>
+                            </p>
+                            <p class="text-secondary mb-0" style="line-height: 1.2;">
+                              ID: {{ bm_account.acc_id }}
+                              <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ bm_account.acc_id }}', this)" title="Copy BM ID">
+                                <i class="fas fa-copy"></i>
+                              </button>
+                            </p>
                         </div>
                         {% endif %}
                     {% empty %}
@@ -177,5 +198,37 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function copyToClipboard(text, button) {
+      // Create temporary textarea
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        document.execCommand('copy');
+        // Visual feedback
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-check';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+          icon.className = originalClass;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-secondary');
+        }, 1500);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+      
+      document.body.removeChild(textarea);
+    }
+  </script>
 
 {% endblock %}

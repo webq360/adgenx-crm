@@ -63,7 +63,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'crm.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -74,6 +73,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'admin_dashboard.context_processors.site_settings',
+                'dashboard.group_permissions.group_permissions_context',  # DJANGO GROUPS (Standard & Reliable)
             ],
         },
     },

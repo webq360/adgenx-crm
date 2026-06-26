@@ -320,6 +320,10 @@ def api_request_ad_account(request):
         monthly_budget=monthly_budget or 0,
     )
     acc.bm_accounts.add(bm)
+    
+    # Send notifications
+    from dashboard.notification_handler import notify_ad_account_requested
+    notify_ad_account_requested(acc)
 
     return Response({'message': 'Ad account request submitted successfully!'})
 
@@ -404,6 +408,11 @@ def api_decrease_limit(request):
         return Response({'success': False, 'error': 'Ad account not found.'})
 
     TopupHistory.objects.create(ad_account=acc, amount=amount, type='decrease', status='pending')
+    
+    # Send notifications
+    from dashboard.notification_handler import notify_topup_requested
+    notify_topup_requested(TopupHistory.objects.filter(ad_account=acc, type='decrease', status='pending').last())
+    
     return Response({'success': True})
 
 
@@ -500,7 +509,7 @@ def api_deposit(request):
         except Exception:
             compressed_receipt = receipt
 
-    DepositTransaction.objects.create(
+    deposit = DepositTransaction.objects.create(
         user=request.user,
         method=method.method_name,
         trx_id=tx_id,
@@ -510,6 +519,10 @@ def api_deposit(request):
         usd_amount=usd_amount,
         status='pending',
     )
+    
+    # Send notifications
+    from dashboard.notification_handler import notify_deposit_submitted
+    notify_deposit_submitted(deposit)
 
     return Response({'message': 'Deposit request submitted successfully!'})
 
@@ -568,6 +581,11 @@ def api_request_bm(request):
 
     bm = BMAccount.objects.create(acc_id=mb_id, acc_name=mb_name, request_type='add')
     acc.bm_accounts.add(bm)
+    
+    # Send notifications
+    from dashboard.notification_handler import notify_bm_requested
+    notify_bm_requested(bm, acc)
+    
     return Response({'success': True})
 
 

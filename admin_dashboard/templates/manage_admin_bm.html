@@ -1,0 +1,233 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<main class="flex-grow-1 overflow-auto p-4">
+<div class="container-fluid">
+
+<section class="bg-white rounded-3 shadow-sm p-3">
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link {% if tab == 'admin_bm' %}active{% endif %}" href="?tab=admin_bm" role="tab">
+      <i class="fas fa-lock"></i> Admin BM Accounts
+    </a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link {% if tab == 'bm_accounts' %}active{% endif %}" href="?tab=bm_accounts" role="tab">
+      <i class="fas fa-user"></i> BM Accounts
+    </a>
+  </li>
+</ul>
+
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3 gap-3">
+<h2 class="fw-semibold fs-5 mb-0">
+  {% if tab == 'admin_bm' %}
+    Admin BM Accounts
+  {% else %}
+    BM Accounts (User Submitted)
+  {% endif %}
+</h2>
+<div class="d-flex gap-2 align-items-center w-100 w-sm-auto">
+<form method="get" class="d-flex gap-2 flex-grow-1">
+<input type="search" class="input-search" placeholder="Search BM accounts" name="search" value="{{ search_query }}" autocomplete="off" />
+<input type="hidden" name="tab" value="{{ tab }}">
+<button type="submit" class="btn-create"><i class="fas fa-search"></i> Search</button>
+</form>
+{% if tab == 'admin_bm' %}
+<a href="{% url 'admin_dashboard:add_admin_bm' %}" class="btn btn-primary" style="white-space: nowrap;">
+  <i class="fas fa-plus"></i> Add Admin BM
+</a>
+{% endif %}
+</div>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+{{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Admin BM Accounts Tab -->
+{% if tab == 'admin_bm' %}
+<div class="table-responsive">
+<table class="table table-borderless align-middle mb-0 fs-6">
+<thead class="bg-light border border-secondary-subtle">
+<tr>
+<th class="border border-secondary-subtle">#</th>
+<th class="border border-secondary-subtle">BM Name</th>
+<th class="border border-secondary-subtle">BM ID</th>
+<th class="border border-secondary-subtle">Connected Ad Accounts</th>
+<th class="border border-secondary-subtle">Action</th>
+</tr>
+</thead>
+<tbody>
+{% for bm in admin_bms %}
+<tr class="border border-secondary-subtle">
+<td class="border border-secondary-subtle">{{ admin_bms.start_index|add:forloop.counter0 }}</td>
+<td class="border border-secondary-subtle">
+<p class="fw-semibold mb-0">{{ bm.acc_name }}</p>
+</td>
+<td class="border border-secondary-subtle">
+<p class="text-secondary mb-0">{{ bm.acc_id }}</p>
+</td>
+<td class="border border-secondary-subtle">
+<p class="mb-0">{{ bm.adaccount_set.count }} accounts</p>
+</td>
+<td class="border border-secondary-subtle">
+<a href="{% url 'admin_dashboard:edit_admin_bm' bm.id %}" class="btn btn-sm btn-outline-primary">
+<i class="fas fa-edit"></i> Edit
+</a>
+<a href="{% url 'admin_dashboard:delete_admin_bm' bm.id %}" class="btn btn-sm btn-outline-danger">
+<i class="fas fa-trash"></i> Delete
+</a>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="5" class="text-center py-4">No Admin BM accounts found.</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<!-- Admin BM Pagination -->
+<div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
+<nav aria-label="Page navigation">
+<ul class="pagination mb-0">
+{% if admin_bms.has_previous %}
+<li class="page-item">
+<a class="page-link" href="?tab=admin_bm&page={{ admin_bms.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+<i class="fas fa-chevron-left"></i>
+</a>
+</li>
+{% else %}
+<li class="page-item disabled">
+<span class="page-link"><i class="fas fa-chevron-left"></i></span>
+</li>
+{% endif %}
+
+{% for i in admin_bms.paginator.page_range %}
+{% if admin_bms.number == i %}
+<li class="page-item active"><span class="page-link">{{ i }}</span></li>
+{% else %}
+<li class="page-item"><a class="page-link" href="?tab=admin_bm&page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+{% endif %}
+{% endfor %}
+
+{% if admin_bms.has_next %}
+<li class="page-item">
+<a class="page-link" href="?tab=admin_bm&page={{ admin_bms.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+<i class="fas fa-chevron-right"></i>
+</a>
+</li>
+{% else %}
+<li class="page-item disabled">
+<span class="page-link"><i class="fas fa-chevron-right"></i></span>
+</li>
+{% endif %}
+</ul>
+</nav>
+</div>
+
+<!-- BM Accounts Tab -->
+{% elif tab == 'bm_accounts' %}
+<div class="table-responsive">
+<table class="table table-borderless align-middle mb-0 fs-6">
+<thead class="bg-light border border-secondary-subtle">
+<tr>
+<th class="border border-secondary-subtle">#</th>
+<th class="border border-secondary-subtle">BM Name</th>
+<th class="border border-secondary-subtle">BM ID</th>
+<th class="border border-secondary-subtle">Status</th>
+<th class="border border-secondary-subtle">Request Type</th>
+<th class="border border-secondary-subtle">Action</th>
+</tr>
+</thead>
+<tbody>
+{% for bm in bm_accounts %}
+<tr class="border border-secondary-subtle">
+<td class="border border-secondary-subtle">{{ bm_accounts.start_index|add:forloop.counter0 }}</td>
+<td class="border border-secondary-subtle">
+<p class="fw-semibold mb-0">{{ bm.acc_name }}</p>
+</td>
+<td class="border border-secondary-subtle">
+<p class="text-secondary mb-0">{{ bm.acc_id }}</p>
+</td>
+<td class="border border-secondary-subtle">
+{% if bm.status == 'pending' %}
+  <span style="background-color: #ffc107; color: white; padding: 3px 8px; border-radius: 3px; font-weight: bold;">Pending</span>
+{% elif bm.status == 'approved' %}
+  <span style="background-color: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-weight: bold;">Approved</span>
+{% endif %}
+</td>
+<td class="border border-secondary-subtle">
+<span class="badge bg-light text-dark">{{ bm.get_request_type_display }}</span>
+</td>
+<td class="border border-secondary-subtle">
+<a href="/admin/dashboard/bmaccount/{{ bm.id }}/change/" class="btn btn-sm btn-outline-primary">
+<i class="fas fa-edit"></i> Edit
+</a>
+<a href="/admin/dashboard/bmaccount/{{ bm.id }}/delete/" class="btn btn-sm btn-outline-danger">
+<i class="fas fa-trash"></i> Delete
+</a>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="6" class="text-center py-4">No BM accounts found.</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<!-- BM Accounts Pagination -->
+<div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
+<nav aria-label="Page navigation">
+<ul class="pagination mb-0">
+{% if bm_accounts.has_previous %}
+<li class="page-item">
+<a class="page-link" href="?tab=bm_accounts&page={{ bm_accounts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+<i class="fas fa-chevron-left"></i>
+</a>
+</li>
+{% else %}
+<li class="page-item disabled">
+<span class="page-link"><i class="fas fa-chevron-left"></i></span>
+</li>
+{% endif %}
+
+{% for i in bm_accounts.paginator.page_range %}
+{% if bm_accounts.number == i %}
+<li class="page-item active"><span class="page-link">{{ i }}</span></li>
+{% else %}
+<li class="page-item"><a class="page-link" href="?tab=bm_accounts&page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+{% endif %}
+{% endfor %}
+
+{% if bm_accounts.has_next %}
+<li class="page-item">
+<a class="page-link" href="?tab=bm_accounts&page={{ bm_accounts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+<i class="fas fa-chevron-right"></i>
+</a>
+</li>
+{% else %}
+<li class="page-item disabled">
+<span class="page-link"><i class="fas fa-chevron-right"></i></span>
+</li>
+{% endif %}
+</ul>
+</nav>
+</div>
+{% endif %}
+
+</section>
+
+</div>
+</main>
+{% endblock %}

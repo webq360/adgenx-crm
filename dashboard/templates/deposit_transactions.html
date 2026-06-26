@@ -1,218 +1,290 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block styles %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'transactions.css' %}">
-{% endblock %}
-
 {% block content %}
-
-  <div class="container-fluid py-4 px-4 table-container-container">
-    <h2 class="fw-semibold mb-3 fs-5">Transaction History</h2>
-    <div class="bg-white rounded-3 p-3 shadow-sm">
-      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-
-        <a href="{% url 'deposit_transactions' %}" type="button" class="btn-filter text-decoration-none active">Deposit</a>
-        <a href="{% url 'topup_transactions' %}" type="button" class="btn-filter text-decoration-none">Top Up</a>
-        <a type="button" class="btn-filter text-decoration-none">Withdrawals</a>
-
-        <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
-          <form method="get" action="{% url 'deposit_transactions' %}" class="d-flex align-items-center">
-            <input type="text" class="input-search" placeholder="Trx Id" name="trx_id" 
-            value="{% if trx_id %}{{ trx_id }}{% endif %}" autocomplete="off" />
-
-            <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                </svg>
-                Search
-            </button>
-          </form>
-        {% if request.user.is_staff %}
-          <form method="get" action="{% url 'deposit_transactions' %}" class="d-flex align-items-center">
-            <input type="text" class="input-search" placeholder="User email" name="email" 
-            value="{% if email %}{{ email }}{% endif %}" autocomplete="off" />
-
-            <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0_1 11 0"/>
-                </svg>
-                Search
-            </button>
-          </form>
-        {% endif %}
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="mb-5">
+            <h1 class="fs-2 fw-bold mb-2" style="color: #1a1d29;">Transaction History</h1>
+            <p class="text-secondary">View and manage all your transactions</p>
         </div>
-      </div>
-        <div class="table-responsive">
-          <table class="table align-middle mb-0">
-            <thead>
-              <tr>
-                <th class="ps-2">Timestamp</th>
-                {% if request.user.is_staff %}
-                <th>ID</th>
-                <th>User Info</th>
-                {% endif %}
-                <th>Method</th>
-                <th>Trx ID</th>
-                <th>Vendor Trx ID</th>
-                <th>Attachment</th>
-                {% if request.user.is_staff %}
-                <th>Rate</th>
-                {% endif %}
-                <th>BDT Amount</th>
-                <th>USD Amount</th>
-                <th>Status</th>
-                {% if request.user.is_staff %}
-                <th>Action</th>
-                {% endif %}
-                
-              </tr>
-            </thead>
-            <tbody>
-              {% for transaction in transactions %}
-              <tr>
-                <td class="ps-2 fs-6 text-secondary">{{ transaction.created_at|date:"H:i, d M Y" }}</td>
-                {% if request.user.is_staff %}
-                <td class="fs-6">{{ transaction.id }}</td>
-                <td class="fs-6">
-                  {{ transaction.user.first_name }} {{ transaction.user.last_name }} ({{ transaction.user.username }})
-                </td>
-                {% endif %}
-                
-                <td class="fs-6">{{ transaction.method }}</td>
-                <td class="fs-6">{{ transaction.trx_id }}</td>
-                <td class="fs-6">{{ transaction.vendor_trx_id }}</td>
-                <td class="">
-                  {% if transaction.receipt %}
-                  <a href="#" onclick="showReceipt('{{ transaction.receipt.url }}'); return false;" class="text-decoration-none">
-                    <i class="fas fa-eye"></i> View Receipt
-                  </a>
-                  {% else %}
-                  N/A
-                  {% endif %}
-                </td>
-                {% if request.user.is_staff %}
-                <td class="fs-6">${{ transaction.user_dollar_rate }}</td>
-                {% endif %}
-                <td class="fs-6">৳{{ transaction.bdt_amount }}</td>
-                <td class="fs-6">${{ transaction.usd_amount }}</td>
-                <td><span class="status-{{ transaction.status }}">{{ transaction.status|capfirst }}</span></td>
-                {% if request.user.is_staff %}
-                <td class="pe-2">
-                  <a href="{% url 'admin_dashboard:review_deposit_details' transaction.id %}" class="text-decoration-none btn btn-sm btn-primary">View</a>
-                </td>
-                {% endif %}
-                <td class="pe-2"></td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="12" class="text-center">No transactions found.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+
+        <!-- Navigation Tabs -->
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <a href="{% url 'deposit_transactions' %}" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/>
+                </svg>
+                Deposit
+            </a>
+            <a href="{% url 'topup_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                Top Up
+            </a>
+            <a href="{% url 'withdrawal_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                Withdrawals
+            </a>
         </div>
-      <div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
-        <nav aria-label="Page navigation">
-          <ul class="pagination mb-0">
-            {% if transactions.has_previous %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}"
-                aria-label="Previous">
-                  <i class="fas fa-chevron-left"></i>
-                </a>
-              </li>
-            {% else %}
-              <li class="page-item disabled">
-                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
-              </li>
-            {% endif %}
 
-            {% with transactions.number as current_page %}
-            {% with transactions.paginator.num_pages as total_pages %}
-              {% if total_pages > 5 %}
-                {% if current_page > 3 %}
-                  <li class="page-item"><a class="page-link" href="?page=1{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}">1</a></li>
-                  {% if current_page > 4 %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                  {% endif %}
-                {% endif %}
+        <!-- Filter Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 24px;">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Search by Trx ID -->
+                    <div class="col-12 col-md-6">
+                        <form method="get" action="{% url 'deposit_transactions' %}" class="d-flex gap-2">
+                            <input type="text" class="form-control" placeholder="Search by Transaction ID..." name="trx_id" value="{% if trx_id %}{{ trx_id }}{% endif %}" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px;">
+                            <button type="submit" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; white-space: nowrap;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 6px;">
+                                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Search
+                            </button>
+                        </form>
+                    </div>
 
-                {% for i in transactions.paginator.page_range %}
-                  {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
-                    {% if current_page == i %}
-                      <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                    {% else %}
-                      <li class="page-item"><a class="page-link" href="?page={{ i }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}">{{ i }}</a></li>
+                    <!-- Search by Email (Admin Only) -->
+                    {% if request.user.is_staff %}
+                    <div class="col-12 col-md-6">
+                        <form method="get" action="{% url 'deposit_transactions' %}" class="d-flex gap-2">
+                            <input type="text" class="form-control" placeholder="Search by email..." name="email" value="{% if email %}{{ email }}{% endif %}" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px;">
+                            <button type="submit" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; white-space: nowrap;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 6px;">
+                                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Search
+                            </button>
+                        </form>
+                    </div>
                     {% endif %}
-                  {% endif %}
-                {% endfor %}
+                </div>
+            </div>
+        </div>
 
-                {% if current_page < total_pages|add:'-2' %}
-                  {% if current_page < total_pages|add:'-3' %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                  {% endif %}
-                  <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}">{{ total_pages }}</a></li>
+        <!-- Transactions Table Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div class="card-body p-0" style="background: white;">
+                {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                <tr>
+                                    <th class="text-secondary small fw-semibold text-uppercase px-4 py-3" style="color: #6b7280;">Timestamp</th>
+                                    {% if request.user.is_staff %}
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">User</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Rate</th>
+                                    {% endif %}
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Method</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Trx ID</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Amount (BDT)</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Amount (USD)</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Status</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                    <td class="px-4 py-3">
+                                        <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ transaction.created_at|date:"M d, Y" }}</div>
+                                        <div style="font-size: 0.75rem; color: #6b7280;">{{ transaction.created_at|date:"H:i" }}</div>
+                                    </td>
+                                    {% if request.user.is_staff %}
+                                    <td class="py-3">
+                                        <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ transaction.user.first_name }} {{ transaction.user.last_name }}</div>
+                                        <div style="font-size: 0.75rem; color: #6b7280;">{{ transaction.user.username }}</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #667eea; font-weight: 600;">${{ transaction.user_dollar_rate }}/BDT</span>
+                                    </td>
+                                    {% endif %}
+                                    <td class="py-3">
+                                        <span class="badge" style="background: #dbeafe; color: #0369a1; font-weight: 600; padding: 6px 12px; border-radius: 6px;">{{ transaction.method }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span style="font-family: monospace; color: #1a1d29; font-weight: 500;">{{ transaction.trx_id }}</span>
+                                            <button class="btn btn-sm" onclick="copyToClipboard('{{ transaction.trx_id }}', this)" style="background: #f3f4f6; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer;" title="Copy">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">
+                                                    <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #667eea; font-weight: 600;">৳{{ transaction.bdt_amount }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #10b981; font-weight: 600;">${{ transaction.usd_amount }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge" style="background: {% if transaction.status == 'approved' %}#d1fae5; color: #059669{% elif transaction.status == 'pending' %}#fef3c7; color: #b45309{% elif transaction.status == 'rejected' %}#fee2e2; color: #dc2626{% else %}#dbeafe; color: #0369a1{% endif %}; font-weight: 600; padding: 6px 12px; border-radius: 6px;">{{ transaction.status|capfirst }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm" style="background: #f3f4f6; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;" data-bs-toggle="dropdown">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="16" height="16" style="color: #6b7280;">
+                                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                                </svg>
+                                            </button>
+                                            <ul class="dropdown-menu" style="border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                                {% if transaction.receipt %}
+                                                <li><a class="dropdown-item" href="#" onclick="showReceipt('{{ transaction.receipt.url }}'); return false;">View Receipt</a></li>
+                                                {% endif %}
+                                                {% if request.user.is_staff %}
+                                                <li><a class="dropdown-item" href="{% url 'admin_dashboard:review_deposit_details' transaction.id %}">Review Details</a></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if transactions.has_other_pages %}
+                    <div class="p-3 border-top" style="background: #f9fafb;">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if transactions.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</span>
+                                </li>
+                                {% endif %}
+                                
+                                {% with transactions.number as current_page %}
+                                {% with transactions.paginator.num_pages as total_pages %}
+                                    {% if total_pages > 5 %}
+                                        {% if current_page > 3 %}
+                                            <li class="page-item"><a class="page-link" href="?page=1{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">1</a></li>
+                                            {% if current_page > 4 %}
+                                                <li class="page-item disabled"><span class="page-link" style="border: 1px solid #e5e7eb; margin: 0 2px;">...</span></li>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% for i in transactions.paginator.page_range %}
+                                            {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
+                                                {% if current_page == i %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">{{ i }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ i }}</a></li>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if current_page < total_pages|add:'-2' %}
+                                            {% if current_page < total_pages|add:'-3' %}
+                                                <li class="page-item disabled"><span class="page-link" style="border: 1px solid #e5e7eb; margin: 0 2px;">...</span></li>
+                                            {% endif %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ total_pages }}</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        {% for i in transactions.paginator.page_range %}
+                                            {% if transactions.number == i %}
+                                                <li class="page-item active">
+                                                    <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">{{ i }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ i }}</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endwith %}
+                                {% endwith %}
+
+                                {% if transactions.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ transactions.next_page_number }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48" height="48" style="color: #d1d5db; margin: 0 auto 20px;">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="text-secondary mb-0">No deposit transactions found.</p>
+                    </div>
                 {% endif %}
-              {% else %}
-                {% for i in transactions.paginator.page_range %}
-                  {% if transactions.number == i %}
-                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                  {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}">{{ i }}</a></li>
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-            {% endwith %}
+            </div>
+        </div>
 
-            {% if transactions.has_next %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ transactions.next_page_number }}{% if trx_id %}&trx_id={{ trx_id }}{% elif email %}&email={{ email }}{% endif %}"
-                aria-label="Next">
-                  <i class="fas fa-chevron-right"></i>
-                </a>
-              </li>
-            {% else %}
-              <li class="page-item disabled">
-                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
-      </div>
     </div>
-  </div>
+</main>
 
 <!-- Receipt Modal -->
 <div class="modal fade" id="receiptModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-        <h5 class="modal-title">
-          <i class="fas fa-receipt"></i> Receipt Image
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center p-0">
-        <img id="receiptImage" src="" alt="Receipt" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
-      </div>
-      <div class="modal-footer">
-        <a id="downloadReceipt" href="" download class="btn btn-primary">
-          <i class="fas fa-download"></i> Download
-        </a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <h5 class="modal-title fw-bold">Receipt Image</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="receiptImage" src="" alt="Receipt" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                <a id="downloadReceipt" href="" download class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                        <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    Download
+                </a>
+                <button type="button" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
 function showReceipt(receiptUrl) {
-  document.getElementById('receiptImage').src = receiptUrl;
-  document.getElementById('downloadReceipt').href = receiptUrl;
-  new bootstrap.Modal(document.getElementById('receiptModal')).show();
+    document.getElementById('receiptImage').src = receiptUrl;
+    document.getElementById('downloadReceipt').href = receiptUrl;
+    new bootstrap.Modal(document.getElementById('receiptModal')).show();
+}
+
+function copyToClipboard(text, button) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        const svg = button.querySelector('svg');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14" style="color: #10b981;"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+        button.style.background = '#d1fae5';
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = '#f3f4f6';
+        }, 1500);
+    } catch (err) {
+        console.error('Copy failed:', err);
+    }
+    
+    document.body.removeChild(textarea);
 }
 </script>
 

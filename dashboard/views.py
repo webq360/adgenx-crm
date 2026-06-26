@@ -10,10 +10,12 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum
 from decimal import Decimal
+from functools import wraps
 
-from .models import DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory, PaymentMethod, ActivityLog
+from .models import DepositTransaction, Wallet, AdAccount, BMAccount, TopupHistory, PaymentMethod, ActivityLog, WithdrawalRequest
 from .fb_api_reqs import change_spend_cap, get_ad_account_info
 from .utils import paginate_data, get_user_utils, get_processed_ad_accounts_data, log_activity
+from .group_permissions import require_group_permission as require_permission  # Using Django Groups now
 
 # Create your views here.
 
@@ -61,31 +63,39 @@ def index(request):
 
     # Filtered and aggregated data
     deposit_qs = DepositTransaction.objects.filter(user=request.user, status='approved')
-    topup_qs = TopupHistory.objects.filter(ad_account__user=request.user, status='approved', type='increase')
+    withdrawal_qs = WithdrawalRequest.objects.filter(user=request.user, status__in=['approved', 'processed'])
 
     if start_date:
         deposit_qs = deposit_qs.filter(created_at__gte=start_date, created_at__lt=end_date)
-        topup_qs = topup_qs.filter(date__gte=start_date, date__lt=end_date)
+        withdrawal_qs = withdrawal_qs.filter(requested_at__gte=start_date, requested_at__lt=end_date)
 
     total_deposit = deposit_qs.aggregate(total=Sum('usd_amount'))['total'] or 0
-    total_topup_increase = topup_qs.aggregate(total=Sum('amount'))['total'] or 0
+    total_withdrawal = withdrawal_qs.aggregate(total=Sum('amount_usd'))['total'] or 0
 
-    # Deposit summary by rate
-    deposit_summary = deposit_qs.values('created_at__date').annotate(
-        total_bdt=Sum('bdt_amount'),
-        total_usd=Sum('usd_amount')
-    ).order_by('-created_at__date')
+    # Deposit summary by rate (group by exchange rate)
+    from decimal import Decimal
+    from collections import defaultdict
     
-    # Calculate rate for each day
-    deposit_by_rate = []
-    for item in deposit_summary:
-        rate = round(item['total_bdt'] / item['total_usd'], 2) if item['total_usd'] > 0 else 0
-        deposit_by_rate.append({
-            'date': item['created_at__date'],
-            'bdt_amount': item['total_bdt'],
-            'usd_amount': item['total_usd'],
-            'rate': rate
-        })
+    deposits = deposit_qs.values('bdt_amount', 'usd_amount')
+    rate_summary = defaultdict(lambda: {'bdt': Decimal('0'), 'usd': Decimal('0')})
+    
+    for deposit in deposits:
+        bdt = Decimal(str(deposit['bdt_amount']))
+        usd = Decimal(str(deposit['usd_amount']))
+        if usd > 0:
+            rate = round(bdt / usd, 2)
+            rate_summary[rate]['bdt'] += bdt
+            rate_summary[rate]['usd'] += usd
+    
+    # Convert to list and sort by rate
+    deposit_by_rate = [
+        {
+            'rate': rate,
+            'bdt_amount': float(data['bdt']),
+            'usd_amount': float(data['usd'])
+        }
+        for rate, data in sorted(rate_summary.items(), reverse=True)
+    ]
 
     ad_accounts_qs = AdAccount.objects.filter(user=request.user, status='active').order_by('-start_date')
     ad_accounts_data = get_processed_ad_accounts_data(ad_accounts_qs)
@@ -96,7 +106,7 @@ def index(request):
         'ad_accounts': ad_accounts_data,
         'utils': utils,
         'total_deposit': total_deposit,
-        'total_topup_increase': total_topup_increase,
+        'total_withdrawal': total_withdrawal,
         'deposit_by_rate': deposit_by_rate,
         'start_date': start_date_str,
         'end_date': end_date_str,
@@ -104,6 +114,7 @@ def index(request):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_accounts')
 def ad_accounts(request):    
     search_query = request.GET.get('search', '')
     if request.user.is_staff:
@@ -130,6 +141,25 @@ def ad_accounts(request):
                 'status': bm.status,
                 'request_type': bm.request_type,
             })
+        
+        # Calculate total spent from TopupHistory
+        topup_history = TopupHistory.objects.filter(ad_account=acc)
+        total_spent = sum(t.amount for t in topup_history if t.type == 'increase')
+        total_decreased = sum(t.amount for t in topup_history if t.type == 'decrease')
+        
+        # Update total_spent field in model
+        acc.total_spent = total_spent
+        
+        # Calculate remaining balance
+        remaining_balance = acc.monthly_budget - total_spent + total_decreased
+        acc.remaining_balance = remaining_balance
+        
+        # Update limit (can be same as monthly_budget or set separately)
+        if acc.limit == 0:
+            acc.limit = acc.monthly_budget
+        
+        acc.save()
+        
         ad_accounts_data.append({
             'id': acc.id,
             'name': acc.name,
@@ -137,6 +167,9 @@ def ad_accounts(request):
             'acc_link': acc.acc_link,
             'start_date': str(acc.start_date),
             'monthly_budget': str(acc.monthly_budget),
+            'total_spent': str(acc.total_spent),
+            'remaining_balance': str(acc.remaining_balance),
+            'limit': str(acc.limit),
             'status': acc.status,
             'has_admin_bm': bool(acc.admin_bm and acc.status == 'active'),
             'bm_accounts': bm_accounts_list,
@@ -173,6 +206,82 @@ def get_ad_account_fb_info(request, ad_account_id):
 
 
 @login_required(login_url='auth')
+@require_permission('can_manage_payments')
+def withdrawal(request):
+    """Handle withdrawal requests from users"""
+    if request.user.is_staff:
+        return redirect('admin_dashboard:admin_overview')
+    
+    wallet, created = Wallet.objects.get_or_create(
+        user=request.user,
+        defaults={'balance': 0.00, 'dollar_rate': 127.00}
+    )
+    utils = get_user_utils(request.user)
+    payment_methods = PaymentMethod.objects.filter(is_active=True)
+
+    if request.method == 'POST':
+        payment_method_id = request.POST.get('payment_method')
+        amount_usd = request.POST.get('amount_usd')
+        account_details = request.POST.get('account_details', '').strip()
+
+        # Input validation
+        try:
+            from decimal import Decimal, InvalidOperation
+            amount_usd = Decimal(str(amount_usd))
+            
+            if amount_usd <= 0:
+                messages.error(request, 'Amount must be positive.')
+                return redirect('withdrawal')
+            
+            if amount_usd > wallet.balance:
+                messages.error(request, f'Insufficient balance. Your current balance is ${wallet.balance}')
+                return redirect('withdrawal')
+            
+            if amount_usd > 999999999:
+                messages.error(request, 'Amount too large.')
+                return redirect('withdrawal')
+                
+            if not account_details:
+                messages.error(request, 'Please provide account details for withdrawal.')
+                return redirect('withdrawal')
+        except (ValueError, InvalidOperation, TypeError):
+            messages.error(request, 'Invalid amount entered.')
+            return redirect('withdrawal')
+
+        payment_method = get_object_or_404(PaymentMethod, id=payment_method_id)
+        
+        # Calculate BDT amount
+        amount_bdt = amount_usd * wallet.dollar_rate
+
+        try:
+            withdrawal_request = WithdrawalRequest.objects.create(
+                user=request.user,
+                amount_usd=amount_usd,
+                amount_bdt=amount_bdt,
+                payment_method=payment_method.method_name,
+                account_details=account_details,
+                status='pending'
+            )
+
+            # Send notifications to user and admins
+            from dashboard.notification_handler import notify_withdrawal_requested
+            notify_withdrawal_requested(withdrawal_request)
+
+            messages.success(request, 'Withdrawal request submitted successfully! Awaiting admin approval.')
+            return redirect('withdrawal_transactions')
+        except Exception as e:
+            messages.error(request, f'Error submitting withdrawal request: {e}')
+            return redirect('withdrawal')
+        
+    return render(request, 'withdrawal.html', {
+        'wallet': wallet,
+        'utils': utils,
+        'payment_methods': payment_methods
+    })
+
+
+@login_required(login_url='auth')
+@require_permission('can_manage_payments')
 def deposit(request):
     if request.user.is_staff:
         return redirect('admin_dashboard:admin_overview')
@@ -248,6 +357,10 @@ def deposit(request):
                 status='pending'
             )
 
+            # Send notifications to user and admins
+            from dashboard.notification_handler import notify_deposit_submitted
+            notify_deposit_submitted(deposit_transaction)
+
             messages.success(request, 'Deposit request submitted successfully!')
             return redirect('index') # Redirect to transactions page after successful submission
         except Exception as e:
@@ -299,6 +412,16 @@ def topup_transactions(request):
             topups_list = TopupHistory.objects.filter(ad_account__user=request.user).order_by('-date')
     topups = paginate_data(request, topups_list, 10)
     return render(request, 'topup_transactions.html', {'topups': topups, 'ad_acc_name': ad_acc_name})
+
+@login_required(login_url='auth')
+def withdrawal_transactions(request):
+    if request.user.is_staff:
+        withdrawals_list = WithdrawalRequest.objects.all().order_by('-requested_at')
+    else:
+        withdrawals_list = WithdrawalRequest.objects.filter(user=request.user).order_by('-requested_at')
+    
+    withdrawals = paginate_data(request, withdrawals_list, 10)
+    return render(request, 'withdrawal_transactions.html', {'withdrawals': withdrawals})
 
 @login_required(login_url='auth')
 def request_ad_account(request):
@@ -376,6 +499,12 @@ def topup(request):
                     wallet.save()
                     wallet.refresh_from_db()
                     new_balance = wallet.balance
+                    
+                    # Update ad account balances
+                    ad_account.total_spent = F('total_spent') + amount
+                    ad_account.remaining_balance = F('remaining_balance') - amount
+                    ad_account.save()
+                    ad_account.refresh_from_db()
                     
                     TopupHistory.objects.create(
                         ad_account=ad_account,
@@ -480,3 +609,208 @@ def remove_bm_account_request(request):
 @login_required(login_url='auth')
 def account_settings(request):
     return render(request, 'account_settings.html')
+
+@login_required(login_url='auth')
+def edit_ad_account(request):
+    if request.method == 'POST':
+        ad_account_id = request.POST.get('ad_account_id')
+        account_name = request.POST.get('account_name')
+        account_link = request.POST.get('account_link')
+        monthly_budget = request.POST.get('monthly_budget')
+        limit = request.POST.get('limit')
+
+        try:
+            from decimal import Decimal, InvalidOperation
+            
+            if request.user.is_staff:
+                ad_account = get_object_or_404(AdAccount, id=ad_account_id)
+            else:
+                ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
+            
+            ad_account.name = account_name
+            ad_account.acc_link = account_link
+            
+            # Update monthly budget if provided
+            if monthly_budget:
+                try:
+                    monthly_budget_decimal = Decimal(str(monthly_budget))
+                    if monthly_budget_decimal >= 0:
+                        ad_account.monthly_budget = monthly_budget_decimal
+                except InvalidOperation:
+                    pass
+            
+            # Update limit if provided
+            if limit:
+                try:
+                    limit_decimal = Decimal(str(limit))
+                    if limit_decimal >= 0:
+                        ad_account.limit = limit_decimal
+                except InvalidOperation:
+                    pass
+            
+            ad_account.save()
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+@login_required(login_url='auth')
+def delete_ad_account(request):
+    if request.method == 'POST':
+        ad_account_id = request.POST.get('ad_account_id')
+
+        try:
+            if request.user.is_staff:
+                ad_account = get_object_or_404(AdAccount, id=ad_account_id)
+            else:
+                ad_account = get_object_or_404(AdAccount, id=ad_account_id, user=request.user)
+            
+            ad_account.delete()
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+
+@login_required(login_url='auth')
+@login_required(login_url='auth')
+def add_ad_account_page(request):
+    """Render page to add new ad account"""
+    if request.method == 'POST':
+        account_name = request.POST.get('account_name', '').strip()
+        account_id = request.POST.get('account_id', '').strip()
+        account_link = request.POST.get('account_link', '').strip()
+        monthly_budget = request.POST.get('monthly_budget', '0')
+        limit = request.POST.get('limit', '0')
+        status = request.POST.get('status', 'inactive')
+        bm_accounts = request.POST.getlist('bm_accounts')
+
+        try:
+            # Validation
+            if not account_name or not account_id or not account_link:
+                messages.error(request, 'All required fields must be filled.')
+                return redirect('add_ad_account_page')
+            
+            from decimal import Decimal, InvalidOperation
+            try:
+                monthly_budget = Decimal(str(monthly_budget)) if monthly_budget else Decimal('0')
+                limit = Decimal(str(limit)) if limit else monthly_budget
+                
+                if monthly_budget < 0:
+                    messages.error(request, 'Monthly budget cannot be negative.')
+                    return redirect('add_ad_account_page')
+                if limit < 0:
+                    messages.error(request, 'Limit cannot be negative.')
+                    return redirect('add_ad_account_page')
+            except InvalidOperation:
+                messages.error(request, 'Invalid budget or limit amount.')
+                return redirect('add_ad_account_page')
+            
+            # Check if account already exists
+            if AdAccount.objects.filter(user=request.user, acc_id=account_id).exists():
+                messages.error(request, 'This ad account already exists.')
+                return redirect('add_ad_account_page')
+            
+            # Create new ad account
+            ad_account = AdAccount.objects.create(
+                user=request.user,
+                name=account_name,
+                acc_id=account_id,
+                acc_link=account_link,
+                status=status,
+                monthly_budget=monthly_budget,
+                limit=limit,
+                remaining_balance=monthly_budget,
+                total_spent=Decimal('0'),
+                start_date=timezone.now().date()
+            )
+            
+            # Add BM accounts if selected
+            if bm_accounts:
+                for bm_id in bm_accounts:
+                    try:
+                        bm = BMAccount.objects.get(id=bm_id)
+                        ad_account.bm_accounts.add(bm)
+                    except BMAccount.DoesNotExist:
+                        pass
+            
+            log_activity(
+                performed_by=request.user,
+                activity_type='ad_account_created',
+                description=f"Created new ad account: {account_name} ({account_id}) - Status: {status}",
+                target_user=request.user,
+                old_value=None,
+                new_value={'account_id': ad_account.id, 'account_name': account_name},
+                request=request
+            )
+            
+            messages.success(request, 'Ad account created successfully!')
+            return redirect('ad_accounts')
+            
+        except Exception as e:
+            messages.error(request, f'Error creating account: {str(e)}')
+            return redirect('add_ad_account_page')
+    
+    # GET request - prepare context
+    available_bms = BMAccount.objects.all()
+    return render(request, 'add_ad_account.html', {
+        'available_bms': available_bms
+    })
+
+
+def add_ad_account(request):
+    """AJAX endpoint for adding ad account via modal"""
+    if request.method == 'POST':
+        account_name = request.POST.get('account_name', '').strip()
+        account_id = request.POST.get('account_id', '').strip()
+        account_link = request.POST.get('account_link', '').strip()
+        monthly_budget = request.POST.get('monthly_budget', '0')
+
+        try:
+            # Validation
+            if not account_name or not account_id or not account_link:
+                return JsonResponse({'success': False, 'error': 'All required fields must be filled.'})
+            
+            from decimal import Decimal, InvalidOperation
+            try:
+                monthly_budget = Decimal(str(monthly_budget)) if monthly_budget else Decimal('0')
+                if monthly_budget < 0:
+                    return JsonResponse({'success': False, 'error': 'Monthly budget cannot be negative.'})
+            except InvalidOperation:
+                return JsonResponse({'success': False, 'error': 'Invalid budget amount.'})
+            
+            # Check if account already exists
+            if AdAccount.objects.filter(user=request.user, acc_id=account_id).exists():
+                return JsonResponse({'success': False, 'error': 'This ad account already exists.'})
+            
+            # Create new ad account
+            ad_account = AdAccount.objects.create(
+                user=request.user,
+                name=account_name,
+                acc_id=account_id,
+                acc_link=account_link,
+                status='inactive',
+                monthly_budget=monthly_budget,
+                start_date=timezone.now().date()
+            )
+            
+            log_activity(
+                performed_by=request.user,
+                activity_type='ad_account_created',
+                description=f"Created new ad account: {account_name} ({account_id}) via modal",
+                target_user=request.user,
+                old_value=None,
+                new_value={'account_id': ad_account.id, 'account_name': account_name},
+                request=request
+            )
+            
+            return JsonResponse({'success': True, 'message': 'Ad account created successfully!'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})

@@ -1,401 +1,340 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-    <!-- Content -->
-    <main class="flex-grow-1 overflow-auto p-4 table-container-container">
-        <div class="mb-3 d-flex flex-column flex-md-row justify-content-md-between align-items-start align-items-md-center">
+<main class="flex-grow-1 overflow-auto" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="mb-5 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <div>
-                <h1 class="fs-5 fw-semibold mb-1">Overview</h1>
-                <p class="small mb-4">
-                    Hello, {{ request.user.first_name }} {{ request.user.last_name }}.
-                </p>
+                <h1 class="fs-3 fw-bold mb-2" style="color: #1a1d29;">Dashboard</h1>
+                <p class="text-secondary mb-0">Welcome back, <span class="fw-semibold text-dark">{{ request.user.first_name }} {{ request.user.last_name }}</span></p>
             </div>
-            <div>
-                <a href="{% url 'deposit' %}" class="btn btn-primary text-decoration-none" role="button" type="button">
-                    Add Balance
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" class="ms-1">
-                        <path d="M5 12h14m-7-7l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    
-
-    <!-- Status bars -->
-    <div class="d-flex flex-wrap gap-3 mb-4">
-        <div class="status-bar status-red">
-        <div class="status-icon bg-danger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16.002 13.5C16.002 14.3284 16.6735 15 17.502 15C18.3304 15 19.002 14.3284 19.002 13.5C19.002 12.6716 18.3304 12 17.502 12C16.6735 12 16.002 12.6716 16.002 13.5Z" stroke="white" stroke-width="1.5"></path>
-            <path d="M2.00195 11C2.00195 7.22876 2.00195 5.34315 3.17353 4.17157C4.3451 3 6.23072 3 10.002 3H14.002C14.9319 3 15.3969 3 15.7784 3.10222C16.8137 3.37962 17.6223 4.18827 17.8997 5.22354C18.002 5.60504 18.002 6.07003 18.002 7M10.002 7H16.002C18.8304 7 20.2446 7 21.1233 7.87868C22.002 8.75736 22.002 10.1716 22.002 13V15C22.002 17.8284 22.002 19.2426 21.1233 20.1213C20.2446 21 18.8304 21 16.002 21H12.5005" stroke="white" stroke-width="1.5" stroke-linecap="round"></path><path d="M10 17H6M6 17H2M6 17V21M6 17V13" stroke="white" stroke-width="1.5" stroke-linecap="round"></path></svg>
-        </div>
-        <div>
-            <div>Pending</div>
-            <div>Deposit</div>
-        </div>
-        <div class="value fs-3 p-2">{{ utils.pending_deposits }}</div>
-        </div>
-        <div class="status-bar status-green">
-        <div class="status-icon bg-success">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-            <path d="M18.364 5.636a9 9 0 11-12.728 0" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M12 3v9l3 3" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-        </div>
-        <div>
-            <div>Pending</div>
-            <div>Accounts</div>
-        </div>
-        <div class="value fs-3 p-2">{{ utils.pending_accounts }}</div>
-        </div>
-        <div class="status-bar status-purple-light">
-        <div class="status-icon bg-purple text-white fw-bold text-center fs-6">Ad</div>
-        <div>
-            <div>Share &amp; Remove</div>
-            <div>Ad Acc Requests</div>
-        </div>
-        <div class="value fs-3 p-2">0</div>
-        </div>
-    </div>
-
-    <form method="GET" action="{% url 'index' %}" class="d-flex flex-column flex-md-row align-items-md-center gap-2 mb-3">
-        <div class="d-flex gap-2">
-            <input type="date" name="start_date" class="form-control" value="{{ start_date|default:'' }}">
-            <input type="date" name="end_date" class="form-control" value="{{ end_date|default:'' }}">
-        </div>
-        <button type="submit" class="btn btn-outline-primary">Filter</button>
-    </form>
-    
-    <!-- Wallet and stats cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card-small">
-            <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon text-info" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"></rect>
-                <path d="M16 3h-8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            Wallet Balance
-            </div>
-            <p class="card-value mb-1">${{ wallet.balance }}</p>
-            <p class="card-subtext mb-0">Last deposit:</p>
-        </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card-small">
-            <div class="card-title text-info">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-                <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"></circle>
-                <line x1="8" y1="12" x2="16" y2="12" stroke-linecap="round" stroke-linejoin="round"></line>
-                <line x1="12" y1="8" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"></line>
-            </svg>
-            Current USD Rate
-            </div>
-            <p class="card-value mb-1">৳{{ wallet.dollar_rate }}/USD</p>
-            <p class="card-subtext mb-0">Expires on:</p>
-        </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card-small">
-            <div class="card-title text-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-                <path d="M18 12a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            Total Deposit
-            </div>
-            <p class="card-value mb-1">${{ total_deposit }}</p>
-            <p class="card-subtext mb-0">USD</p>
-        </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card-small">
-            <div class="card-title text-success">
-            <div class="bg-success text-white fw-bold text-center rounded me-1 px-1 fs-6" style="width: 1.25rem; height: 1.25rem; line-height: 1.25rem;">Ad</div>
-            Active Ad Accounts
-            </div>
-            <p class="card-value mb-1">{{ utils.active_accounts }}</p>
-            <p class="card-subtext mb-0">Total</p>
-        </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card-small">
-                <div class="card-title text-warning">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    Total Topup
-                </div>
-                <p class="card-value mb-1">${{ total_topup_increase }}</p>
-                <p class="card-subtext mb-0">Increased</p>
-            </div>
-        </div>
-    </div>
-
-    
-
-    <!-- Deposit Summary by Rate Table -->
-    {% if deposit_by_rate %}
-    <section class="bg-white rounded-3 shadow-sm table-container p-3 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h2 class="fw-semibold text-secondary fs-6 mb-0">Deposit Summary by Rate</h2>
-        </div>
-        <div class="table-responsive mb-2">
-            <table class="table table-borderless align-middle mb-0 fs-6">
-                <thead class="bg-light border border-secondary-subtle">
-                    <tr>
-                        <th class="border border-secondary-subtle">Date</th>
-                        <th class="border border-secondary-subtle">BDT Amount</th>
-                        <th class="border border-secondary-subtle">USD Amount</th>
-                        <th class="border border-secondary-subtle">Exchange Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in deposit_by_rate %}
-                    <tr class="border border-secondary-subtle">
-                        <td class="border border-secondary-subtle">{{ item.date|date:"M d, Y" }}</td>
-                        <td class="border border-secondary-subtle">৳{{ item.bdt_amount|floatformat:2 }}</td>
-                        <td class="border border-secondary-subtle">${{ item.usd_amount|floatformat:2 }}</td>
-                        <td class="border border-secondary-subtle">
-                            <span class="badge bg-info text-dark">৳{{ item.rate }}/USD</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-    {% endif %}
-
-    <section class="bg-white rounded-3 shadow-sm table-container p-3">
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-2 gap-3">
-            <h2 class="fw-semibold text-secondary fs-6 mb-0">Ad Accounts</h2>
-            <div class="d-flex gap-2 w-100 w-sm-auto">
-                <a href="{% url 'request_ad_account' %}" type="button" class="btn-create btn-primary text-decoration-none"
-                    role="button">
-                    Create Ad Account
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
-                        <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                </a>
-            </div>
-        </div>
-        <div class="table-responsive mb-2">
-            <table class="table table-borderless align-middle mb-0 fs-6">
-                <thead class="bg-light border border-secondary-subtle">
-                    <tr>
-                        <th class="border border-secondary-subtle">Ad Account</th>
-                        <th class="border border-secondary-subtle">Connected BM</th>
-                        <th class="border border-secondary-subtle">Remaining Balance</th>
-                        <th class="border border-secondary-subtle">Total Spent</th>
-                        <th class="border border-secondary-subtle">Limit</th>
-                        <th class="border border-secondary-subtle">Status</th>
-                        <th class="border border-secondary-subtle">Action</th>
-                        {% if not request.user.is_staff %}
-                        <th class="border border-secondary-subtle">Top Up</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ad_account in ad_accounts %}
-                    <tr class="border border-secondary-subtle align-top">
-                        <td class="border border-secondary-subtle">
-                            <!--ad_account name-->
-                            <p class="fw-semibold mb-1">{{ ad_account.name }}</p>
-                            <!--ad_account_id-->
-                            <p class="text-secondary mb-0 lh-sm">
-                                id - {{ ad_account.acc_id }} 
-                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyToClipboard('{{ ad_account.acc_id }}', this)" title="Copy Account ID">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <br />
-                                <a href="{{ ad_account.acc_link }}" target="_blank" rel="noopener noreferrer"
-                                    class="text-primary text-decoration-none">{{ ad_account.acc_link }}</a>
-                            </p>
-                        </td>
-                        <td class="border border-secondary-subtle">
-                            {% for bm_account in ad_account.bm_accounts %}
-                                {% if bm_account.status == 'approved' %}
-                                <p class="text-success fw-semibold mb-0">Approved</p>
-                                    <p class="mb-0">{{ bm_account.acc_name }}</p>
-                                    <p class="mb-1">
-                                        {{ bm_account.acc_id }} 
-                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyToClipboard('{{ bm_account.acc_id }}', this)" title="Copy BM ID">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </p>
-                                {% elif bm_account.status == 'pending' %}
-                                <p class="text-warning fw-semibold mb-0">Pending</p>
-                                    <p class="mb-0 text-secondary">{{ bm_account.acc_name }}</p>
-                                    <p class="mb-1 text-secondary">
-                                        {{ bm_account.acc_id }} 
-                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyToClipboard('{{ bm_account.acc_id }}', this)" title="Copy BM ID">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </p>
-                                {% endif %}
-                            {% empty %}
-                                <p class="text-secondary mb-0">No BM accounts</p>
-                            {% endfor %}
-                        </td>
-                        <td class="border border-secondary-subtle">${{ ad_account.balance }}</td>
-                        <td class="border border-secondary-subtle">${{ ad_account.total_spent }}</td>
-                        <td class="border border-secondary-subtle">${{ ad_account.limit }}</td>
-                        <td class="border border-secondary-subtle">
-                            <span class="badge-{{ ad_account.status }}">{{ ad_account.status|capfirst }}</span>
-                        </td>
-                        <td class="border border-secondary-subtle text-center">
-                            <div class="dropup">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ ad_account.id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper-config='{"strategy":"fixed"}'>
-                                    
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ ad_account.id }}">
-                                    <li><button class="dropdown-item" data-bs-toggle="modal"
-                                        data-bs-target="#adMbAccountModal"
-                                        data-ad-account-id="{{ ad_account.id }}">Ad BM Account
-                                    </button></li>
-                                    <li><button class="dropdown-item" href="#" data-bs-toggle="modal"
-                                        data-bs-target="#removeBmAccountModal"
-                                        data-ad-account-id="{{ ad_account.id }}">Remove BM Account
-                                    </button></li>
-                                    <li><a href="{% url 'topup_transactions' %}?ad_acc_name={{ ad_account.name }}" 
-                                        class="dropdown-item text-white text-decoration-none">Topup History
-                                    </a></li>
-                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#decreaseLimitModal" data-ad-account-id="{{ ad_account.id }}">Decrease Limit</button></li>
-                                </ul>
-                            </div>
-                        </td>
-                        {% if not request.user.is_staff %}
-                        <td class="border border-secondary-subtle">
-                            <button type="button" class="btn-topup" data-bs-toggle="modal" data-bs-target="#topupModal"
-                                data-ad-account-id="{{ ad_account.id }}">
-                                Top Up
-                            </button>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">No ad accounts found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <a href="{% url 'ad_accounts' %}" class="btn btn-outline-primary btn-sm text-decoration-none mb-2" role="button" type="button">
-                View All Ad Accounts 
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" class="ms-1">
-                <path d="M5 12h14m-7-7l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+            <a href="{% url 'deposit' %}" class="btn px-4 py-2 text-white text-decoration-none" role="button" type="button" style="border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); font-weight: 600; transition: all 0.3s ease;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18" class="me-2" style="display: inline;">
+                    <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
+                Add Balance
             </a>
-    </section>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row g-3 mb-5">
+            <!-- Wallet Balance Card -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card h-100" style="border: none; border-radius: 12px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <p class="text-secondary small mb-1">Wallet Balance</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 28px; color: #1a1d29;">${{ wallet.balance }}</h3>
+                            </div>
+                            <div class="p-2 rounded-circle" style="background: #e0e7ff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#667eea" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                    <path d="M16 3h-8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-secondary small mb-0">Rate: ৳{{ wallet.dollar_rate }}/USD</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Deposit Card -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card h-100" style="border: none; border-radius: 12px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <p class="text-secondary small mb-1">Total Deposit</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 28px; color: #1a1d29;">${{ total_deposit }}</h3>
+                            </div>
+                            <div class="p-2 rounded-circle" style="background: #d1fae5;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3v-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-secondary small mb-0">USD received</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Ad Accounts Card -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card h-100" style="border: none; border-radius: 12px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <p class="text-secondary small mb-1">Active Ad Accounts</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 28px; color: #1a1d29;">{{ utils.active_accounts }}</h3>
+                            </div>
+                            <div class="p-2 rounded-circle" style="background: #fef3c7;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-secondary small mb-0">Connected & active</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Withdrawal Card -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card h-100" style="border: none; border-radius: 12px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <p class="text-secondary small mb-1">Total Withdrawal</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 28px; color: #1a1d29;">${{ total_withdrawal }}</h3>
+                            </div>
+                            <div class="p-2 rounded-circle" style="background: #fee2e2;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 13l3-3m0 0l3 3m-3-3v7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-secondary small mb-0">USD withdrawn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Status Cards -->
+        <div class="row g-3 mb-5">
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100" style="border: none; border-radius: 12px; border-left: 4px solid #f59e0b; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-secondary small mb-1">Pending Deposits</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 24px; color: #f59e0b;">{{ utils.pending_deposits }}</h3>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24" width="32" height="32" style="opacity: 0.6;">
+                                <path d="M12 8v8m-4-4h8M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100" style="border: none; border-radius: 12px; border-left: 4px solid #3b82f6; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-secondary small mb-1">Pending Accounts</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 24px; color: #3b82f6;">{{ utils.pending_accounts }}</h3>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24" width="32" height="32" style="opacity: 0.6;">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <path d="M12 7a5 5 0 110 10 5 5 0 010-10z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100" style="border: none; border-radius: 12px; border-left: 4px solid #10b981; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-secondary small mb-1">Ad Requests</p>
+                                <h3 class="fw-bold mb-0" style="font-size: 24px; color: #10b981;">0</h3>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24" width="32" height="32" style="opacity: 0.6;">
+                                <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="mb-4">
+            <form method="GET" action="{% url 'index' %}" class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                <div class="d-flex gap-2 flex-grow-1">
+                    <input type="date" name="start_date" class="form-control" value="{{ start_date|default:'' }}" style="border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <input type="date" name="end_date" class="form-control" value="{{ end_date|default:'' }}" style="border-radius: 8px; border: 1px solid #e5e7eb;">
+                </div>
+                <button type="submit" class="btn btn-outline-primary px-4" style="border-radius: 8px; border: 2px solid #667eea; color: #667eea; font-weight: 600;">Filter</button>
+            </form>
+        </div>
+
+        <!-- Ad Accounts Section -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div class="card-header p-4" style="background: white; border-bottom: 1px solid #e5e7eb;">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: #1a1d29;">Ad Accounts</h5>
+                        <p class="text-secondary small mb-0">Manage your connected ad accounts</p>
+                    </div>
+                    <a href="{% url 'request_ad_account' %}" class="btn btn-sm px-3 py-2 text-white" role="button" type="button" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" class="me-2" style="display: inline;">
+                            <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        Create Account
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4" style="background: white;">
+                {% if ad_accounts %}
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle mb-0">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #e5e7eb;">
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Account Name</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Connected BM</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Monthly Budget</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Remaining Balance</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Total Spent</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Limit</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Status</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase" style="color: #6b7280;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ad_account in ad_accounts %}
+                                <tr style="border-bottom: 1px solid #f3f4f6; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                                    <td>
+                                        <div class="fw-semibold" style="color: #1a1d29;">{{ ad_account.name }}</div>
+                                        <div class="text-secondary small">ID: {{ ad_account.acc_id }}</div>
+                                    </td>
+                                    <td>
+                                        {% for bm_account in ad_account.bm_accounts %}
+                                            {% if bm_account.status == 'approved' %}
+                                                <span class="badge" style="background: #d1fae5; color: #059669; font-weight: 600;">✓ {{ bm_account.acc_name }}</span>
+                                            {% elif bm_account.status == 'pending' %}
+                                                <span class="badge" style="background: #fef3c7; color: #b45309; font-weight: 600;">⏳ Pending</span>
+                                            {% endif %}
+                                        {% empty %}
+                                            <span class="text-secondary small">Not connected</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <span style="color: #1a1d29; font-weight: 600;">${{ ad_account.monthly_budget }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold" style="color: #10b981;">${{ ad_account.remaining_balance }}</span>
+                                    </td>
+                                    <td>
+                                        <span style="color: #ef4444;">${{ ad_account.total_spent }}</span>
+                                    </td>
+                                    <td>
+                                        <span style="color: #667eea; font-weight: 600;">${{ ad_account.limit }}</span>
+                                    </td>
+                                    <td>
+                                        {% if ad_account.status == 'active' %}
+                                            <span class="badge" style="background: #d1fae5; color: #059669; font-weight: 600;">Active</span>
+                                        {% else %}
+                                            <span class="badge" style="background: #fee2e2; color: #dc2626; font-weight: 600;">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            {% if ad_account.status == 'active' %}
+                                            <button type="button" class="btn btn-sm text-white" data-bs-toggle="modal" data-bs-target="#topupModal" data-ad-account-id="{{ ad_account.id }}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; font-weight: 600; padding: 4px 12px; font-size: 0.8rem;">
+                                                Top Up
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <div class="dropdown" style="position: static;">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" style="border-radius: 6px; border: 1px solid #d1d5db; font-weight: 600; padding: 4px 12px; font-size: 0.8rem;">
+                                                    More
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end" style="border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 150px;">
+                                                    <li><a class="dropdown-item" href="{% url 'topup_transactions' %}?ad_acc_name={{ ad_account.name }}">View History</a></li>
+                                                    {% if ad_account.status == 'active' %}
+                                                    <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#decreaseLimitModal" data-ad-account-id="{{ ad_account.id }}">Decrease Limit</button></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'ad_accounts' %}" class="btn btn-outline-primary btn-sm px-3 py-2" style="border-radius: 8px; font-weight: 600;">
+                            View All Accounts
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" class="ms-2" style="display: inline;">
+                                <path d="M5 12h14m-7-7l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48" height="48" style="color: #d1d5db;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v6l4 2"></path>
+                            </svg>
+                        </div>
+                        <p class="text-secondary mb-3">No ad accounts yet</p>
+                        <a href="{% url 'request_ad_account' %}" class="btn btn-primary px-4 py-2" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">
+                            Create Your First Account
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </main>
 
-<!-- Top Up Modal -->
+<!-- Modals (Top Up, Decrease Limit, etc.) -->
 <div class="modal fade" id="topupModal" tabindex="-1" aria-labelledby="topupModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="topupModalLabel">Top Up Ad Account</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold" id="topupModalLabel">Top Up Ad Account</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="topup-form">
                 {% csrf_token %}
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <input type="hidden" name="ad_account_id" id="ad-account-id">
                     <div id="topup-message" class="mb-3"></div>
                     <div class="mb-3">
-                        <label for="amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
+                        <label for="amount" class="form-label fw-semibold">Amount (USD)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required style="border-radius: 8px; border: 1px solid #d1d5db;">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Top Up</button>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">Top Up</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Ad MB Account Modal -->
-<div class="modal fade" id="adMbAccountModal" tabindex="-1" aria-labelledby="adMbAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="adMbAccountModalLabel">Ad BM Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="ad-mb-account-form">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <input type="hidden" name="ad_account_id" id="ad-mb-account-id">
-                    <div id="ad-mb-account-message" class="mb-3"></div>
-                    <div class="mb-3">
-                        <label for="mb-name" class="form-label">BM Name</label>
-                        <input type="text" class="form-control" id="mb-name" name="mb_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="mb-id" class="form-label">BM ID</label>
-                        <input type="text" class="form-control" id="mb-id" name="mb_id" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Remove BM Account Modal -->
-<div class="modal fade" id="removeBmAccountModal" tabindex="-1" aria-labelledby="removeBmAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="removeBmAccountModalLabel">Remove BM Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="remove-bm-account-form">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <input type="hidden" name="ad_account_id" id="remove-bm-account-ad-id">
-                    <div id="remove-bm-account-message" class="mb-3"></div>
-                    <div id="bm-accounts-checkboxes">
-                        <!-- Checkboxes will be populated by JavaScript -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit Request</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Decrease Limit Modal -->
 <div class="modal fade" id="decreaseLimitModal" tabindex="-1" aria-labelledby="decreaseLimitModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="decreaseLimitModalLabel">Request Decrease Limit</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 12px;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title fw-bold" id="decreaseLimitModalLabel">Request Limit Decrease</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="decrease-limit-form">
                 {% csrf_token %}
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <input type="hidden" name="ad_account_id" id="decrease-ad-account-id">
                     <div id="decrease-limit-message" class="mb-3"></div>
                     <div class="mb-3">
-                        <label for="decrease-amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="decrease-amount" name="amount" step="0.01" min="0.01" required>
+                        <label for="decrease-amount" class="form-label fw-semibold">Amount (USD)</label>
+                        <input type="number" class="form-control" id="decrease-amount" name="amount" step="0.01" min="0.01" required style="border-radius: 8px; border: 1px solid #d1d5db;">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Send Request</button>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Close</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">Send Request</button>
                 </div>
             </form>
         </div>
@@ -403,6 +342,7 @@
 </div>
 
 {{ ad_accounts|json_script:"ad_accounts_data_json" }}
+
 <script>
     const ad_accounts_data_element = document.getElementById('ad_accounts_data_json');
     const ad_accounts_data = JSON.parse(ad_accounts_data_element.textContent);
@@ -412,139 +352,33 @@
     topupModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
         const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = topupModal.querySelector('#ad-account-id');
-        adAccountIdInput.value = adAccountId;
-        topupMessage.innerHTML = ''; // Clear previous messages
-        topupModal.querySelector('#amount').value = ''; // Clear previous amount
+        topupModal.querySelector('#ad-account-id').value = adAccountId;
+        topupMessage.innerHTML = '';
+        topupModal.querySelector('#amount').value = '';
     });
 
-    const topupForm = document.getElementById('topup-form');
-    topupForm.addEventListener('submit', async (e) => {
+    document.getElementById('topup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = topupForm.querySelector('button[type="submit"]');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        const formData = new FormData(topupForm);
-        const response = await fetch('/topup/', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            topupMessage.innerHTML = 'Top up successful!';
-            topupMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            topupMessage.innerHTML = `Error: ${result.error}`;
-            topupMessage.style.color = 'red';
-            submitButton.disabled = false;
-        }
-    });
-
-    const adMbAccountModal = document.getElementById('adMbAccountModal');
-    const adMbAccountMessage = document.getElementById('ad-mb-account-message');
-
-    adMbAccountModal.addEventListener('show.bs.modal', function (event) {
-        console.log('Add MB Account modal shown');
-        const button = event.relatedTarget;
-        const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = adMbAccountModal.querySelector('#ad-mb-account-id');
-        adAccountIdInput.value = adAccountId;
-        adMbAccountMessage.innerHTML = ''; // Clear previous messages
-        adMbAccountModal.querySelector('#mb-name').value = '';
-        adMbAccountModal.querySelector('#mb-name').defaultValue = ''; // Clear previous mb name
-        adMbAccountModal.querySelector('#mb-id').value = '';
-        adMbAccountModal.querySelector('#mb-id').defaultValue = ''; // Clear previous mb id
-        console.log('Cleared mb-name and mb-id');
-    });
-
-    const adMbAccountForm = document.getElementById('ad-mb-account-form');
-    adMbAccountForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitButton = adMbAccountForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        const formData = new FormData(adMbAccountForm);
-        const response = await fetch('/request_bm_account/', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            adMbAccountMessage.innerHTML = 'Ad BM Account added successfully!';
-            adMbAccountMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            adMbAccountMessage.innerHTML = `Error: ${result.error}`;
-            adMbAccountMessage.style.color = 'red';
-            submitButton.disabled = false;
-        }
-    });
-
-    const removeBmAccountModal = document.getElementById('removeBmAccountModal');
-    const removeBmAccountMessage = document.getElementById('remove-bm-account-message');
-    const bmAccountsCheckboxesDiv = document.getElementById('bm-accounts-checkboxes');
-
-    removeBmAccountModal.addEventListener('show.bs.modal', function (event) {
-        console.log('Remove BM Account modal shown');
-        const button = event.relatedTarget;
-        const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = removeBmAccountModal.querySelector('#remove-bm-account-ad-id');
-        adAccountIdInput.value = adAccountId;
-        removeBmAccountMessage.innerHTML = ''; // Clear previous messages
-        bmAccountsCheckboxesDiv.innerHTML = ''; // Clear previous checkboxes
-        console.log('Cleared previous messages and checkboxes');
-
-        const adAccount = ad_accounts_data.find(acc => acc.id == adAccountId);
-        console.log('Ad Account data:', adAccount);
-
-        if (adAccount && adAccount.bm_accounts.length > 0) {
-            console.log('Populating checkboxes for BM accounts:', adAccount.bm_accounts);
-            adAccount.bm_accounts.forEach(bm => {
-                const div = document.createElement('div');
-                div.className = 'form-check';
-                div.innerHTML = `
-                    <input class="form-check-input" type="radio" name="bm_account_id" value="${bm.id}" id="bm-${bm.id}">
-                    <label class="form-check-label" for="bm-${bm.id}">
-                        ${bm.acc_name} (ID: ${bm.acc_id})
-                    </label>
-                `;
-                bmAccountsCheckboxesDiv.appendChild(div);
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('/topup/', {
+                method: 'POST',
+                body: formData
             });
-        } else {
-            console.log('No BM accounts found for this Ad Account.');
-            bmAccountsCheckboxesDiv.innerHTML = '<p>No BM accounts connected to this Ad Account.</p>';
-        }
-    });
+            const result = await response.json();
 
-    const removeBmAccountForm = document.getElementById('remove-bm-account-form');
-    removeBmAccountForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitButton = removeBmAccountForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        const formData = new FormData(removeBmAccountForm);
-        const response = await fetch('/remove_bm_account_request/', { // New URL for backend
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            removeBmAccountMessage.innerHTML = 'Remove BM Account request submitted successfully!';
-            removeBmAccountMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            removeBmAccountMessage.innerHTML = `Error: ${result.error}`;
-            removeBmAccountMessage.style.color = 'red';
+            if (result.success) {
+                topupMessage.innerHTML = '<div class="alert alert-success mb-0">✓ Top up successful!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                topupMessage.innerHTML = '<div class="alert alert-danger mb-0">✗ Error: ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            topupMessage.innerHTML = '<div class="alert alert-danger mb-0">✗ Error: ' + err.message + '</div>';
             submitButton.disabled = false;
         }
     });
@@ -555,53 +389,36 @@
     decreaseLimitModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
         const adAccountId = button.getAttribute('data-ad-account-id');
-        const adAccountIdInput = decreaseLimitModal.querySelector('#decrease-ad-account-id');
-        adAccountIdInput.value = adAccountId;
-        decreaseLimitMessage.innerHTML = ''; // Clear previous messages
-        decreaseLimitModal.querySelector('#decrease-amount').value = ''; // Clear previous amount
+        decreaseLimitModal.querySelector('#decrease-ad-account-id').value = adAccountId;
+        decreaseLimitMessage.innerHTML = '';
+        decreaseLimitModal.querySelector('#decrease-amount').value = '';
     });
 
-    const decreaseLimitForm = document.getElementById('decrease-limit-form');
-    decreaseLimitForm.addEventListener('submit', async (e) => {
+    document.getElementById('decrease-limit-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = decreaseLimitForm.querySelector('button[type="submit"]');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        const formData = new FormData(decreaseLimitForm);
-        const response = await fetch('{% url "request_decrease_limit" %}', {
-            method: 'POST',
-            body: formData
-        });
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('{% url "request_decrease_limit" %}', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
 
-        const result = await response.json();
-
-        if (result.success) {
-            decreaseLimitMessage.innerHTML = 'Decrease limit request sent successfully!';
-            decreaseLimitMessage.style.color = 'green';
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            decreaseLimitMessage.innerHTML = `Error: ${result.error}`;
-            decreaseLimitMessage.style.color = 'red';
+            if (result.success) {
+                decreaseLimitMessage.innerHTML = '<div class="alert alert-success mb-0">✓ Request sent successfully!</div>';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                decreaseLimitMessage.innerHTML = '<div class="alert alert-danger mb-0">✗ Error: ' + result.error + '</div>';
+                submitButton.disabled = false;
+            }
+        } catch (err) {
+            decreaseLimitMessage.innerHTML = '<div class="alert alert-danger mb-0">✗ Error: ' + err.message + '</div>';
             submitButton.disabled = false;
         }
     });
-
-    // Copy to clipboard function
-    function copyToClipboard(text, button) {
-        navigator.clipboard.writeText(text).then(() => {
-            const originalIcon = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-check text-success"></i>';
-            button.disabled = true;
-            
-            setTimeout(() => {
-                button.innerHTML = originalIcon;
-                button.disabled = false;
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-            alert('Failed to copy to clipboard');
-        });
-    }
 </script>
+
 {% endblock %}

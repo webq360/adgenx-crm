@@ -145,8 +145,16 @@
                             <td>
                                 <strong>{{ wallet.user.first_name }} {{ wallet.user.last_name }}</strong>
                                 <br><small class="text-muted">{{ wallet.user.username }}</small>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ wallet.user.username }}', this)" title="Copy Username">
+                                  <i class="fas fa-copy"></i>
+                                </button>
                             </td>
-                            <td>{{ wallet.user.email }}</td>
+                            <td>
+                                {{ wallet.user.email }}
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ wallet.user.email }}', this)" title="Copy Email">
+                                  <i class="fas fa-copy"></i>
+                                </button>
+                            </td>
                             <td>
                                 {% if wallet.user.is_manual_client %}
                                 <span class="badge bg-info">Manual</span>
@@ -158,9 +166,22 @@
                                 <span class="{% if wallet.balance > 0 %}positive-balance{% elif wallet.balance == 0 %}zero-balance{% else %}negative-balance{% endif %}">
                                     ${{ wallet.balance|floatformat:2 }}
                                 </span>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ wallet.balance|floatformat:2 }}', this)" title="Copy Balance">
+                                  <i class="fas fa-copy"></i>
+                                </button>
                             </td>
-                            <td>৳{{ wallet.dollar_rate|floatformat:2 }}</td>
-                            <td>৳{{ wallet.balance_bdt|floatformat:2 }}</td>
+                            <td>
+                                ৳{{ wallet.dollar_rate|floatformat:2 }}
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ wallet.dollar_rate|floatformat:2 }}', this)" title="Copy Dollar Rate">
+                                  <i class="fas fa-copy"></i>
+                                </button>
+                            </td>
+                            <td>
+                                ৳{{ wallet.balance_bdt|floatformat:2 }}
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" onclick="copyToClipboard('{{ wallet.balance_bdt|floatformat:2 }}', this)" title="Copy BDT Balance">
+                                  <i class="fas fa-copy"></i>
+                                </button>
+                            </td>
                             <td>
                                 <span class="badge bg-success">{{ wallet.active_accounts }}</span>
                             </td>
@@ -262,6 +283,36 @@ function exportToCSV() {
     a.href = url;
     a.download = `wallet_balance_report_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+}
+
+function copyToClipboard(text, button) {
+  // Create temporary textarea
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  
+  try {
+    document.execCommand('copy');
+    // Visual feedback
+    const icon = button.querySelector('i');
+    const originalClass = icon.className;
+    icon.className = 'fas fa-check';
+    button.classList.add('btn-success');
+    button.classList.remove('btn-outline-secondary');
+    
+    setTimeout(() => {
+      icon.className = originalClass;
+      button.classList.remove('btn-success');
+      button.classList.add('btn-outline-secondary');
+    }, 1500);
+  } catch (err) {
+    console.error('Copy failed:', err);
+  }
+  
+  document.body.removeChild(textarea);
 }
 </script>
 {% endblock %}

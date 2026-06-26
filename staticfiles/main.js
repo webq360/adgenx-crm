@@ -15,6 +15,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Set active navigation link based on current URL
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        const linkPath = new URL(link.href).pathname;
+        
+        if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+            link.classList.add('active');
+        }
+    });
+
     const alerts = document.querySelectorAll('.alert.alert-dismissible');
     alerts.forEach(function(alert) {
         // Add 'show' class to trigger fade-in

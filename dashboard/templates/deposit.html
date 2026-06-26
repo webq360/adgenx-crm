@@ -1,190 +1,263 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block styles %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'deposit.css' %}">
-{% endblock %}
-
-{% block scripts %}
-<script src="{% static 'deposit.js' %}"></script>
-{% endblock %}
-
-
 {% block content %}
-
-
-  <div class="container-fluid px-3 px-md-4 py-3">
-      <h1 class="h6 fw-semibold mb-4">Deposit to Your Fund</h1>
-
-    <div class="row g-3 mb-4">
-      <div class="col-12 col-sm-4">
-        <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="bg-primary p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
-              <i class="fas fa-wallet"></i>
-            </div>
-            <h2 class="fs-6 fw-semibold mb-0">Wallet Balance</h2>
-          </div>
-          <p class="fs-5 fw-bold mb-1">${{ wallet.balance }}</p>
-          <p class="text-muted small mb-0">Last deposit:</p>
-        </div>
-      </div>
-      <div class="col-12 col-sm-4">
-        <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="bg-info p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
-              <i class="fas fa-percent"></i>
-            </div>
-            <h2 class="fs-6 fw-semibold mb-0">Current USD Rate</h2>
-          </div>
-          <p class="fs-5 fw-bold mb-1">৳{{ wallet.dollar_rate }}/USD</p>
-          <p class="text-muted small mb-0">Expires on:</p>
-        </div>
-      </div>
-      <div class="col-12 col-sm-4">
-        <div class="bg-white rounded-3 p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="bg-danger p-2 rounded text-white d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
-              <i class="fas fa-file-invoice-dollar"></i>
-            </div>
-            <h2 class="fs-6 fw-semibold mb-0">Pending Deposit</h2>
-          </div>
-          <p class="fs-5 fw-bold mb-1">{{ utils.pending_deposits }}</p>
-          <p class="text-muted small mb-0">Admin approval is pending</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-light rounded-3 p-4 d-flex flex-column flex-md-row gap-4">
-      <div class="flex-grow-1 d-flex flex-column">
-        <!-- Stepper -->
-        <div class="step-progress">
-            <div class="step-item">
-                <div id="step-circle-1" class="step-circle active">1</div>
-                <div id="step-label-1" class="step-label active">Bank Info</div>
-                <div class="step-connector"></div>
-            </div>
-            <div class="step-item">
-                <div id="step-circle-2" class="step-circle inactive">2</div>
-                <div id="step-label-2" class="step-label">Payment Info</div>
-                <div class="step-connector"></div>
-            </div>
-            <div class="step-item">
-                <div id="step-circle-3" class="step-circle inactive">3</div>
-                <div id="step-label-3" class="step-label">Check & Finish</div>
-            </div>
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="mb-5">
+            <h1 class="fs-2 fw-bold mb-2" style="color: #1a1d29;">Add Funds to Your Wallet</h1>
+            <p class="text-secondary">Deposit money to your account and start managing ads</p>
         </div>
 
-        <form id="deposit-form" method="POST" action="{% url 'deposit' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="payment_method" id="hidden-payment-method">
-            <input type="hidden" name="bdt_amount" id="hidden-bdt-amount">
-            <input type="hidden" name="tx_id" id="hidden-tx-id">
-            <input type="hidden" name="usd_amount" id="hidden-usd-amount">
-            <input type="file" name="receipt" id="hidden-receipt" class="d-none">
-        </form>
-
-        <div id="step-1">
-            <div class="d-flex flex-column flex-md-row gap-4">
-              <!-- Select Bank -->
-              <section class="flex-grow-1 bank-select p-1">
-                <p class="fw-semibold small mb-2">Select Payment Method</p>
-                <div class="d-flex gap-3 mb-3">
-                    {% for method in payment_methods %}
-                        <div id="{{ method.method_name|slugify }}-button" tabindex="0" role="button" class="bank-option bg-white shadow-sm rounded-3 p-3 d-flex align-items-center gap-2 {% if forloop.first %}selected{% endif %}" style="font-weight: 600; font-size: 0.75rem; color: #1e293b;" data-method-id="{{ method.id }}">
-                            {% if method.method_logo %}
-                                <img loading="lazy" src="{{ method.method_logo.url }}" alt="{{ method.method_name }} logo" width="48" height="48" />
-                            {% endif %}
-                            {{ method.method_name }}
+        <div class="row g-4 mb-5">
+            <!-- Wallet Balance Card -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="text-secondary mb-0" style="font-size: 0.875rem; font-weight: 600;">Wallet Balance</h6>
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                    <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                                </svg>
+                            </div>
                         </div>
-                    {% endfor %}
+                        <div class="mb-2">
+                            <h3 class="fs-4 fw-bold mb-0" style="color: #667eea;">${{ wallet.balance }}</h3>
+                        </div>
+                        <p class="text-secondary small mb-0">Available to use</p>
+                    </div>
                 </div>
-              </section>
-
-              <!-- Bank Details -->
-                {% for method in payment_methods %}
-                    <section id="{{ method.method_name|slugify }}-details" class="bank-details flex-grow-1" {% if not forloop.first %}style="display: none;"{% endif %}>
-                        <p class="fw-semibold text-dark mb-2">{{ method.method_name }} Details</p>
-                        {% if method.account_name %}<p class="mb-1">Acc Name: {{ method.account_name }}</p>{% endif %}
-                        {% if method.account_number %}<p class="mb-1">Acc Number: {{ method.account_number }}</p>{% endif %}
-                        {% if method.district %}<p class="mb-1">District: {{ method.district }}</p>{% endif %}
-                        {% if method.branch_name %}<p class="">Branch Name: {{ method.branch_name }}</p>{% endif %}
-                        <p class="fw-semibold mt-3 mb-1">Instructions:</p>
-                        <p>Must attach a transaction screenshort</p>
-                    </section>
-                {% endfor %}
             </div>
-            <div class="d-flex justify-content-end mt-4">
-              <button id="next-button-1" type="button" class="btn btn-primary align-items-center gap-1">
-                Next <i class="fas fa-arrow-right"></i>
-              </button>
+
+            <!-- USD Rate Card -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="text-secondary mb-0" style="font-size: 0.875rem; font-weight: 600;">Current USD Rate</h6>
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h3 class="fs-4 fw-bold mb-0" style="color: #f5576c;">৳{{ wallet.dollar_rate }}/USD</h3>
+                        </div>
+                        <p class="text-secondary small mb-0">Rate is updated daily</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Deposits Card -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="text-secondary mb-0" style="font-size: 0.875rem; font-weight: 600;">Pending Deposits</h6>
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h3 class="fs-4 fw-bold mb-0" style="color: #00f2fe;">{{ utils.pending_deposits }}</h3>
+                        </div>
+                        <p class="text-secondary small mb-0">Awaiting admin approval</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="step-2" style="display: none;">
-            <div class="row">
-                <div class="col-lg-5">
-                    <div class="form-section p-2">
-                        <!-- Amount in BDT -->
-                        <div class="mb-4">
-                            <label for="bdtAmount" class="form-label fw-semibold text-dark">Amount in BDT</label>
-                            <div class="input-group">
-                                <span class="input-group-text">৳</span>
-                                <input type="number" class="form-control" id="bdtAmount" placeholder="Provide the amount in BDT" step="1" required data-dollar-rate="{{ wallet.dollar_rate }}">
-                            </div>
-                        </div>
+        <!-- Main Deposit Form Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div class="card-body p-4 p-md-5">
 
-                        <!-- Transaction ID -->
-                        <div class="mb-4">
-                            <label for="txId" class="form-label fw-semibold text-dark">Trx ID or Reference</label>
-                            <input type="text" class="form-control" id="txId" placeholder="Trx ID" required>
+                <!-- Progress Steps -->
+                <div class="mb-5">
+                    <div class="step-progress" style="display: flex; align-items: center; justify-content: space-around; position: relative; padding: 20px 0; flex-wrap: nowrap;">
+                        <div class="step-item" style="display: flex; flex-direction: row; align-items: center; position: relative; flex: 1; justify-content: center; gap: 15px;">
+                            <div id="step-circle-1" class="step-circle active" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; flex-shrink: 0;">1</div>
+                            <div id="step-label-1" class="step-label active" style="font-weight: 600; color: #667eea; white-space: nowrap;">Payment Method</div>
+                            <div class="step-connector" style="position: absolute; top: 22px; left: 50%; width: 100%; height: 2px; background-color: #dee2e6; z-index: 0; display: none;"></div>
                         </div>
-
-                        <!-- Receipt Upload -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark">Receipt copy or screenshot</label>
-                            <div class="upload-area" onclick="document.getElementById('receiptFile').click()">
-                                <i class="bi bi-cloud-arrow-up upload-icon"></i>
-                                <div id="upload-text" class="text-primary fw-medium">Upload</div>
-                                <div class="text-muted small">or drop a file</div>
-                            </div>
-                            <input type="file" id="receiptFile" class="d-none" accept="image/*,.pdf">
+                        <div class="step-item" style="display: flex; flex-direction: row; align-items: center; position: relative; flex: 1; justify-content: center; gap: 15px;">
+                            <div id="step-circle-2" class="step-circle inactive" style="background: #e5e7eb; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 700; font-size: 18px; flex-shrink: 0;">2</div>
+                            <div id="step-label-2" class="step-label" style="font-weight: 500; color: #6b7280; white-space: nowrap;">Payment Details</div>
+                            <div class="step-connector" style="position: absolute; top: 22px; left: 50%; width: 100%; height: 2px; background-color: #dee2e6; z-index: 0; display: none;"></div>
+                        </div>
+                        <div class="step-item" style="display: flex; flex-direction: row; align-items: center; position: relative; flex: 1; justify-content: center; gap: 15px;">
+                            <div id="step-circle-3" class="step-circle inactive" style="background: #e5e7eb; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: 700; font-size: 18px; flex-shrink: 0;">3</div>
+                            <div id="step-label-3" class="step-label" style="font-weight: 500; color: #6b7280; white-space: nowrap;">Review & Confirm</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column -->
-                <div class="col-lg-6 mb-4">
-                    <div class="form-section p-4">
-                        <h6 class="fw-semibold text-dark mb-3">You will receive the amount in USD:</h6>
-                        <div class="border rounded p-4 bg-light">
-                          <!--entered bdt amount in usd -->
-                            <div class="amount-display">$0.00</div>
-                            <div class="rate-info mt-2">
-                                Your current USD rate is {{ wallet.dollar_rate }} BDT/USD.
+                <form id="deposit-form" method="POST" action="{% url 'deposit' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="payment_method" id="hidden-payment-method">
+                    <input type="hidden" name="bdt_amount" id="hidden-bdt-amount">
+                    <input type="hidden" name="tx_id" id="hidden-tx-id">
+                    <input type="hidden" name="usd_amount" id="hidden-usd-amount">
+                    <input type="file" name="receipt" id="hidden-receipt" class="d-none">
+
+                    <!-- Step 1: Payment Method Selection -->
+                    <div id="step-1">
+                        <h5 class="fw-bold mb-4" style="color: #1a1d29;">Select Payment Method</h5>
+                        <div class="d-flex gap-3 flex-wrap mb-4">
+                            {% for method in payment_methods %}
+                            <div id="{{ method.method_name|slugify }}-button" role="button" tabindex="0" class="bank-option" style="border: 2px solid #e5e7eb; border-radius: 16px; width: auto; padding: 20px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; min-width: 140px; {% if forloop.first %}border-color: #667eea; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);{% else %}background: white;{% endif %}" data-method-id="{{ method.id }}">
+                                <div class="text-center">
+                                    {% if method.method_logo %}
+                                    <img loading="lazy" src="{{ method.method_logo.url }}" alt="{{ method.method_name }}" style="width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px;">
+                                    {% else %}
+                                    <div style="width: 40px; height: 40px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20" style="color: #9ca3af;">
+                                            <path d="M3 10h18M7 15h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                    </div>
+                                    {% endif %}
+                                    <h6 class="fw-bold mb-0" style="color: #1a1d29; font-size: 0.85rem;">{{ method.method_name }}</h6>
+                                </div>
                             </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Bank Details Display -->
+                        <div class="mb-4">
+                            {% for method in payment_methods %}
+                            <div id="{{ method.method_name|slugify }}-details" class="bank-details" {% if not forloop.first %}style="display: none;"{% endif %}>
+                                <div style="background: white; border-radius: 20px; padding: 30px; border: 3px solid #667eea; position: relative; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);">
+                                    <div style="position: absolute; top: -15px; left: 30px;">
+                                        <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">{{ method.method_name }} Details</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                                        {% if method.account_name %}
+                                        <div class="detail-item">
+                                            <p class="text-secondary small mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Account Name</p>
+                                            <p class="fw-bold" style="color: #1a1d29; font-size: 0.95rem;">{{ method.account_name }}</p>
+                                        </div>
+                                        {% endif %}
+                                        {% if method.account_number %}
+                                        <div class="detail-item">
+                                            <p class="text-secondary small mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Account Number</p>
+                                            <p class="fw-bold" style="color: #1a1d29; font-size: 0.95rem; font-family: monospace; letter-spacing: 1px;">{{ method.account_number }}</p>
+                                        </div>
+                                        {% endif %}
+                                        {% if method.district %}
+                                        <div class="detail-item">
+                                            <p class="text-secondary small mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">District</p>
+                                            <p class="fw-bold" style="color: #1a1d29; font-size: 0.95rem;">{{ method.district }}</p>
+                                        </div>
+                                        {% endif %}
+                                        {% if method.branch_name %}
+                                        <div class="detail-item">
+                                            <p class="text-secondary small mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Branch Name</p>
+                                            <p class="fw-bold" style="color: #1a1d29; font-size: 0.95rem;">{{ method.branch_name }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div style="margin-top: 20px; padding: 15px 20px; background: linear-gradient(135deg, rgba(245, 87, 108, 0.1) 0%, rgba(245, 87, 108, 0.05) 100%); border-radius: 12px; border-left: 4px solid #f5576c;">
+                                        <p class="small mb-0" style="color: #1a1d29;"><strong>⚠️ Important:</strong> <span class="text-secondary">Please attach a transaction screenshot as proof of payment.</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button id="next-button-1" type="button" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; font-weight: 600;">
+                                Next <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-left: 8px;">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="d-flex justify-content-between">
-                <button id="back-button-2" type="button" class="btn btn-secondary px-4">
-                    <i class="fas fa-arrow-left me-2"></i> Back
-                </button>
-                <button id="next-button-2" type="button" class="btn btn-primary px-4" disabled>
-                    Next<i class="fas fa-arrow-right ms-2"></i>
-                </button>
+
+                    <!-- Step 2: Payment Details -->
+                    <div id="step-2" style="display: none;">
+                        <h5 class="fw-bold mb-4" style="color: #1a1d29;">Enter Payment Details</h5>
+                        <div class="row g-4">
+                            <div class="col-lg-6">
+                                <!-- Amount in BDT -->
+                                <div class="mb-4">
+                                    <label for="bdtAmount" class="form-label fw-semibold mb-2" style="color: #1a1d29;">Amount in BDT</label>
+                                    <div class="input-group" style="border: 2px solid #e5e7eb; border-radius: 20px; overflow: hidden; background: white;">
+                                        <span class="input-group-text" style="background: white; border: none; padding: 14px 20px; color: #667eea; font-weight: 700; font-size: 18px;">৳</span>
+                                        <input type="number" class="form-control" id="bdtAmount" placeholder="0.00" step="1" required data-dollar-rate="{{ wallet.dollar_rate }}" style="border: none; padding: 14px 16px; font-size: 16px; background: white;">
+                                    </div>
+                                    <small class="text-secondary mt-2 d-block">Enter the amount in BDT you want to transfer</small>
+                                </div>
+
+                                <!-- Transaction ID -->
+                                <div class="mb-4">
+                                    <label for="txId" class="form-label fw-semibold mb-2" style="color: #1a1d29;">Transaction ID / Reference</label>
+                                    <input type="text" class="form-control" id="txId" placeholder="e.g., TXN12345678" required style="border: 2px solid #e5e7eb; padding: 14px 20px; font-size: 16px; border-radius: 20px; background: white;">
+                                    <small class="text-secondary mt-2 d-block">Transaction ID or reference from your bank</small>
+                                </div>
+
+                                <!-- Receipt Upload -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold mb-2" style="color: #1a1d29;">Upload Receipt / Screenshot</label>
+                                    <div class="upload-area" onclick="document.getElementById('receiptFile').click()" style="border: 3px dashed #e5e7eb; border-radius: 20px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: white;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="40" height="40" style="color: #d1d5db; margin: 0 auto 12px;">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5m0 0l5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                        <div id="upload-text" class="fw-semibold" style="color: #667eea; margin-bottom: 4px;">Click to upload or drag and drop</div>
+                                        <div class="text-secondary small">PNG, JPG, PDF (Max 5MB)</div>
+                                    </div>
+                                    <input type="file" id="receiptFile" class="d-none" accept="image/*,.pdf">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <!-- USD Conversion Summary -->
+                                <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border-radius: 20px; padding: 30px; border: 2px solid #e5e7eb;">
+                                    <h6 class="fw-bold mb-4" style="color: #1a1d29;">You Will Receive</h6>
+                                    <div class="mb-4">
+                                        <p class="text-secondary small mb-1">Amount in USD</p>
+                                        <div class="amount-display" style="font-size: 2.5rem; font-weight: 700; color: #667eea;">$0.00</div>
+                                    </div>
+                                    <div style="padding: 16px 20px; background: white; border-radius: 16px; border-left: 4px solid #667eea;">
+                                        <p class="small mb-0"><strong>Current Rate:</strong> <span style="color: #667eea; font-weight: 600;">{{ wallet.dollar_rate }} BDT/USD</span></p>
+                                        <p class="small text-secondary mt-2 mb-0">Rate updated daily at 12:00 AM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between gap-2 mt-4">
+                            <button id="back-button-2" type="button" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 25px; font-weight: 600;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                                    <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Back
+                            </button>
+                            <button id="next-button-2" type="button" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; font-weight: 600;" disabled>
+                                Review <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-left: 8px;">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Review & Confirm -->
+                    <div id="step-3" style="display: none;">
+                        <h5 class="fw-bold mb-4" style="color: #1a1d29;">Review Your Deposit</h5>
+                        <div id="final-details-container"></div>
+                    </div>
+
+                </form>
             </div>
         </div>
-
-        <div id="step-3" style="display: none;">
-            <div id="final-details-container"></div>
-        </div>
-
-      </div>
 
     </div>
-  </div>
+</main>
+
+<script src="{% static 'deposit.js' %}"></script>
 
 {% endblock %}

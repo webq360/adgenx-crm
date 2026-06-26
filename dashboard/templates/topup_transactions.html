@@ -1,148 +1,185 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block styles %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'transactions.css' %}">
-{% endblock %}
-
 {% block content %}
-
-  <div class="container-fluid py-4 px-4 table-container-container">
-    <h2 class="fw-semibold mb-3 fs-5">Topup History</h2>
-    <div class="bg-white rounded-3 p-3 shadow-sm">
-      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-
-        <a href="{% url 'deposit_transactions' %}" type="button" class="btn-filter text-decoration-none">Deposit</a>
-        <a href="{% url 'topup_transactions' %}" type="button" class="btn-filter text-decoration-none active">Top Up</a>
-        <a type="button" class="btn-filter text-decoration-none">Withdrawals</a>
-
-        <div class="ms-auto">
-          <form method="get" action="{% url 'topup_transactions' %}" class="d-flex align-items-center">
-            <input type="text" class="input-search" placeholder="Ad Account Name" name="ad_acc_name" 
-            value="{% if ad_acc_name %} {{ ad_acc_name }} {% endif %}" autocomplete="off" />
-
-            <button type="submit" class="btn-create ms-2 d-flex align-items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                </svg>
-                Search
-            </button>
-          </form>
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="mb-5">
+            <h1 class="fs-2 fw-bold mb-2" style="color: #1a1d29;">TopUp History</h1>
+            <p class="text-secondary">View and manage all your topup transactions</p>
         </div>
 
-      </div>
-      <div class="table-responsive">
-        <table class="table align-middle mb-0 table-nowrap">
-          <thead>
-            <tr>
-              <th class="ps-2 date-column">Date</th>
-              <th>Ad Account</th>
-              <th>Amount</th>
-              <th>Type</th>
-              <th>Status</th>
-              {% if request.user.is_staff %}
-              <th>User</th>
-              {% endif %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for topup in topups %}
-            <tr>
-              <td class="text-secondary date-column">{{ topup.date|date:"H:i, d M Y" }}</td>
-              <td class="fs-6" >
-                {% if request.user.is_staff %}
-                    <a href="{% url 'ad_accounts' %}?search={{ topup.ad_account.name }}">
-                        {{ topup.ad_account.name }}
-                    </a>
-                {% else %}
-                    {{ topup.ad_account.name }}
-                {% endif %}
-               </td>
-              <td class="fs-6">${{ topup.amount }}</td>
-              <td class="fs-6">{{ topup.get_type_display }}</td>
-              <td><span class="status-{{ topup.status }}">{{ topup.get_status_display }}</span></td>
-              {% if request.user.is_staff %}
-              <td class="fs-6">{{ topup.ad_account.user.username }}</td>
-              {% endif %}
-              <td class="pe-2"></td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="7" class="text-center">No top-ups found.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <div class="d-flex flex-wrap justify-content-center align-items-center mt-3 text-secondary fs-6">
-        <nav aria-label="Page navigation">
-          <ul class="pagination mb-0">
-            {% if topups.has_previous %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ topups.previous_page_number }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" aria-label="Previous">
-                  <i class="fas fa-chevron-left"></i>
-                </a>
-              </li>
-            {% else %}
-              <li class="page-item disabled">
-                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
-              </li>
-            {% endif %}
+        <!-- Navigation Tabs -->
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <a href="{% url 'deposit_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                Deposit
+            </a>
+            <a href="{% url 'topup_transactions' %}" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                </svg>
+                Top Up
+            </a>
+            <a href="{% url 'withdrawal_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600;">
+                Withdrawals
+            </a>
+        </div>
 
-            {% with topups.number as current_page %}
-            {% with topups.paginator.num_pages as total_pages %}
-              {% if total_pages > 5 %}
-                {% if current_page > 3 %}
-                  <li class="page-item"><a class="page-link" href="?page=1{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">1</a></li>
-                  {% if current_page > 4 %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                  {% endif %}
-                {% endif %}
+        <!-- Filter Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 24px;">
+            <div class="card-body p-4">
+                <form method="get" action="{% url 'topup_transactions' %}" class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Search by Ad Account Name..." name="ad_acc_name" value="{% if ad_acc_name %}{{ ad_acc_name }}{% endif %}" style="border: 2px solid #e5e7eb; padding: 10px 14px; border-radius: 8px;">
+                    <button type="submit" class="btn px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; white-space: nowrap;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 6px;">
+                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        Search
+                    </button>
+                </form>
+            </div>
+        </div>
 
-                {% for i in topups.paginator.page_range %}
-                  {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
-                    {% if current_page == i %}
-                      <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                    {% else %}
-                      <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ i }}</a></li>
+        <!-- TopUp Table Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div class="card-body p-0" style="background: white;">
+                {% if topups %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                <tr>
+                                    <th class="text-secondary small fw-semibold text-uppercase px-4 py-3" style="color: #6b7280;">Date</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Ad Account</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Amount</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Type</th>
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">Status</th>
+                                    {% if request.user.is_staff %}
+                                    <th class="text-secondary small fw-semibold text-uppercase py-3" style="color: #6b7280;">User</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for topup in topups %}
+                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                    <td class="px-4 py-3">
+                                        <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ topup.date|date:"M d, Y" }}</div>
+                                        <div style="font-size: 0.75rem; color: #6b7280;">{{ topup.date|date:"H:i" }}</div>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if request.user.is_staff %}
+                                            <a href="{% url 'ad_accounts' %}?search={{ topup.ad_account.name }}" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                                                {{ topup.ad_account.name }}
+                                            </a>
+                                        {% else %}
+                                            <span style="color: #1a1d29; font-weight: 600;">{{ topup.ad_account.name }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        <span style="color: #10b981; font-weight: 600; font-size: 1rem;">${{ topup.amount }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge" style="background: #dbeafe; color: #0369a1; font-weight: 600; padding: 6px 12px; border-radius: 6px;">{{ topup.get_type_display }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge" style="background: {% if topup.status == 'completed' %}#d1fae5; color: #059669{% elif topup.status == 'pending' %}#fef3c7; color: #b45309{% elif topup.status == 'failed' %}#fee2e2; color: #dc2626{% else %}#dbeafe; color: #0369a1{% endif %}; font-weight: 600; padding: 6px 12px; border-radius: 6px;">{{ topup.get_status_display }}</span>
+                                    </td>
+                                    {% if request.user.is_staff %}
+                                    <td class="py-3">
+                                        <div style="font-size: 0.875rem; color: #1a1d29; font-weight: 500;">{{ topup.ad_account.user.username }}</div>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if topups.has_other_pages %}
+                    <div class="p-3 border-top" style="background: #f9fafb;">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if topups.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ topups.previous_page_number }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Previous</span>
+                                </li>
+                                {% endif %}
+                                
+                                {% with topups.number as current_page %}
+                                {% with topups.paginator.num_pages as total_pages %}
+                                    {% if total_pages > 5 %}
+                                        {% if current_page > 3 %}
+                                            <li class="page-item"><a class="page-link" href="?page=1{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">1</a></li>
+                                            {% if current_page > 4 %}
+                                                <li class="page-item disabled"><span class="page-link" style="border: 1px solid #e5e7eb; margin: 0 2px;">...</span></li>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% for i in topups.paginator.page_range %}
+                                            {% if i > current_page|add:'-3' and i < current_page|add:'3' %}
+                                                {% if current_page == i %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">{{ i }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ i }}</a></li>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if current_page < total_pages|add:'-2' %}
+                                            {% if current_page < total_pages|add:'-3' %}
+                                                <li class="page-item disabled"><span class="page-link" style="border: 1px solid #e5e7eb; margin: 0 2px;">...</span></li>
+                                            {% endif %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ total_pages }}</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        {% for i in topups.paginator.page_range %}
+                                            {% if topups.number == i %}
+                                                <li class="page-item active">
+                                                    <span class="page-link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 6px; margin: 0 2px;">{{ i }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">{{ i }}</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endwith %}
+                                {% endwith %}
+
+                                {% if topups.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ topups.next_page_number }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="border-radius: 6px; border: 1px solid #e5e7eb; margin: 0 2px;">Next</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
                     {% endif %}
-                  {% endif %}
-                {% endfor %}
 
-                {% if current_page < total_pages|add:'-2' %}
-                  {% if current_page < total_pages|add:'-3' %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                  {% endif %}
-                  <li class="page-item"><a class="page-link" href="?page={{ total_pages }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ total_pages }}</a></li>
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48" height="48" style="color: #d1d5db; margin: 0 auto 20px;">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="text-secondary mb-0">No topup transactions found.</p>
+                    </div>
                 {% endif %}
-              {% else %}
-                {% for i in topups.paginator.page_range %}
-                  {% if topups.number == i %}
-                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
-                  {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}">{{ i }}</a></li>
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-            {% endwith %}
+            </div>
+        </div>
 
-            {% if topups.has_next %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ topups.next_page_number }}{% if ad_acc_name %}&ad_acc_name={{ ad_acc_name }}{% endif %}" aria-label="Next">
-                  <i class="fas fa-chevron-right"></i>
-                </a>
-              </li>
-            {% else %}
-              <li class="page-item disabled">
-                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
-      </div>
     </div>
-  </div>
+</main>
 
 {% endblock %}

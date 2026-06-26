@@ -1,0 +1,336 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+    }
+
+    main {
+        background: #f3f4f6;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .page-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .content-wrapper {
+        padding: 0 2rem 2rem 2rem;
+    }
+
+    .search-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .search-section .input-group {
+        max-width: 500px;
+    }
+
+    .search-section input {
+        border: 1px solid #d1d5db;
+        border-radius: 8px 0 0 8px;
+        padding: 0.75rem 1rem;
+    }
+
+    .search-section button {
+        background: var(--primary);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0 8px 8px 0;
+        color: white;
+        font-weight: 600;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        margin: 0;
+    }
+
+    thead {
+        background: #f9fafb;
+    }
+
+    thead th {
+        padding: 1rem;
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: #374151;
+        text-align: left;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 0.925rem;
+    }
+
+    tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .btn-view {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        padding: 0;
+        list-style: none;
+    }
+
+    .pagination .page-link {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: #f3f4f6;
+    }
+
+    .pagination .page-link.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
+<main class="flex-grow-1 overflow-auto">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Ad Accounts Management</h1>
+        <p>View and manage all ad accounts in the system</p>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Search Section -->
+        <div class="search-section">
+            <form method="get" action="">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search all accounts..." value="{{ search_query }}">
+                    <button type="submit" class="btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ad Account</th>
+                            <th>Connected BM</th>
+                            <th>User</th>
+                            <th>Monthly Budget</th>
+                            <th>Start Date</th>
+                            <th>Status</th>
+                            <th style="text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ad_account in ad_accounts %}
+                        <tr>
+                            <td>
+                                <strong>{{ ad_account.name }}</strong><br>
+                                <small style="color: #6b7280;">ID: {{ ad_account.acc_id }}</small><br>
+                                {% if ad_account.acc_link %}
+                                <a href="{{ ad_account.acc_link }}" target="_blank" style="color: var(--primary); font-size: 0.875rem;">
+                                    View on Facebook
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ad_account.admin_bm %}
+                                <strong>{{ ad_account.admin_bm.acc_name }}</strong><br>
+                                <small style="color: #6b7280;">{{ ad_account.admin_bm.acc_id }}</small>
+                                {% else %}
+                                <span style="color: #6b7280;">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_dashboard:manage_user' %}?search={{ ad_account.user.username }}" style="color: var(--primary); text-decoration: none;">
+                                    {{ ad_account.user.username }}
+                                </a><br>
+                                <small style="color: #6b7280;">{{ ad_account.user.email }}</small>
+                            </td>
+                            <td>
+                                <strong>${{ ad_account.monthly_budget }}</strong>
+                            </td>
+                            <td>
+                                {{ ad_account.start_date|date:"M d, Y" }}
+                            </td>
+                            <td>
+                                {% if ad_account.status == 'active' %}
+                                <span class="badge badge-success">Active</span>
+                                {% else %}
+                                <span class="badge badge-warning">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="{% url 'admin_dashboard:ad_account_details' ad_account.id %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                    </svg>
+                                    <p>{% if search_query %}No accounts found matching "{{ search_query }}"{% else %}No ad accounts found{% endif %}</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if ad_accounts.has_other_pages %}
+        <ul class="pagination">
+            {% if ad_accounts.has_previous %}
+            <li>
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li>
+                <a href="?page={{ ad_accounts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in ad_accounts.paginator.page_range %}
+                {% if ad_accounts.number == num %}
+                <li>
+                    <span class="page-link active">{{ num }}</span>
+                </li>
+                {% elif num > ad_accounts.number|add:'-3' and num < ad_accounts.number|add:'3' %}
+                <li>
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if ad_accounts.has_next %}
+            <li>
+                <a href="?page={{ ad_accounts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            <li>
+                <a href="?page={{ ad_accounts.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+</main>
+
+{% endblock %}

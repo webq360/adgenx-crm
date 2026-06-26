@@ -11,13 +11,16 @@ def paginate_data(request, data, num_per_page):
     return page_obj
 
 def get_user_utils(user):
+    from .models import WithdrawalRequest
     pending_deposits = DepositTransaction.objects.filter(user=user, status='pending').count()
     pending_accounts = AdAccount.objects.filter(user=user, status='inactive').count()
     active_accounts = AdAccount.objects.filter(user=user, status='active').count()
+    pending_withdrawals = WithdrawalRequest.objects.filter(user=user, status='pending').count()
     return {
         'pending_deposits': pending_deposits,
         'pending_accounts': pending_accounts,
         'active_accounts': active_accounts,
+        'pending_withdrawals': pending_withdrawals,
     }
 
 def log_activity(performed_by, activity_type, description, target_user=None, old_value=None, new_value=None, request=None):
@@ -68,20 +71,34 @@ def log_activity(performed_by, activity_type, description, target_user=None, old
 def get_processed_ad_accounts_data(ad_accounts_qs):
     ad_accounts_data = []
     for acc in ad_accounts_qs:
+        # Update balances from TopupHistory
+        from dashboard.models import TopupHistory
+        topup_history = TopupHistory.objects.filter(ad_account=acc)
+        total_spent = sum(t.amount for t in topup_history if t.type == 'increase')
+        total_decreased = sum(t.amount for t in topup_history if t.type == 'decrease')
+        
+        # Update model fields
+        acc.total_spent = total_spent
+        acc.remaining_balance = acc.monthly_budget - total_spent + total_decreased
+        if acc.limit == 0:
+            acc.limit = acc.monthly_budget
+        acc.save()
+        
+        # Get Facebook API data if available (optional, can be removed if not needed)
         if acc.admin_bm and acc.status == 'active':
             ad_info = get_ad_account_info(acc.acc_id, acc.admin_bm.acc_id)
             if ad_info:
                 acc_balance = ad_info.get('balance', 0)
-                acc_total_spent = ad_info.get('amount_spent', 0)
-                acc_limit = ad_info.get('spend_cap', 0)
+                fb_total_spent = ad_info.get('amount_spent', 0)
+                fb_limit = ad_info.get('spend_cap', 0)
             else:
                 acc_balance = 'N/A'
-                acc_limit = 'N/A'
-                acc_total_spent = 'N/A'
+                fb_limit = 'N/A'
+                fb_total_spent = 'N/A'
         else:
             acc_balance = 'N/A'
-            acc_limit = 'N/A'
-            acc_total_spent = 'N/A'
+            fb_limit = 'N/A'
+            fb_total_spent = 'N/A'
 
         bm_accounts_list = []
         for bm in acc.bm_accounts.all():
@@ -98,12 +115,13 @@ def get_processed_ad_accounts_data(ad_accounts_qs):
             'name': acc.name,
             'acc_id': acc.acc_id,
             'acc_link': acc.acc_link,
-            'start_date': str(acc.start_date), # Convert date to string
-            'monthly_budget': str(acc.monthly_budget), # Convert Decimal to string
+            'start_date': str(acc.start_date),
+            'monthly_budget': str(acc.monthly_budget),
+            'remaining_balance': str(acc.remaining_balance),
+            'total_spent': str(acc.total_spent),
+            'limit': str(acc.limit),
             'status': acc.status,
-            'balance': acc_balance,
-            'limit': acc_limit,
-            'total_spent': acc_total_spent,
+            'balance': acc_balance,  # Facebook API balance (optional)
             'bm_accounts': bm_accounts_list,
         })
     return ad_accounts_data

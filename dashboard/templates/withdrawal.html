@@ -1,0 +1,208 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<main class="flex-grow-1" style="background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%); min-height: 100vh; overflow-y: auto;">
+    <div class="p-4 p-md-5">
+        
+        <!-- Header Section -->
+        <div class="mb-5">
+            <h1 class="fs-2 fw-bold mb-2" style="color: #1a1d29;">Withdraw Funds</h1>
+            <p class="text-secondary">Request to withdraw money from your wallet</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- Wallet Balance Card -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="text-secondary mb-0" style="font-size: 0.875rem; font-weight: 600;">Available Balance</h6>
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                    <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h3 class="fs-4 fw-bold mb-0" style="color: #667eea;">${{ wallet.balance }}</h3>
+                        </div>
+                        <p class="text-secondary small mb-0">Available for withdrawal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- USD Rate Card -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="text-secondary mb-0" style="font-size: 0.875rem; font-weight: 600;">Current USD Rate</h6>
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h3 class="fs-4 fw-bold mb-0" style="color: #f5576c;">৳{{ wallet.dollar_rate }}/USD</h3>
+                        </div>
+                        <p class="text-secondary small mb-0">You will receive BDT</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Withdrawals Card -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="text-secondary mb-0" style="font-size: 0.875rem; font-weight: 600;">Pending Withdrawals</h6>
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="20" height="20">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h3 class="fs-4 fw-bold mb-0" style="color: #00f2fe;">{{ utils.pending_withdrawals }}</h3>
+                        </div>
+                        <p class="text-secondary small mb-0">Awaiting admin processing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Withdrawal Form Card -->
+        <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-bold mb-4" style="color: #1a1d29;">Request Withdrawal</h5>
+
+                <form method="POST" action="{% url 'withdrawal' %}">
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <!-- Amount in USD -->
+                            <div class="mb-4">
+                                <label for="amount_usd" class="form-label fw-semibold mb-2" style="color: #1a1d29;">Amount in USD</label>
+                                <div class="input-group" style="border: 2px solid #e5e7eb; border-radius: 20px; overflow: hidden; background: white;">
+                                    <span class="input-group-text" style="background: white; border: none; padding: 14px 20px; color: #667eea; font-weight: 700; font-size: 18px;">$</span>
+                                    <input type="number" class="form-control" id="amount_usd" name="amount_usd" placeholder="0.00" step="0.01" min="1" max="{{ wallet.balance }}" required data-dollar-rate="{{ wallet.dollar_rate }}" style="border: none; padding: 14px 16px; font-size: 16px; background: white;">
+                                </div>
+                                <small class="text-secondary mt-2 d-block">Maximum: ${{ wallet.balance }}</small>
+                            </div>
+
+                            <!-- Payment Method Selection -->
+                            <div class="mb-4">
+                                <label for="payment_method" class="form-label fw-semibold mb-2" style="color: #1a1d29;">Select Payment Method</label>
+                                <select class="form-select" id="payment_method" name="payment_method" required style="border: 2px solid #e5e7eb; padding: 14px 20px; font-size: 16px; border-radius: 20px; background: white;">
+                                    <option value="" selected disabled>Choose payment method...</option>
+                                    {% for method in payment_methods %}
+                                    <option value="{{ method.id }}">{{ method.method_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-secondary mt-2 d-block">Where you want to receive the money</small>
+                            </div>
+
+                            <!-- Account Details -->
+                            <div class="mb-4">
+                                <label for="account_details" class="form-label fw-semibold mb-2" style="color: #1a1d29;">Account Details</label>
+                                <textarea class="form-control" id="account_details" name="account_details" rows="4" placeholder="Enter your account number, bank name, branch, mobile number, etc." required style="border: 2px solid #e5e7eb; padding: 14px 20px; font-size: 16px; border-radius: 20px; background: white;"></textarea>
+                                <small class="text-secondary mt-2 d-block">Provide complete details for receiving payment</small>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <!-- BDT Amount Display -->
+                            <div style="background: linear-gradient(135deg, rgba(245, 87, 108, 0.05) 0%, rgba(245, 87, 108, 0.05) 100%); border-radius: 20px; padding: 30px; border: 2px solid #e5e7eb;">
+                                <h6 class="fw-bold mb-4" style="color: #1a1d29;">You Will Receive</h6>
+                                <div class="mb-4">
+                                    <p class="text-secondary small mb-1">Amount in BDT</p>
+                                    <div class="amount-display" id="bdt-amount-display" style="font-size: 2.5rem; font-weight: 700; color: #f5576c;">৳0.00</div>
+                                </div>
+                                <div style="padding: 16px 20px; background: white; border-radius: 16px; border-left: 4px solid #f5576c;">
+                                    <p class="small mb-0"><strong>Current Rate:</strong> <span style="color: #f5576c; font-weight: 600;">{{ wallet.dollar_rate }} BDT/USD</span></p>
+                                    <p class="small text-secondary mt-2 mb-0">Rate updated daily at 12:00 AM</p>
+                                </div>
+
+                                <div class="mt-4" style="padding: 16px 20px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%); border-radius: 16px; border-left: 4px solid #ffc107;">
+                                    <h6 class="fw-bold mb-2" style="color: #1a1d29; font-size: 0.9rem;">⚠️ Important Notes:</h6>
+                                    <ul class="small text-secondary mb-0" style="padding-left: 20px;">
+                                        <li>Processing time: 1-3 business days</li>
+                                        <li>Minimum withdrawal: $10</li>
+                                        <li>Verify account details carefully</li>
+                                        <li>Admin will review before processing</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between gap-2 mt-4">
+                        <a href="{% url 'withdrawal_transactions' %}" class="btn px-4 py-2" style="background: white; color: #667eea; border: 2px solid #667eea; border-radius: 25px; font-weight: 600;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-right: 8px;">
+                                <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            View History
+                        </a>
+                        <button type="submit" class="btn px-4 py-2" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 25px; font-weight: 600;">
+                            Submit Withdrawal Request
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16" style="display: inline; margin-left: 8px;">
+                                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+// Real-time BDT calculation
+document.getElementById('amount_usd').addEventListener('input', function() {
+    const usdAmount = parseFloat(this.value) || 0;
+    const dollarRate = parseFloat(this.getAttribute('data-dollar-rate')) || 127;
+    const bdtAmount = usdAmount * dollarRate;
+    
+    document.getElementById('bdt-amount-display').textContent = '৳' + bdtAmount.toFixed(2);
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const usdAmount = parseFloat(document.getElementById('amount_usd').value) || 0;
+    const maxBalance = parseFloat(document.getElementById('amount_usd').getAttribute('max')) || 0;
+    
+    if (usdAmount <= 0) {
+        e.preventDefault();
+        alert('Please enter a valid withdrawal amount.');
+        return false;
+    }
+    
+    if (usdAmount < 10) {
+        e.preventDefault();
+        alert('Minimum withdrawal amount is $10.');
+        return false;
+    }
+    
+    if (usdAmount > maxBalance) {
+        e.preventDefault();
+        alert('Insufficient balance. Your available balance is $' + maxBalance);
+        return false;
+    }
+    
+    const accountDetails = document.getElementById('account_details').value.trim();
+    if (accountDetails.length < 10) {
+        e.preventDefault();
+        alert('Please provide complete account details (minimum 10 characters).');
+        return false;
+    }
+    
+    return confirm('Are you sure you want to submit this withdrawal request?');
+});
+</script>
+
+{% endblock %}
