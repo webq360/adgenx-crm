@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, TopupHistory, PaymentMethod
+from .models import User, DepositTransaction, Wallet, AdAccount, BMAccount, AdminBM, TopupHistory, PaymentMethod, FCMToken
 
 
 # Custom User Admin with Group management
@@ -243,3 +243,52 @@ class AdAccountAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AdAccount, AdAccountAdmin)
+
+
+
+class FCMTokenAdmin(admin.ModelAdmin):
+    list_display = ('user', 'device_type', 'device_name', 'is_active_badge', 'last_used', 'token_preview')
+    list_filter = ('device_type', 'is_active', 'created_at')
+    search_fields = ('user__email', 'device_name', 'token')
+    readonly_fields = ('token', 'created_at', 'last_used', 'user')
+    fieldsets = (
+        ('Device Information', {
+            'fields': ('user', 'device_type', 'device_name')
+        }),
+        ('Token', {
+            'fields': ('token',),
+            'classes': ('collapse',),
+            'description': 'Firebase Cloud Messaging token'
+        }),
+        ('Status', {
+            'fields': ('is_active', 'created_at', 'last_used')
+        }),
+    )
+    
+    def is_active_badge(self, obj):
+        """Display active status as colored badge"""
+        color = '#28a745' if obj.is_active else '#dc3545'
+        status = 'Active' if obj.is_active else 'Inactive'
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 8px; border-radius: 3px; font-weight: bold;">{}</span>',
+            color, status
+        )
+    is_active_badge.short_description = 'Status'
+    
+    def token_preview(self, obj):
+        """Display truncated token"""
+        if len(obj.token) > 20:
+            return obj.token[:20] + '...'
+        return obj.token
+    token_preview.short_description = 'Token'
+    
+    def has_add_permission(self, request):
+        """Don't allow manual addition - only via API"""
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        """Allow deletion of old tokens"""
+        return request.user.is_superuser
+
+
+admin.site.register(FCMToken, FCMTokenAdmin)

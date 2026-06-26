@@ -296,3 +296,29 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+
+
+class FCMToken(models.Model):
+    """Firebase Cloud Messaging Token for Push Notifications"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fcm_tokens')
+    token = models.TextField(unique=True, db_index=True)
+    device_name = models.CharField(max_length=255, blank=True, help_text="Device name/identifier")
+    device_type = models.CharField(
+        max_length=20,
+        choices=[('android', 'Android'), ('ios', 'iOS'), ('web', 'Web')],
+        default='android'
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-last_used']
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['token']),
+        ]
+        unique_together = ('user', 'token')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.device_type} ({self.device_name})"

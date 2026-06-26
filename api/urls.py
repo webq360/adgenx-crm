@@ -39,6 +39,14 @@ urlpatterns = [
     path('api/notifications/read/',        views.api_mark_notifications_read, name='api_mark_notifications_read'),
     path('api/notifications/unread-count/', views.api_unread_count,           name='api_unread_count'),
     
+    # Firebase FCM Tokens
+    path('api/fcm-token/register/',        views.api_register_fcm_token,      name='api_register_fcm_token'),
+    path('api/fcm-token/unregister/',      views.api_unregister_fcm_token,    name='api_unregister_fcm_token'),
+    
+    # Withdrawal
+    path('api/withdrawal/',                 views.api_request_withdrawal,      name='api_request_withdrawal'),
+    path('api/withdrawal-transactions/',    views.api_withdrawal_transactions, name='api_withdrawal_transactions'),
+    
     # CORS Test
     path('api/cors-test/', views.api_cors_test, name='api_cors_test'),
 ]

@@ -675,16 +675,168 @@ def api_unread_count(request):
     return Response({'unread_count': count})
 
 
-# ─── CORS TEST ────────────────────────────────────────────────────────────────
+# ─── FIREBASE FCM TOKEN ───────────────────────────────────────────────────────
 
-@api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
-def api_cors_test(request):
-    """Test endpoint to verify CORS is working"""
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_register_fcm_token(request):
+    """
+    Register Firebase Cloud Messaging token for push notifications
+    
+    Expected data:
+    {
+        'token': 'fcm_token_here',
+        'device_name': 'My iPhone' (optional),
+        'device_type': 'android|ios|web' (optional, default: android)
+    }
+    """
+    from dashboard.firebase_service import register_fcm_token
+    
+    token = request.data.get('token', '').strip()
+    device_name = request.data.get('device_name', '').strip()
+    device_type = request.data.get('device_type', 'android').strip().lower()
+    
+    if not token:
+        return Response({'success': False, 'error': 'FCM token is required'}, status=400)
+    
+    if device_type not in ['android', 'ios', 'web']:
+        device_type = 'android'
+    
+    success = register_fcm_token(
+        user=request.user,
+        token=token,
+        device_name=device_name,
+        device_type=device_type
+    )
+    
+    if success:
+        return Response({
+            'success': True,
+            'message': f'FCM token registered for {device_type}',
+        })
+    else:
+        return Response({
+            'success': False,
+            'error': 'Failed to register FCM token'
+        }, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_unregister_fcm_token(request):
+    """Unregister/deactivate FCM token"""
+    from dashboard.firebase_service import unregister_fcm_token
+    
+    token = request.data.get('token', '').strip()
+    
+    if not token:
+        return Response({'success': False, 'error': 'FCM token is required'}, status=400)
+    
+    success = unregister_fcm_token(user=request.user, token=token)
+    
+    if success:
+        return Response({'success': True, 'message': 'FCM token deactivated'})
+    else:
+        return Response({'success': False, 'error': 'Failed to deactivate token'}, status=400)
+
+
+# ─── WITHDRAWAL ────────────────────────────────────────────────────────────────
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_request_withdrawal(request):
+    """
+    Request withdrawal from wallet
+    
+    Expected data:
+    {
+        'amount_usd': 100.50,
+        'amount_bdt': 12000,
+        'payment_method': 'bkash|nagad|rocket|bank_transfer',
+        'account_details': 'Phone number or account number',
+        'bank_name': 'Optional - for bank transfers'
+    }
+    """
+    from dashboard.models import WithdrawalRequest
+    from dashboard.notification_handler import notify_withdrawal_requested
+    
+    amount_usd_raw = request.data.get('amount_usd')
+    amount_bdt_raw = request.data.get('amount_bdt')
+    payment_method = request.data.get('payment_method', '').strip()
+    account_details = request.data.get('account_details', '').strip()
+    bank_name = request.data.get('bank_name', '').strip()
+    
+    # Validation
+    try:
+        amount_usd = Decimal(str(amount_usd_raw))
+        amount_bdt = Decimal(str(amount_bdt_raw))
+        if amount_usd <= 0 or amount_bdt <= 0:
+            return Response({'success': False, 'error': 'Amount must be positive'}, status=400)
+    except (InvalidOperation, TypeError):
+        return Response({'success': False, 'error': 'Invalid amount'}, status=400)
+    
+    if not payment_method or payment_method not in ['bkash', 'nagad', 'rocket', 'bank_transfer']:
+        return Response({'success': False, 'error': 'Invalid payment method'}, status=400)
+    
+    if not account_details:
+        return Response({'success': False, 'error': 'Account details are required'}, status=400)
+    
+    # Check wallet balance
+    wallet = Wallet.objects.get(user=request.user)
+    if wallet.balance < amount_usd:
+        return Response({'success': False, 'error': 'Insufficient wallet balance'}, status=400)
+    
+    # Create withdrawal request
+    withdrawal = WithdrawalRequest.objects.create(
+        user=request.user,
+        amount_usd=amount_usd,
+        amount_bdt=amount_bdt,
+        payment_method=payment_method,
+        account_details=account_details,
+        bank_name=bank_name if bank_name else None,
+        status='pending',
+    )
+    
+    # Send notifications
+    notify_withdrawal_requested(withdrawal)
+    
+    return Response({'success': True, 'message': 'Withdrawal request submitted successfully!'})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_withdrawal_transactions(request):
+    """Get user's withdrawal transactions with pagination"""
+    from dashboard.models import WithdrawalRequest
+    
+    page = int(request.GET.get('page', 1))
+    per_page = 15
+    status_filter = request.GET.get('status', '').strip()
+    
+    qs = WithdrawalRequest.objects.filter(user=request.user).order_by('-created_at')
+    
+    if status_filter and status_filter in ['pending', 'approved', 'rejected']:
+        qs = qs.filter(status=status_filter)
+    
+    start = (page - 1) * per_page
+    end = start + per_page
+    total = qs.count()
+    items = qs[start:end]
+    
+    results = [{
+        'id': w.id,
+        'amount_usd': str(w.amount_usd),
+        'amount_bdt': str(w.amount_bdt),
+        'payment_method': w.payment_method,
+        'account_details': w.account_details,
+        'status': w.status,
+        'created_at': w.created_at.strftime('%Y-%m-%d %H:%M') if w.created_at else '',
+        'admin_notes': w.admin_notes or '',
+    } for w in items]
+    
     return Response({
-        'success': True,
-        'message': 'CORS is working!',
-        'method': request.method,
-        'origin': request.META.get('HTTP_ORIGIN', 'No origin header'),
-        'timestamp': timezone.now().isoformat(),
+        'count': total,
+        'next': f'?page={page+1}' if end < total else None,
+        'previous': f'?page={page-1}' if page > 1 else None,
+        'results': results,
     })

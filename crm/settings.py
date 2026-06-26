@@ -19,8 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -218,3 +216,22 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 0  # Disable HSTS on PythonAnywhere initially
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
+
+
+# ─── FIREBASE CONFIGURATION ──────────────────────────────────────────────────
+import firebase_admin
+from firebase_admin import credentials
+
+FIREBASE_CREDENTIALS_PATH = os.getenv('FIREBASE_CREDENTIALS_JSON', '')
+FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID', '')
+
+# Initialize Firebase Admin SDK
+if FIREBASE_CREDENTIALS_PATH and os.path.exists(FIREBASE_CREDENTIALS_PATH):
+    try:
+        cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+        firebase_admin.initialize_app(cred)
+        print("✓ Firebase Admin SDK initialized successfully")
+    except Exception as e:
+        print(f"✗ Firebase initialization error: {e}")
+else:
+    print("⚠️  Firebase credentials not configured - push notifications will be disabled")
