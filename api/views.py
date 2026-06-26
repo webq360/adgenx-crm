@@ -668,8 +668,23 @@ def api_mark_notifications_read(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def api_unread_count(request):
     from dashboard.models import Notification
     count = Notification.objects.filter(user=request.user, is_read=False).count()
     return Response({'unread_count': count})
+
+
+# ─── CORS TEST ────────────────────────────────────────────────────────────────
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def api_cors_test(request):
+    """Test endpoint to verify CORS is working"""
+    return Response({
+        'success': True,
+        'message': 'CORS is working!',
+        'method': request.method,
+        'origin': request.META.get('HTTP_ORIGIN', 'No origin header'),
+        'timestamp': timezone.now().isoformat(),
+    })

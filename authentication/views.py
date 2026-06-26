@@ -69,6 +69,15 @@ def auth_view(request):
                 messages.error(request, 'Please provide both email and password.')
                 return redirect('auth')
 
+            # Check if user exists and is active
+            try:
+                user_check = User.objects.get(email=email)
+                if not user_check.is_active:
+                    messages.error(request, 'Your account is not yet activated. Please verify your email or contact admin.')
+                    return redirect('auth')
+            except User.DoesNotExist:
+                pass  # Let authenticate handle this
+
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
@@ -86,24 +95,41 @@ def auth_view(request):
             password = request.POST.get('password')
             password2 = request.POST.get('password2')
 
-            # Verify reCAPTCHA
-            recaptcha_response = request.POST.get('g-recaptcha-response')
-            if not recaptcha_response:
-                messages.error(request, 'Please complete the CAPTCHA verification.')
-                return redirect('auth')
-            
-            recaptcha_verify = http_requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data={
-                    'secret': settings.RECAPTCHA_SECRET_KEY,
-                    'response': recaptcha_response,
-                },
-                timeout=5
-            )
-            recaptcha_result = recaptcha_verify.json()
-            if not recaptcha_result.get('success'):
-                messages.error(request, 'CAPTCHA verification failed. Please try again.')
-                return redirect('auth')
+            # Verify reCAPTCHA (if enabled)
+            if settings.RECAPTCHA_ENABLED:
+                recaptcha_response = request.POST.get('g-recaptcha-response')
+                if not recaptcha_response:
+                    messages.error(request, 'Please complete the CAPTCHA verification.')
+                    return redirect('auth')
+                
+                try:
+                    recaptcha_verify = http_requests.post(
+                        'https://www.google.com/recaptcha/api/siteverify',
+                        data={
+                            'secret': settings.RECAPTCHA_SECRET_KEY,
+                            'response': recaptcha_response,
+                            'remoteip': request.META.get('REMOTE_ADDR'),
+                        },
+                        timeout=10
+                    )
+                    recaptcha_result = recaptcha_verify.json()
+                    
+                    # Log the result for debugging
+                    if not recaptcha_result.get('success'):
+                        error_codes = recaptcha_result.get('error-codes', [])
+                        print(f"reCAPTCHA verification failed. Errors: {error_codes}")
+                        
+                        # If it's a network/timeout issue on server side, allow registration
+                        # but log it for admin review
+                        if not error_codes or 'timeout-or-duplicate' in error_codes:
+                            print("Warning: reCAPTCHA verification skipped due to server issue")
+                        else:
+                            messages.error(request, 'CAPTCHA verification failed. Please try again.')
+                            return redirect('auth')
+                except (http_requests.exceptions.Timeout, http_requests.exceptions.RequestException) as e:
+                    # If Google's reCAPTCHA service is unreachable, log and allow registration
+                    print(f"reCAPTCHA service error: {e}")
+                    print("Warning: Proceeding without reCAPTCHA verification due to service unavailability")
 
             if not all([first_name, last_name, email, phone_number, password, password2]):
                 messages.error(request, 'Please fill in all fields.')
@@ -175,8 +201,9 @@ def verify_email(request, uidb64, token):
 
     if user is not None and account_activation_token.check_token(user, token):
         user.is_verified = True
+        user.is_active = True  # Activate user after email verification
         user.save()
-        messages.success(request, 'Your email has been successfully verified. A staff member will activate your account shortly.')
+        messages.success(request, 'Your email has been successfully verified. You can now log in!')
         return redirect('auth')
     else:
         messages.error(request, 'Activation link is invalid!')

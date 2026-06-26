@@ -109,7 +109,9 @@
             </div>
 
             <div class="mb-3">
-                <div class="g-recaptcha" data-sitekey="6LdCEBotAAAAABUjLx7A12DYMCvZxGGcW9_6Wm-A"></div>
+                {% if recaptcha_site_key %}
+                <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                {% endif %}
             </div>
 
             <button type="submit" id="register-button" class="btn-modern btn-modern-primary w-100 mb-3">
@@ -125,7 +127,9 @@
 {% endblock %}
 
 {% block scripts %}
+{% if recaptcha_site_key %}
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endif %}
 <script>
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');

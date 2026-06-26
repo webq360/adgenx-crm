@@ -157,6 +157,7 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 # Google reCAPTCHA v2
 RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY', '')
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
+RECAPTCHA_ENABLED = os.getenv('RECAPTCHA_ENABLED', 'True') == 'True'
 
 
 # ─── Django REST Framework ────────────────────────────────────────────────────
@@ -173,8 +174,41 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://webq.pythonanywhere.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://webq.pythonanywhere.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 # Security Settings for Production
 if not DEBUG:

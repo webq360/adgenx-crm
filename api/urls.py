@@ -38,4 +38,7 @@ urlpatterns = [
     path('api/notifications/',             views.api_notifications,           name='api_notifications'),
     path('api/notifications/read/',        views.api_mark_notifications_read, name='api_mark_notifications_read'),
     path('api/notifications/unread-count/', views.api_unread_count,           name='api_unread_count'),
+    
+    # CORS Test
+    path('api/cors-test/', views.api_cors_test, name='api_cors_test'),
 ]
