@@ -16,7 +16,7 @@
   - `python manage.py activate_pending_users`
 
 ### 3. **CORS Configuration**
-- ✅ Added proper CORS for `https://webq.pythonanywhere.com`
+- ✅ Added proper CORS for `https://adgenx.pythonanywhere.com`
 - ✅ CSRF trusted origins configured
 - ✅ Removed insecure `CORS_ALLOW_ALL_ORIGINS`
 - ✅ Test endpoint: `/api/cors-test/`
@@ -117,7 +117,7 @@ python manage.py activate_pending_users
 ## 🧪 Post-Deployment Testing
 
 ### 1. **Basic Access**
-- ✅ Visit: `https://webq.pythonanywhere.com`
+- ✅ Visit: `https://adgenx.pythonanywhere.com`
 - ✅ Should load without errors
 
 ### 2. **User Registration**
@@ -140,13 +140,13 @@ python manage.py activate_pending_users
 - ✅ Check Action buttons work (Top Up, More dropdown)
 
 ### 5. **CORS Test**
-- ✅ Visit: `https://webq.pythonanywhere.com/api/cors-test/`
+- ✅ Visit: `https://adgenx.pythonanywhere.com/api/cors-test/`
 - ✅ Should return JSON with success message
 
 ### 6. **API Endpoints**
 ```bash
 # Test API login
-curl -X POST https://webq.pythonanywhere.com/auth/api/login/ \
+curl -X POST https://adgenx.pythonanywhere.com/auth/api/login/ \
   -H "Content-Type: application/json" \
   -d '{"email":"test@test.com","password":"password"}'
 ```
@@ -187,7 +187,7 @@ python manage.py activate_user user@example.com
 - Check `settings.py` has:
 ```python
 CORS_ALLOWED_ORIGINS = [
-    'https://webq.pythonanywhere.com',
+    'https://adgenx.pythonanywhere.com',
 ]
 ```
 

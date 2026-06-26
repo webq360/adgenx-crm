@@ -175,7 +175,7 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    'https://webq.pythonanywhere.com',
+    'https://adgenx.pythonanywhere.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
@@ -205,7 +205,7 @@ CORS_ALLOW_HEADERS = [
 
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
-    'https://webq.pythonanywhere.com',
+    'https://adgenx.pythonanywhere.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
